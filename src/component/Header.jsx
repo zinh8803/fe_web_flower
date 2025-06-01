@@ -1,27 +1,70 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../store/userSlice";
+import { InputBase, Badge, IconButton } from "@mui/material";
+import { Search, ShoppingCart, Phone, LocationOn } from "@mui/icons-material";
 
 const Header = () => {
-    const user = useSelector((state) => state.user.user);
-    const dispatch = useDispatch();
-
     return (
-        <header className="p-4 shadow bg-white flex justify-between">
-            <h1 className="text-xl font-bold">Flower Shop</h1>
-            {user ? (
-                <div className="flex items-center gap-4">
-                    <span className="text-gray-700">Xin chào, {user.name}</span>
-                    <button
-                        onClick={() => dispatch(logout())}
-                        className="bg-red-500 text-white px-4 py-1 rounded"
+        <header className="w-full border-t border-green-600 flex items-center justify-between px-4 py-2">
+            {/* Logo */}
+            <div className="flex items-center space-x-2">
+                <img
+                    src="https://shop.dalathasfarm.com/public/dalathasfarm/images/logo.png"
+                    alt="Dalat Hasfarm"
+                    className="h-10 object-contain"
+                />
+                <span className="text-sm text-gray-500">Flower your life</span>
+            </div>
+
+            {/* Search Box */}
+            <div className="flex-1 max-w-[500px] mx-4">
+                <div className="flex items-center border border-green-600 rounded-full overflow-hidden">
+                    <InputBase
+                        placeholder="Tìm kiếm"
+                        className="px-4 py-1 w-full"
+                        sx={{ fontSize: 14 }}
+                    />
+                    <IconButton
+                        type="submit"
+                        sx={{
+                            backgroundColor: "#008437",
+                            color: "#fff",
+                            borderRadius: "0 9999px 9999px 0",
+                            padding: "8px",
+                            "&:hover": { backgroundColor: "#006f2f" },
+                        }}
                     >
-                        Đăng xuất
-                    </button>
+                        <Search />
+                    </IconButton>
                 </div>
-            ) : (
-                <a href="/login" className="text-blue-500">Đăng nhập</a>
-            )}
+            </div>
+
+            {/* Địa chỉ + Liên hệ + Giỏ hàng */}
+            <div className="flex items-center space-x-6">
+                {/* Địa chỉ */}
+                <div className="flex items-center space-x-1 text-sm">
+                    <LocationOn fontSize="small" />
+                    <div>
+                        <div className="text-gray-500">Giao đến</div>
+                        <div className="font-semibold text-black">QUẬN 1</div>
+                    </div>
+                </div>
+
+                {/* Số điện thoại */}
+                <div className="flex items-center space-x-1 text-sm">
+                    <Phone fontSize="small" />
+                    <div>
+                        <div className="font-bold text-black">1800 1143</div>
+                        <div className="text-gray-500 text-xs">từ 08:00 - 20:00</div>
+                    </div>
+                </div>
+
+                {/* Giỏ hàng */}
+                <IconButton>
+                    <Badge badgeContent={0} color="warning">
+                        <ShoppingCart />
+                    </Badge>
+                </IconButton>
+            </div>
         </header>
     );
 };

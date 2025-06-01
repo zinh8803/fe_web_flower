@@ -10,12 +10,14 @@ import store from "./store";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Provider store={store}>
+    <tailwindcss>
+      <Provider store={store}>
 
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </Provider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </Provider>
+    </tailwindcss>
   </React.StrictMode>
 );
