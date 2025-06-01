@@ -1,11 +1,16 @@
 import React from "react";
+import { Box, Typography } from "@mui/material";
 
 const Home = () => {
     return (
-        <div className="text-center py-10">
-            <h1 className="text-3xl font-bold text-blue-600">Welcome to Flower Shop</h1>
-            <p className="mt-4 text-gray-500">Trang chủ đang hoạt động!</p>
-        </div>
+        <Box textAlign="center" py={10}>
+            <Typography variant="h3" color="primary" fontWeight="bold">
+                Welcome to Flower Shop
+            </Typography>
+            <Typography mt={4} color="text.secondary">
+                Trang chủ đang hoạt động!
+            </Typography>
+        </Box>
     );
 };
 

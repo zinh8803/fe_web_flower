@@ -1,15 +1,25 @@
 import React from "react";
-import { Container } from "@mui/material";
+import { Container, Box, Typography } from "@mui/material";
 import Header from "../component/Header";
 
 const MainLayout = ({ children }) => {
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* <header className="p-4 shadow bg-white">Header</header> */}
+        <Box minHeight="100vh" bgcolor="#f9fafb">
             <Header />
             <Container>{children}</Container>
-            <footer className="p-4 shadow bg-white text-center mt-10">© 2025</footer>
-        </div>
+            <Box
+                component="footer"
+                py={2}
+                boxShadow={1}
+                bgcolor="#fff"
+                textAlign="center"
+                mt={10}
+            >
+                <Typography variant="body2" color="text.secondary">
+                    © 2025
+                </Typography>
+            </Box>
+        </Box>
     );
 };
 

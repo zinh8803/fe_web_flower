@@ -1,7 +1,12 @@
 import React from "react";
+import { Typography } from "@mui/material";
 
 const About = () => {
-    return <h2 className="text-xl">Giới thiệu về Flower Shop</h2>;
+    return (
+        <Typography variant="h5">
+            Giới thiệu về Flower Shop
+        </Typography>
+    );
 };
 
 export default About;

@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/userSlice";
+import { Box, Button, Typography } from "@mui/material";
 
 const Login = () => {
     const dispatch = useDispatch();
@@ -12,12 +13,14 @@ const Login = () => {
     };
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-4">Đăng nhập</h2>
-            <button className="bg-blue-600 text-white px-4 py-2" onClick={handleLogin}>
+        <Box p={6}>
+            <Typography variant="h5" fontWeight="bold" mb={4}>
                 Đăng nhập
-            </button>
-        </div>
+            </Typography>
+            <Button variant="contained" color="primary" onClick={handleLogin}>
+                Đăng nhập
+            </Button>
+        </Box>
     );
 };
 
