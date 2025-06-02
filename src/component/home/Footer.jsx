@@ -342,57 +342,8 @@ export default function Footer() {
                       Hotline: 1800 1143
                     </Typography>
                   </Stack>
-                  {/* Certification Badges */}
-                  <Stack direction="row" spacing={1} sx={{ mt: 2 }} justifyContent={{ xs: "center", md: "flex-start" }}>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      sx={{
-                        bgcolor: '#4CAF50',
-                        fontSize: '11px',
-                        '&:hover': { bgcolor: '#45a049' }
-                      }}
-                    >
-                      DMCA
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      sx={{
-                        bgcolor: '#4CAF50',
-                        color: 'white',
-                        fontSize: '11px',
-                        '&:hover': { bgcolor: '#45a049' }
-                      }}
-                    >
-                      PROTECTED
-                    </Button>
-                  </Stack>
-                  {/* Government Certification */}
-                  <Paper
-                    elevation={2}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      bgcolor: '#1976d2',
-                      color: 'white',
-                      p: 1.5,
-                      borderRadius: 2,
-                      mt: 2,
-                      justifyContent: { xs: "center", md: "flex-end" }
-                    }}
-                  >
-                    <CheckCircleIcon sx={{ fontSize: 35 }} />
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '13px' }}>
-                        ĐÃ THÔNG BÁO
-                      </Typography>
-                      <Typography variant="caption" sx={{ fontSize: '11px' }}>
-                        BỘ CÔNG THƯƠNG
-                      </Typography>
-                    </Box>
-                  </Paper>
+
+
                 </Stack>
               </Box>
             </Grid>
