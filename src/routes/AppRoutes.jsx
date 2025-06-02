@@ -5,6 +5,7 @@ import NotFound from "../pages/NotFound";
 import MainLayout from "../layouts/MainLayout";
 import Login from "../pages/Login";
 import Cart from "../component/Cart/Cart";
+import ProductDetail from "../pages/ProductDetail";
 
 const AppRoutes = () => (
     <Router>
@@ -15,6 +16,7 @@ const AppRoutes = () => (
                 <Route path="*" element={<NotFound />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/detail/:id" element={<ProductDetail />} />
             </Routes>
         </MainLayout>
     </Router>

@@ -6,7 +6,6 @@ import {
   Typography,
   Link,
   Stack,
-  Divider,
   Button,
   Paper
 } from "@mui/material";
@@ -15,34 +14,38 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export default function Footer() {
-
-
   return (
-    <Box component="footer"
-      py={2}
-      boxShadow={1}
-      bgcolor="#fff"
-
-    >
-
-
-      <Box sx={{ bgcolor: "#f8f9fa", py: 6 }}>
+    <Box component="footer" display="flex" flexDirection="column" minHeight="1px">
+      <Box sx={{ bgcolor: "#f8f9fa", py: 6, flex: "1 0 auto" }}>
         <Container maxWidth="xl">
           <Grid
             container
             spacing={4}
-            justifyContent="center"
             alignItems="flex-start"
-            sx={{ textAlign: { xs: 'center', md: 'inherit' } }}
+            sx={{
+              textAlign: { xs: 'center', md: 'inherit' },
+              justifyContent: { md: "space-between" }
+            }}
           >
-            {/* Company Info - nằm ngoài cùng bên trái */}
-            <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            {/* Company Info - dịch qua phải một chút */}
+            <Grid
+              item
+              xs={12}
+              md={3}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: { xs: 'center', md: 'flex-start' },
+                pl: { md: 6, lg: 18 }, // Dịch qua phải nhiều hơn
+                pr: { md: 0 }
+              }}
+            >
               <img
                 src="https://shop.dalathasfarm.com/public/dalathasfarm/images/footer-logo.png"
                 alt="Dalat Hasfarm"
                 style={{ height: 48, marginBottom: 12 }}
               />
-              <Box sx={{ textAlign: 'left', maxWidth: 260, width: '100%' }}>
+              <Box sx={{ textAlign: { xs: 'center', md: 'left' }, maxWidth: 260, width: '100%' }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -50,24 +53,20 @@ export default function Footer() {
                     color: '#333',
                     mb: 1,
                     fontSize: '1rem',
-                    textAlign: 'left'
                   }}
                 >
                   Công ty TNHH Dalat Hasfarm
                 </Typography>
-
                 <Typography
                   variant="body2"
                   sx={{
                     color: '#666',
                     lineHeight: 1.6,
                     fontSize: '13px',
-                    textAlign: 'left'
                   }}
                 >
                   Dalat Hasfarm - Được biết đến là công ty tiên phong mở đầu cho việc trồng hoa chuyên nghiệp tại Việt Nam được thành lập từ năm 1994.
                 </Typography>
-
                 <Typography
                   variant="body2"
                   sx={{
@@ -75,12 +74,10 @@ export default function Footer() {
                     lineHeight: 1.6,
                     mt: 1,
                     fontSize: '13px',
-                    textAlign: 'left'
                   }}
                 >
                   Năm 2013 Dalat Hasfarm được tạp chí Flowers Tech có trụ sở tại Mỹ bình chọn là công ty hoa tươi lớn nhất Đông Nam Á.
                 </Typography>
-
                 <Typography
                   variant="body2"
                   sx={{
@@ -88,12 +85,10 @@ export default function Footer() {
                     lineHeight: 1.6,
                     mt: 1,
                     fontSize: '13px',
-                    textAlign: 'left'
                   }}
                 >
                   <strong>- Địa chỉ trụ sở:</strong> 450 Nguyễn Tử Lực, P.8, Đà Lạt, Lâm Đồng, Việt Nam
                 </Typography>
-
                 <Typography
                   variant="body2"
                   sx={{
@@ -101,7 +96,6 @@ export default function Footer() {
                     lineHeight: 1.6,
                     mt: 1,
                     fontSize: '13px',
-                    textAlign: 'left'
                   }}
                 >
                   <strong>- Giấy chứng nhận Đăng ký Doanh nghiệp số:</strong> <strong>5800000167</strong> do Sở Kế hoạch và Đầu tư Tỉnh Lâm Đồng cấp ngày 07/06/1994
@@ -109,8 +103,18 @@ export default function Footer() {
               </Box>
             </Grid>
 
-            {/* Webshop Menu */}
-            <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            {/* WEBSHOP */}
+            <Grid
+              item
+              xs={12}
+              md={3}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: { xs: 'center', md: 'center' },
+                justifyContent: 'center'
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -122,7 +126,7 @@ export default function Footer() {
               >
                 WEBSHOP
               </Typography>
-              <Box sx={{ width: '100%', textAlign: 'left', maxWidth: 220 }}>
+              <Box sx={{ width: '100%', textAlign: 'center', maxWidth: 220 }}>
                 <Stack spacing={2}>
                   <Link
                     href="#"
@@ -170,8 +174,18 @@ export default function Footer() {
               </Box>
             </Grid>
 
-            {/* Company Info Menu */}
-            <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            {/* THÔNG TIN */}
+            <Grid
+              item
+              xs={12}
+              md={3}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: { xs: 'center', md: 'center' },
+                justifyContent: 'center'
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -183,7 +197,7 @@ export default function Footer() {
               >
                 THÔNG TIN
               </Typography>
-              <Box sx={{ width: '100%', textAlign: 'left', maxWidth: 220 }}>
+              <Box sx={{ width: '100%', textAlign: 'center', maxWidth: 220 }}>
                 <Stack spacing={2}>
                   <Link
                     href="#"
@@ -259,8 +273,19 @@ export default function Footer() {
               </Box>
             </Grid>
 
-            {/* Contact Info */}
-            <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            {/* LIÊN HỆ - dịch qua trái */}
+            <Grid
+              item
+              xs={12}
+              md={3}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: { xs: 'center', md: 'flex-start' },
+                justifyContent: 'center',
+                pr: { md: 6, lg: 18 }
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -272,12 +297,16 @@ export default function Footer() {
               >
                 LIÊN HỆ
               </Typography>
-
-              <Box sx={{ width: '100%', textAlign: 'left', maxWidth: 260 }}>
+              <Box sx={{ width: '100%', textAlign: { xs: 'center', md: 'left' }, maxWidth: 260 }}>
                 <Stack spacing={2.5}>
-                  <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-                    <EmailIcon sx={{ color: '#4CAF50', fontSize: 20, mt: 0.2 }} />
-                    <Box>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1.5}
+                    justifyContent={{ xs: "center", md: "flex-start" }}
+                  >
+                    <EmailIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
+                    <Box sx={{ textAlign: "left" }}>
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333' }}>
                         Email Đặt Hàng:
                       </Typography>
@@ -286,10 +315,14 @@ export default function Footer() {
                       </Typography>
                     </Box>
                   </Stack>
-
-                  <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-                    <EmailIcon sx={{ color: '#4CAF50', fontSize: 20, mt: 0.2 }} />
-                    <Box>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1.5}
+                    justifyContent={{ xs: "center", md: "flex-start" }}
+                  >
+                    <EmailIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
+                    <Box sx={{ textAlign: "left" }}>
                       <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333' }}>
                         Email CSKH:
                       </Typography>
@@ -298,16 +331,19 @@ export default function Footer() {
                       </Typography>
                     </Box>
                   </Stack>
-
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1.5}
+                    justifyContent={{ xs: "center", md: "flex-start" }}
+                  >
                     <PhoneIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#333', textAlign: "left" }}>
                       Hotline: 1800 1143
                     </Typography>
                   </Stack>
-
                   {/* Certification Badges */}
-                  <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: 2 }} justifyContent={{ xs: "center", md: "flex-start" }}>
                     <Button
                       size="small"
                       variant="contained"
@@ -332,7 +368,6 @@ export default function Footer() {
                       PROTECTED
                     </Button>
                   </Stack>
-
                   {/* Government Certification */}
                   <Paper
                     elevation={2}
@@ -344,7 +379,8 @@ export default function Footer() {
                       color: 'white',
                       p: 1.5,
                       borderRadius: 2,
-                      mt: 2
+                      mt: 2,
+                      justifyContent: { xs: "center", md: "flex-end" }
                     }}
                   >
                     <CheckCircleIcon sx={{ fontSize: 35 }} />
@@ -361,15 +397,18 @@ export default function Footer() {
               </Box>
             </Grid>
           </Grid>
-
-
-
-
         </Container>
       </Box>
 
-      {/* Copyright */}
-      <Box sx={{ bgcolor: "#e9ecef", py: 2.5, textAlign: 'center' }}>
+      {/* Copyright - luôn dính sát cuối */}
+      <Box
+        sx={{
+          bgcolor: "#e9ecef",
+          py: 2.5,
+          textAlign: 'center',
+          mt: "auto"
+        }}
+      >
         <Typography variant="body2" sx={{ color: '#666' }}>
           © 2020 Dalathasfarm. All rights reserved.
         </Typography>

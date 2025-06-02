@@ -13,8 +13,10 @@ import {
     Button,
     Paper,
     Divider,
+    Link
 } from "@mui/material";
 import { Minus, Plus, Trash2, MapPin } from "lucide-react";
+
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([
@@ -77,7 +79,16 @@ const Cart = () => {
             {/* Breadcrumb */}
             <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                    Trang chủ / <span style={{ color: '#333' }}>Giỏ hàng</span>
+                    <Link sx={{
+                        fontWeight: 'bold',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        '&:hover': {
+                            textDecoration: 'underline'
+                        }
+                    }}
+                    href="/"
+                    >Trang chủ</Link> / <span style={{ color: '#333' }}>Giỏ hàng</span>
                 </Typography>
             </Box>
 

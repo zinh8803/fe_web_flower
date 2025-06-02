@@ -60,25 +60,25 @@ const HomeBanner = () => {
 
     const features = [
         {
-            icon: "/icons/price.png",
+            icon: "https://shop.dalathasfarm.com/public/dalathasfarm/images/commit.png",
             title: "Cam kết",
             description: "Giá cả hợp lý",
             borderColor: "#FFA500",
         },
         {
-            icon: "/icons/delivery.png",
+            icon: "https://shop.dalathasfarm.com/public/dalathasfarm/images/shipping.png",
             title: "Giao nhanh",
             description: "Nội thành",
             borderColor: "#00AA66",
         },
         {
-            icon: "/icons/fresh.png",
+            icon: "https://shop.dalathasfarm.com/public/dalathasfarm/images/guarantee.png",
             title: "Đảm bảo",
             description: "Sạch, Tươi, Mới",
             borderColor: "#00AA66",
         },
         {
-            icon: "/icons/eco.png",
+            icon: "https://shop.dalathasfarm.com/public/dalathasfarm/images/sustainability.png",
             title: "Thân thiện",
             description: "Môi trường sống",
             borderColor: "#FFA500",

@@ -9,7 +9,7 @@ import {
     Typography,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-
+import { Link } from "react-router-dom";
 const sectionData = {
     title: "HOA TẶNG & HOA DỊCH VỤ1",
     products: [
@@ -85,50 +85,57 @@ const ProductGrid = ({ title }) => {
                 }}
             >
                 {sectionData.products.map((item, idx) => (
-                    <Card
+                    <Link
                         key={idx}
-                        sx={{
-                            width: "18%",
-                            minWidth: 220,
-                            maxWidth: 240,
-                            borderRadius: 2,
-                            boxShadow: "0 0 10px rgba(0,0,0,0.05)",
-                            transition: "transform 0.2s",
-                            "&:hover": {
-                                transform: "translateY(-4px)",
-                            },
-                        }}
+                        to={`/detail/${item.id}`}
+                        style={{ textDecoration: "none", color: "inherit" }}
                     >
-                        <CardMedia
-                            component="img"
-                            image={item.image}
-                            alt={item.name}
+                        <Card
+                            key={idx}
                             sx={{
-                                height: 180,
-                                objectFit: "contain",
-                                p: 1,
+                                width: "18%",
+                                minWidth: 220,
+                                maxWidth: 240,
+                                borderRadius: 2,
+
+                                boxShadow: "0 0 10px rgba(0,0,0,0.05)",
+                                transition: "transform 0.2s",
+                                "&:hover": {
+                                    transform: "translateY(-4px)",
+                                },
                             }}
-                        />
-                        <CardContent sx={{ textAlign: "center" }}>
-                            <Typography variant="body2" fontWeight={600}>
-                                {item.name}
-                            </Typography>
-                            <Typography color="error" fontWeight={700}>
-                                {item.price}/{item.unit}
-                            </Typography>
-                        </CardContent>
-                        <CardActions sx={{ justifyContent: "center", pb: 2 }}>
-                            <Button
-                                size="small"
-                                variant="contained"
-                                color="error"
-                                endIcon={<ShoppingCartIcon />}
-                                sx={{ borderRadius: 5, px: 2 }}
-                            >
-                                Mua Ngay
-                            </Button>
-                        </CardActions>
-                    </Card>
+                        >
+                            <CardMedia
+                                component="img"
+                                image={item.image}
+                                alt={item.name}
+                                sx={{
+                                    height: 180,
+                                    objectFit: "contain",
+                                    p: 1,
+                                }}
+                            />
+                            <CardContent sx={{ textAlign: "center" }}>
+                                <Typography variant="body2" fontWeight={600}>
+                                    {item.name}
+                                </Typography>
+                                <Typography color="error" fontWeight={700}>
+                                    {item.price}/{item.unit}
+                                </Typography>
+                            </CardContent>
+                            <CardActions sx={{ justifyContent: "center", pb: 2 }}>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="error"
+                                    endIcon={<ShoppingCartIcon />}
+                                    sx={{ borderRadius: 5, px: 2 }}
+                                >
+                                    Mua Ngay
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Link>
                 ))}
             </Box>
 
