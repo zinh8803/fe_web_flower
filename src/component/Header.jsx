@@ -7,7 +7,7 @@ const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     // Gán cứng login
-    const isLoggedIn = false;
+    const isLoggedIn = true;
     const userInfo = {
         name: "Nguyễn Văn A",
         avatar: "https://i.pravatar.cc/40",
