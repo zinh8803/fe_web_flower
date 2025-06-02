@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper } from "@mui/material";
 import { ShoppingCart, Menu as MenuIcon, Search } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
+import LoginDialog from "../auth/LoginDialog";
 
 const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
-
+    const [showLogin, setShowLogin] = useState(false);
     // Gán cứng login
     const isLoggedIn = false;
     const userInfo = {
@@ -13,8 +14,12 @@ const Header = () => {
         avatar: "https://i.pravatar.cc/40",
     };
 
+    const handleLoginDialogClose = (shouldReopen = false) => {
+        setShowLogin(shouldReopen);
+    };
+
     return (
-        <Box component="header" width="100%" borderTop={1} borderColor="divider" boxShadow={1}>
+        <Box component="header" width="100%" borderTop={1} borderColor="divider" boxShadow={1} position="sticky" top={0} zIndex={1000} bgcolor="#fff">
             <Box
                 maxWidth="lg"
                 mx="auto"
@@ -73,11 +78,7 @@ const Header = () => {
 
                 {/* Right side */}
                 <Box display="flex" alignItems="center" gap={3}>
-                    {/* Vị trí */}
-                    <Box display={{ xs: "none", lg: "flex" }} flexDirection="column" alignItems="center" fontSize="small">
-                        <Typography color="text.secondary" fontStyle="italic">Giao đến</Typography>
-                        <Typography fontWeight="bold">QUẬN 1</Typography>
-                    </Box>
+
 
                     {/* Hotline */}
                     <Box display={{ xs: "none", lg: "flex" }} flexDirection="column" alignItems="center" fontSize="small">
@@ -96,7 +97,9 @@ const Header = () => {
                     {isLoggedIn ? (
                         <UserMenu user={userInfo} />
                     ) : (
-                        <Button color="success" variant="text" size="small">
+                        <Button color="success" variant="contained" size="small"
+                            onClick={() => setShowLogin(true)}
+                        >
                             Đăng nhập
                         </Button>
                     )}
@@ -107,6 +110,7 @@ const Header = () => {
                             <MenuIcon />
                         </IconButton>
                     </Box>
+                    <LoginDialog open={showLogin} onClose={handleLoginDialogClose} />
                 </Box>
             </Box>
         </Box>
