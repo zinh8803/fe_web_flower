@@ -3,6 +3,7 @@ import { Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, 
 import { ShoppingCart, Menu as MenuIcon, Search } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
 import LoginDialog from "../auth/LoginDialog";
+import { Link } from "react-router-dom";
 
 const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -31,11 +32,11 @@ const Header = () => {
             >
                 {/* Logo */}
                 <Box display="flex" alignItems="center" gap={2}>
-                    <img
+                    <Link to="/"><img
                         src="https://shop.dalathasfarm.com/public/dalathasfarm/images/logo.png"
                         alt="Logo"
                         style={{ height: 40 }}
-                    />
+                    /></Link>
                 </Box>
 
                 {/* Search */}
@@ -82,16 +83,19 @@ const Header = () => {
 
                     {/* Hotline */}
                     <Box display={{ xs: "none", lg: "flex" }} flexDirection="column" alignItems="center" fontSize="small">
-                        <Typography fontWeight="bold">1800 1143</Typography>
-                        <Typography color="text.secondary" fontStyle="italic">08:00 - 20:00</Typography>
+                        <Link to="/about"
+                            style={{ textDecoration: "none", color: "#16a34a", fontWeight: "bold" }}
+                        >Về chúng tôi</Link>
                     </Box>
 
                     {/* Giỏ hàng */}
-                    <IconButton color="inherit">
-                        <Badge badgeContent={0} color="warning">
-                            <ShoppingCart />
-                        </Badge>
-                    </IconButton>
+                    <Link to="/cart" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <IconButton color="inherit">
+                            <Badge badgeContent={0} color="warning">
+                                <ShoppingCart />
+                            </Badge>
+                        </IconButton>
+                    </Link>
 
                     {/* Đăng nhập / User */}
                     {isLoggedIn ? (
