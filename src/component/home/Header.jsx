@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper } from "@mui/material";
 import { ShoppingCart, Menu as MenuIcon, Search } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
+import LoginDialog from "../auth/LoginDialog";
+import { Link } from "react-router-dom";
 
 const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
-
+    const [showLogin, setShowLogin] = useState(false);
     // Gán cứng login
     const isLoggedIn = true;
     const userInfo = {
@@ -13,8 +15,12 @@ const Header = () => {
         avatar: "https://i.pravatar.cc/40",
     };
 
+    const handleLoginDialogClose = (shouldReopen = false) => {
+        setShowLogin(shouldReopen);
+    };
+
     return (
-        <Box component="header" width="100%" borderTop={1} borderColor="divider" boxShadow={1}>
+        <Box component="header" width="100%" borderTop={1} borderColor="divider" boxShadow={1} position="sticky" top={0} zIndex={1000} bgcolor="#fff">
             <Box
                 maxWidth="lg"
                 mx="auto"
@@ -26,11 +32,11 @@ const Header = () => {
             >
                 {/* Logo */}
                 <Box display="flex" alignItems="center" gap={2}>
-                    <img
+                    <Link to="/"><img
                         src="https://shop.dalathasfarm.com/public/dalathasfarm/images/logo.png"
                         alt="Logo"
                         style={{ height: 40 }}
-                    />
+                    /></Link>
                 </Box>
 
                 {/* Search */}
@@ -73,30 +79,31 @@ const Header = () => {
 
                 {/* Right side */}
                 <Box display="flex" alignItems="center" gap={3}>
-                    {/* Vị trí */}
-                    <Box display={{ xs: "none", lg: "flex" }} flexDirection="column" alignItems="center" fontSize="small">
-                        <Typography color="text.secondary" fontStyle="italic">Giao đến</Typography>
-                        <Typography fontWeight="bold">QUẬN 1</Typography>
-                    </Box>
+
 
                     {/* Hotline */}
                     <Box display={{ xs: "none", lg: "flex" }} flexDirection="column" alignItems="center" fontSize="small">
-                        <Typography fontWeight="bold">1800 1143</Typography>
-                        <Typography color="text.secondary" fontStyle="italic">08:00 - 20:00</Typography>
+                        <Link to="/about"
+                            style={{ textDecoration: "none", color: "#16a34a", fontWeight: "bold" }}
+                        >Về chúng tôi</Link>
                     </Box>
 
                     {/* Giỏ hàng */}
-                    <IconButton color="inherit">
-                        <Badge badgeContent={0} color="warning">
-                            <ShoppingCart />
-                        </Badge>
-                    </IconButton>
+                    <Link to="/cart" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <IconButton color="inherit">
+                            <Badge badgeContent={0} color="warning">
+                                <ShoppingCart />
+                            </Badge>
+                        </IconButton>
+                    </Link>
 
                     {/* Đăng nhập / User */}
                     {isLoggedIn ? (
                         <UserMenu user={userInfo} />
                     ) : (
-                        <Button color="success" variant="text" size="small">
+                        <Button color="success" variant="contained" size="small"
+                            onClick={() => setShowLogin(true)}
+                        >
                             Đăng nhập
                         </Button>
                     )}
@@ -107,6 +114,7 @@ const Header = () => {
                             <MenuIcon />
                         </IconButton>
                     </Box>
+                    <LoginDialog open={showLogin} onClose={handleLoginDialogClose} />
                 </Box>
             </Box>
         </Box>

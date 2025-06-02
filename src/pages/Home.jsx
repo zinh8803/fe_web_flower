@@ -1,16 +1,17 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Container } from "@mui/material";
+import ProductGrid from "../component/home/ProductGrid";
+import LoginDialog from "../component/auth/LoginDialog";
 
 const Home = () => {
     return (
-        <Box textAlign="center" py={10}>
-            <Typography variant="h3" color="primary" fontWeight="bold">
-                Welcome to Flower Shop
-            </Typography>
-            <Typography mt={4} color="text.secondary">
-                Trang chủ đang hoạt động!
-            </Typography>
-        </Box>
+        <Container maxWidth="xl" sx={{ py: 4 }} >
+
+
+
+
+            <ProductGrid title="HOA TẶNG & HOA DỊCH VỤ" />
+        </Container>
     );
 };
 

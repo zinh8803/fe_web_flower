@@ -8,6 +8,9 @@ const theme = createTheme({
     typography: {
         fontFamily: "Inter, sans-serif",
     },
+    orange: {
+        main: "#f97316",
+    },
 });
 
 export default theme;
