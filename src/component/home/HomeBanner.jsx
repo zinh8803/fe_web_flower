@@ -28,9 +28,9 @@ const HomeBanner = () => {
         "Bình Hoa",
         "Hoa Chúc Mừng",
         "Hoa Chia Buồn",
-        "Hoa Xinh Giá Tốt",
-        "E-Gift Voucher",
-        "Phụ Liệu Hoa",
+        // "Hoa Xinh Giá Tốt",
+        // "E-Gift Voucher",
+        // "Phụ Liệu Hoa",
     ];
 
 

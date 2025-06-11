@@ -56,6 +56,9 @@ const Cart = () => {
     const handleApplyDiscount = () => {
         if (discountCode === "FLOWER10") {
             setDiscountAmount(subtotal * 0.1);
+        }
+        if (discountCode === "500k") {
+            setDiscountAmount(500000);
         } else {
             setDiscountAmount(0);
         }
@@ -87,7 +90,7 @@ const Cart = () => {
                             textDecoration: 'underline'
                         }
                     }}
-                    href="/"
+                        href="/"
                     >Trang chủ</Link> / <span style={{ color: '#333' }}>Giỏ hàng</span>
                 </Typography>
             </Box>
