@@ -1,74 +1,61 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, TextField, Grid, Card, CardMedia, CardContent } from "@mui/material";
+import { Box, Typography, Button, TextField } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
-
-// Giả lập dữ liệu sản phẩm
-const fakeProductData = {
-    1: {
-        id: 1,
-        name: "Hộp Hoa Yêu Thương Rực Rỡ 681",
-        image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-        price: 1000000,
-        unit: "Hộp",
-        description: `
-            <p>Mỗi ngày là một dịp đặc biệt để bạn thể hiện sự quan tâm...</p>
-            <ul>
-                <li>Hoa hồng, cẩm chướng, tulip...</li>
-                <li>Giao hàng nhanh toàn quốc.</li>
-            </ul>
-        `,
-        relatedIds: [2, 3, 4],
-    },
-    2: {
-        id: 2,
-        name: "Giỏ Hoa Yêu Thương Rực Rỡ 682",
-        image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-        price: 1200000,
-        unit: "Giỏ",
-    },
-    3: {
-        id: 4,
-        name: "Giỏ Hoa Yêu Thương Rực Rỡ 674",
-        image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-        price: 1300000,
-        unit: "Giỏ",
-    },
-    4: {
-        id: 4,
-        name: "Giỏ Hoa Yêu Thương Rực Rỡ 674",
-        image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-        price: 1300000,
-        unit: "Giỏ",
-    },
-
-};
+import { getProductById, getProductsByCategory } from "../services/productService";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store/cartSlice";
 
 const ProductDetail = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [related, setRelated] = useState([]);
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        const prod = fakeProductData[id];
-        setProduct(prod);
-        setQuantity(1);
+        setLoading(true);
+        getProductById(id)
+            .then(res => {
+                setProduct(res.data.data);
+                setQuantity(1);
+            })
+            .finally(() => setLoading(false));
     }, [id]);
+
+    // Lấy sản phẩm liên quan khi đã có product và product.category_id
+    useEffect(() => {
+        if (product && product.category_id) {
+            console.log("Gọi API lấy sản phẩm liên quan với category_id:", product.category_id);
+            getProductsByCategory(product.category_id).then(res => {
+                console.log("Kết quả API sản phẩm liên quan:", res.data.data);
+                const filtered = res.data.data.filter(p => p.id !== product.id);
+                console.log("Danh sách sản phẩm liên quan sau khi lọc:", filtered);
+                setRelated(filtered);
+            }).catch(err => {
+                console.error("Lỗi khi lấy sản phẩm liên quan:", err);
+            });
+        } else {
+            console.log("Chưa có product hoặc category_id");
+        }
+    }, [product]);
 
     const handleQuantityChange = (e) => {
         const value = parseInt(e.target.value);
         if (!isNaN(value) && value > 0) setQuantity(value);
     };
 
-    if (!product) return <Typography>Đang tải sản phẩm...</Typography>;
+    if (loading) return <Typography>Đang tải sản phẩm...</Typography>;
+    if (!product) return <Typography>Không tìm thấy sản phẩm.</Typography>;
 
-    const total = product.price * quantity;
+    const total = Number(product.price) * quantity;
 
     return (
         <Box sx={{ p: 4, maxWidth: "1200px", mx: "auto" }}>
             <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
                 <Box sx={{ flex: 1 }}>
                     <img
-                        src={product.image}
+                        src={product.image_url}
                         alt={product.name}
                         style={{ width: "100%", maxWidth: "400px", objectFit: "contain", borderRadius: 10 }}
                     />
@@ -80,7 +67,7 @@ const ProductDetail = () => {
                     </Typography>
 
                     <Typography variant="h6" color="error" mb={2}>
-                        {product.price.toLocaleString()}đ / {product.unit}
+                        {Number(product.price).toLocaleString()}đ
                     </Typography>
 
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -102,7 +89,22 @@ const ProductDetail = () => {
                         </span>
                     </Typography>
 
-                    <Button variant="contained" color="error" sx={{ borderRadius: 5 }}>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        sx={{ borderRadius: 5 }}
+                        onClick={() =>
+                            dispatch(
+                                addToCart({
+                                    id: product.id,
+                                    name: product.name,
+                                    price: Number(product.price),
+                                    image: product.image_url,
+                                    quantity: quantity,
+                                })
+                            )
+                        }
+                    >
                         Thêm vào giỏ hàng
                     </Button>
                 </Box>
@@ -122,39 +124,44 @@ const ProductDetail = () => {
             )}
 
             {/* Sản phẩm liên quan */}
-            {product.relatedIds && (
-                <Box sx={{ mt: 6 }}>
-                    <Typography variant="h6" fontWeight={700} mb={2}>
-                        Sản phẩm tương tự
+            {related.length > 0 && (
+                <Box sx={{ mt: 8 }}>
+                    <Typography variant="h6" fontWeight={700} mb={3}>
+                        Sản phẩm liên quan
                     </Typography>
-                    <Grid container spacing={2}>
-                        {product.relatedIds.map((rid) => {
-                            const related = fakeProductData[rid];
-                            if (!related) return null;
-                            return (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={rid}>
-                                    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                                        <Link to={`/chi-tiet/${related.id}`} style={{ textDecoration: "none", color: "inherit", height: "100%", display: "flex", flexDirection: "column" }}>
-                                            <CardMedia
-                                                component="img"
-                                                height="180"
-                                                image={related.image}
-                                                alt={related.name}
-                                            />
-                                            <CardContent sx={{ flexGrow: 1 }}>
-                                                <Typography variant="body1" fontWeight={600}>
-                                                    {related.name}
-                                                </Typography>
-                                                <Typography color="error" fontWeight={500}>
-                                                    {related.price.toLocaleString()}đ
-                                                </Typography>
-                                            </CardContent>
-                                        </Link>
-                                    </Card>
-                                </Grid>
-                            );
-                        })}
-                    </Grid>
+                    <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+                        {related.map(item => (
+                            <Link
+                                key={item.id}
+                                to={`/detail/${item.id}`}
+                                style={{ textDecoration: "none", color: "inherit" }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 220,
+                                        border: "1px solid #eee",
+                                        borderRadius: 2,
+                                        p: 2,
+                                        textAlign: "center",
+                                        transition: "box-shadow 0.2s",
+                                        "&:hover": { boxShadow: 3 },
+                                    }}
+                                >
+                                    <img
+                                        src={item.image_url}
+                                        alt={item.name}
+                                        style={{ width: "100%", height: 120, objectFit: "contain", borderRadius: 8 }}
+                                    />
+                                    <Typography fontWeight={600} mt={1}>
+                                        {item.name}
+                                    </Typography>
+                                    <Typography color="error" fontWeight={700}>
+                                        {Number(item.price).toLocaleString()}đ
+                                    </Typography>
+                                </Box>
+                            </Link>
+                        ))}
+                    </Box>
                 </Box>
             )}
         </Box>

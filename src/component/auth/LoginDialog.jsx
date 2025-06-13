@@ -45,9 +45,17 @@ const LoginDialog = ({ open, onClose }) => {
         try {
             const res = await login(email, password);
             const token = res.data.token;
-            const profileRes = await getProfile(token);
 
-            dispatch(setUser({ user: profileRes.data, token }));
+            // Lấy thông tin profile
+            const profileRes = await getProfile(token);
+            const userData = profileRes.data;
+
+            // Lưu vào Redux
+            dispatch(setUser({ user: userData, token }));
+
+            // Lưu vào localStorage (thêm dòng này)
+            localStorage.setItem("user", JSON.stringify(userData));
+            localStorage.setItem("token", token);
 
             onClose(false);
         } catch (error) {

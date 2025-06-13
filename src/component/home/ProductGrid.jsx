@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -11,60 +11,18 @@ import {
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../../store/cartSlice"; // Đường dẫn đúng tới cartSlice.js
-
-const sectionData = {
-    title: "HOA TẶNG & HOA DỊCH VỤ1",
-    products: [
-        {
-            id: 1,
-            name: "Hộp Hoa Yêu Thương Rực Rỡ 681",
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: 1000000,
-            unit: "Hộp",
-        },
-        {
-            id: 2,
-            name: "Giỏ Hoa Yêu Thương Rực Rỡ 678",
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: 1400000,
-            unit: "Giỏ",
-        },
-        {
-            id: 3,
-            name: "Bó Hoa Chúc Mừng Mặt Trời Đỏ",
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: 850000,
-            unit: "Bó",
-        },
-        {
-            id: 4,
-            name: "Lẵng Hoa Sinh Nhật Tươi Vui",
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: 1200000,
-            unit: "Lẵng",
-        },
-        {
-            id: 5,
-            name: "Hộp Hoa Đỏ Lãng Mạn",
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: 1050000,
-            unit: "Hộp",
-        },
-        {
-            id: 6,
-            name: "Giỏ Hoa Sáng Tạo",
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: 1300000,
-            unit: "Giỏ",
-        },
-
-
-    ],
-};
+import { addToCart } from "../../store/cartSlice";
+import { getProducts } from "../../services/productService"; // Thêm dòng này
 
 const ProductGrid = ({ title }) => {
     const dispatch = useDispatch();
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        getProducts().then(res => {
+            setProducts(res.data.data); // API trả về { data: [...] }
+        });
+    }, []);
 
     return (
         <Box
@@ -89,20 +47,18 @@ const ProductGrid = ({ title }) => {
                     gap: "20px",
                 }}
             >
-                {sectionData.products.map((item, idx) => (
+                {products.map((item) => (
                     <Link
-                        key={idx}
+                        key={item.id}
                         to={`/detail/${item.id}`}
                         style={{ textDecoration: "none", color: "inherit" }}
                     >
                         <Card
-                            key={idx}
                             sx={{
                                 width: "18%",
                                 minWidth: 220,
                                 maxWidth: 240,
                                 borderRadius: 2,
-
                                 boxShadow: "0 0 10px rgba(0,0,0,0.05)",
                                 transition: "transform 0.2s",
                                 "&:hover": {
@@ -112,7 +68,7 @@ const ProductGrid = ({ title }) => {
                         >
                             <CardMedia
                                 component="img"
-                                image={item.image}
+                                image={item.image_url}
                                 alt={item.name}
                                 sx={{
                                     height: 180,
@@ -125,7 +81,7 @@ const ProductGrid = ({ title }) => {
                                     {item.name}
                                 </Typography>
                                 <Typography color="error" fontWeight={700}>
-                                    {item.price}/{item.unit}
+                                    {Number(item.price).toLocaleString()}đ
                                 </Typography>
                             </CardContent>
                             <CardActions sx={{ justifyContent: "center", pb: 2 }}>
@@ -136,8 +92,14 @@ const ProductGrid = ({ title }) => {
                                     endIcon={<ShoppingCartIcon />}
                                     sx={{ borderRadius: 5, px: 2 }}
                                     onClick={e => {
-                                        e.preventDefault(); // Không chuyển trang khi bấm nút
-                                        dispatch(addToCart(item));
+                                        e.preventDefault();
+                                        dispatch(addToCart({
+                                            id: item.id,
+                                            name: item.name,
+                                            price: Number(item.price),
+                                            image: item.image_url,
+                                            quantity: 1,
+                                        }));
                                     }}
                                 >
                                     Mua Ngay

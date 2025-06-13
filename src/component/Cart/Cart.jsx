@@ -18,11 +18,13 @@ import {
 import { Minus, Plus, Trash2, MapPin } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity } from "../../store/cartSlice";
+import { useNavigate } from "react-router-dom";
 
 
 const Cart = () => {
     const cartItems = useSelector(state => state.cart.items);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
@@ -336,6 +338,7 @@ const Cart = () => {
                                         textTransform: 'none',
                                         fontSize: '1.1rem'
                                     }}
+                                    onClick={() => navigate("/checkout")}
                                 >
                                     Tiến hành thanh toán
                                 </Button>
