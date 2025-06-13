@@ -1,5 +1,4 @@
 // src/component/LoginDialog.jsx
-import React from "react";
 import {
     Dialog,
     DialogContent,
@@ -14,15 +13,16 @@ import {
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { orange } from "@mui/material/colors";
-import RegisterDialog from "./RegisterDialog"; // Import RegisterDialog component
+import RegisterDialog from "./RegisterDialog";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../store/userSlice";
 import { login, getProfile } from "../../services/userService";
+import { useState } from "react";
 
 const LoginDialog = ({ open, onClose }) => {
-    const [openRegister, setOpenRegister] = React.useState(false);
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
+    const [openRegister, setOpenRegister] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const dispatch = useDispatch();
 
     const handleOpenRegister = () => {
@@ -37,7 +37,7 @@ const LoginDialog = ({ open, onClose }) => {
     const handleSwitchToLogin = () => {
         setOpenRegister(false);
         setTimeout(() => {
-            onClose(true); // Gọi với true để mở lại form đăng nhập
+            onClose(true);
         }, 100);
     };
 
@@ -47,10 +47,9 @@ const LoginDialog = ({ open, onClose }) => {
             const token = res.data.token;
             const profileRes = await getProfile(token);
 
-            // Lưu vào Redux và localStorage
             dispatch(setUser({ user: profileRes.data, token }));
 
-            onClose(false); // Đóng dialog
+            onClose(false);
         } catch (error) {
             console.error("Login failed:", error);
             alert("Đăng nhập thất bại!");

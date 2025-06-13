@@ -1,5 +1,5 @@
 // src/component/LoginDialog.jsx
-import React from "react";
+import React, { useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -14,14 +14,51 @@ import {
     FormControlLabel,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/userSlice";
+import { register, getProfile } from "../../services/userService";
 
 const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
+    const [form, setForm] = useState({
+        name: "",
+        phone: "",
+        email: "",
+        password: "",
+        password_confirmation: "",
+        // gender: "male",
+    });
+
+    const dispatch = useDispatch();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm({
+            ...form,
+            [name]: value,
+        });
+    };
+
+    const handleRegister = async () => {
+        try {
+            const res = await register(form);
+
+            if (res.data && res.data.token) {
+                const profileRes = await getProfile(res.data.token);
+                dispatch(setUser({ user: profileRes.data, token: res.data.token }));
+                onClose();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Đăng ký thất bại");
+        }
+    };
+
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogContent sx={{ width: "600px", padding: 3, position: 'relative' }}>
                 <IconButton
                     aria-label="close"
-                    onClick={onClose}  // This will now call handleCloseAll from LoginDialog
+                    onClick={onClose}
                     sx={{
                         position: 'absolute',
                         right: 8,
@@ -44,6 +81,9 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     label="Nhập tên người dùng"
                     variant="outlined"
                     margin="normal"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
                 />
 
                 <Typography variant="body1" fontWeight="bold">
@@ -54,6 +94,9 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     label="Nhập số điện thoại"
                     variant="outlined"
                     margin="normal"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
                 />
 
                 <Typography variant="body1" fontWeight="bold">
@@ -64,6 +107,9 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     label="Nhập email"
                     variant="outlined"
                     margin="normal"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
                 />
 
                 <Typography variant="body1" fontWeight="bold">
@@ -75,6 +121,9 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     type="password"
                     variant="outlined"
                     margin="normal"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
                 />
 
                 <Typography variant="body1" fontWeight="bold">
@@ -86,15 +135,18 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     type="password"
                     variant="outlined"
                     margin="normal"
+                    name="password_confirmation"
+                    value={form.password_confirmation}
+                    onChange={handleChange}
                 />
 
-                <Typography variant="body1" fontWeight="bold" mt={2}>
+                {/* <Typography variant="body1" fontWeight="bold" mt={2}>
                     Giới tính
                 </Typography>
-                <RadioGroup row>
-                    <FormControlLabel value="nam" control={<Radio />} label="Nam" />
-                    <FormControlLabel value="nu" control={<Radio />} label="Nữ" />
-                </RadioGroup>
+                <RadioGroup row value={form.gender} onChange={handleChange} name="gender">
+                    <FormControlLabel value="male" control={<Radio />} label="Nam" />
+                    <FormControlLabel value="female" control={<Radio />} label="Nữ" />
+                </RadioGroup> */}
 
                 <Box display="flex" justifyContent="center" mt={3}>
                     <Button
@@ -108,6 +160,7 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                                 backgroundColor: "#fb8c00"
                             }
                         }}
+                        onClick={handleRegister}
                     >
                         ĐĂNG KÝ
                     </Button>

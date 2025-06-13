@@ -11,3 +11,5 @@ export const getProfile = (token) =>
     });
 
 export const getUsers = () => api.get("/users");
+
+export const register = (data) => api.post("/register", data);
