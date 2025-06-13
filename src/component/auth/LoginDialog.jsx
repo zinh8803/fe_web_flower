@@ -15,9 +15,15 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { orange } from "@mui/material/colors";
 import RegisterDialog from "./RegisterDialog"; // Import RegisterDialog component
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/userSlice";
+import { login, getProfile } from "../../services/userService";
 
 const LoginDialog = ({ open, onClose }) => {
     const [openRegister, setOpenRegister] = React.useState(false);
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const dispatch = useDispatch();
 
     const handleOpenRegister = () => {
         setOpenRegister(true);
@@ -33,6 +39,22 @@ const LoginDialog = ({ open, onClose }) => {
         setTimeout(() => {
             onClose(true); // Gọi với true để mở lại form đăng nhập
         }, 100);
+    };
+
+    const handleLogin = async () => {
+        try {
+            const res = await login(email, password);
+            const token = res.data.token;
+            const profileRes = await getProfile(token);
+
+            // Lưu vào Redux và localStorage
+            dispatch(setUser({ user: profileRes.data, token }));
+
+            onClose(false); // Đóng dialog
+        } catch (error) {
+            console.error("Login failed:", error);
+            alert("Đăng nhập thất bại!");
+        }
     };
 
     return (
@@ -65,6 +87,8 @@ const LoginDialog = ({ open, onClose }) => {
                         label="email"
                         variant="outlined"
                         margin="normal"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
 
                     <Typography variant="body1" fontWeight="bold">
@@ -76,6 +100,8 @@ const LoginDialog = ({ open, onClose }) => {
                         type="password"
                         variant="outlined"
                         margin="normal"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -94,6 +120,7 @@ const LoginDialog = ({ open, onClose }) => {
                                 borderRadius: 5,
                                 maxWidth: "80%"
                             }}
+                            onClick={handleLogin}
                         >
                             ĐĂNG NHẬP
                         </Button>

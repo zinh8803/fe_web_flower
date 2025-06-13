@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper } from "@mui/material";
 import { ShoppingCart, Menu as MenuIcon, Search } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
@@ -8,12 +9,7 @@ import { Link } from "react-router-dom";
 const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
-    // Gán cứng login
-    const isLoggedIn = false;
-    const userInfo = {
-        name: "Nguyễn Văn A",
-        avatar: "https://i.pravatar.cc/40",
-    };
+    const user = useSelector((state) => state.user.user);
 
     const handleLoginDialogClose = (shouldReopen = false) => {
         setShowLogin(shouldReopen);
@@ -98,8 +94,13 @@ const Header = () => {
                     </Link>
 
                     {/* Đăng nhập / User */}
-                    {isLoggedIn ? (
-                        <UserMenu user={userInfo} />
+                    {user ? (
+                        <UserMenu
+                            user={{
+                                name: user.name,
+                                avatar: user.avatar_url || "https://i.pravatar.cc/40"
+                            }}
+                        />
                     ) : (
                         <Button color="success" variant="contained" size="small"
                             onClick={() => setShowLogin(true)}

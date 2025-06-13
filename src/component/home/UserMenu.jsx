@@ -1,10 +1,13 @@
 // components/UserMenu.jsx
-import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { logout } from "../../store/userSlice";
 import { Menu, MenuItem, IconButton, Avatar } from "@mui/material";
+import { useState } from "react";
 
 const UserMenu = ({ user }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const dispatch = useDispatch();
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -12,6 +15,10 @@ const UserMenu = ({ user }) => {
 
     const handleClose = () => {
         setAnchorEl(null);
+    };
+
+    const handleLogout = () => {
+        dispatch(logout());
     };
 
     return (
@@ -37,7 +44,7 @@ const UserMenu = ({ user }) => {
                 <MenuItem disabled>{user.name}</MenuItem>
                 <MenuItem>Thông tin tài khoản</MenuItem>
                 <MenuItem>Đơn hàng</MenuItem>
-                <MenuItem>Đăng xuất</MenuItem>
+                <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>
         </div>
     );
