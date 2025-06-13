@@ -16,46 +16,32 @@ import {
     Link
 } from "@mui/material";
 import { Minus, Plus, Trash2, MapPin } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromCart, updateQuantity } from "../../store/cartSlice";
 
 
 const Cart = () => {
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            name: "Bó Hoa Yêu Thương Rực Rỡ 675",
-            price: 1750000,
-            quantity: 1,
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-        },
-        {
-            id: 2,
-            name: "Bó Hoa Tình Yêu Ngọt Ngào",
-            price: 950000,
-            quantity: 2,
-            image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-        },
-    ]);
+    const cartItems = useSelector(state => state.cart.items);
+    const dispatch = useDispatch();
 
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
 
     const handleQuantityChange = (id, delta) => {
-        setCartItems((items) =>
-            items.map((item) =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-                    : item
-            )
-        );
+        const item = cartItems.find(i => i.id === id);
+        if (!item) return;
+        const newQty = Math.max(1, item.quantity + delta);
+        dispatch(updateQuantity({ id, quantity: newQty }));
     };
 
     const handleRemoveItem = (id) => {
-        setCartItems((items) => items.filter((item) => item.id !== id));
+        dispatch(removeFromCart(id));
     };
 
     const handleApplyDiscount = () => {
         if (discountCode === "FLOWER10") {
             setDiscountAmount(subtotal * 0.1);
+            console.log("Áp dụng mã giảm giá FLOWER10: Giảm 10%");
         }
         if (discountCode === "500k") {
             setDiscountAmount(500000);
@@ -163,7 +149,7 @@ const Cart = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Typography variant="body1" fontWeight="500" color="primary">
-                                                        {item.price.toLocaleString()}đ
+                                                        {item.price.toLocaleString()}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell>
@@ -205,7 +191,8 @@ const Cart = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Typography variant="body1" fontWeight="600" color="error">
-                                                        {(item.price * item.quantity).toLocaleString()}đ
+                                                        {((item.price) * item.quantity).toLocaleString()}đ
+                                                        {console.log(item.price * item.quantity)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell>

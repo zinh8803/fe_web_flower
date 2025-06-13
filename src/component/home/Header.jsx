@@ -10,6 +10,7 @@ const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const user = useSelector((state) => state.user.user);
+    const cartCount = useSelector(state => state.cart.items.reduce((sum, i) => sum + i.quantity, 0));
 
     const handleLoginDialogClose = (shouldReopen = false) => {
         setShowLogin(shouldReopen);
@@ -87,7 +88,7 @@ const Header = () => {
                     {/* Giỏ hàng */}
                     <Link to="/cart" style={{ textDecoration: 'none', color: 'inherit' }}>
                         <IconButton color="inherit">
-                            <Badge badgeContent={0} color="warning">
+                            <Badge badgeContent={cartCount} color="warning">
                                 <ShoppingCart />
                             </Badge>
                         </IconButton>

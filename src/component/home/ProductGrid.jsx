@@ -10,6 +10,9 @@ import {
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../store/cartSlice"; // Đường dẫn đúng tới cartSlice.js
+
 const sectionData = {
     title: "HOA TẶNG & HOA DỊCH VỤ1",
     products: [
@@ -17,42 +20,42 @@ const sectionData = {
             id: 1,
             name: "Hộp Hoa Yêu Thương Rực Rỡ 681",
             image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: "1.000.000đ",
+            price: 1000000,
             unit: "Hộp",
         },
         {
             id: 2,
             name: "Giỏ Hoa Yêu Thương Rực Rỡ 678",
             image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: "1.400.000đ",
+            price: 1400000,
             unit: "Giỏ",
         },
         {
             id: 3,
             name: "Bó Hoa Chúc Mừng Mặt Trời Đỏ",
             image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: "850.000đ",
+            price: 850000,
             unit: "Bó",
         },
         {
             id: 4,
             name: "Lẵng Hoa Sinh Nhật Tươi Vui",
             image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: "1.200.000đ",
+            price: 1200000,
             unit: "Lẵng",
         },
         {
             id: 5,
             name: "Hộp Hoa Đỏ Lãng Mạn",
             image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: "1.050.000đ",
+            price: 1050000,
             unit: "Hộp",
         },
         {
             id: 6,
             name: "Giỏ Hoa Sáng Tạo",
             image: "https://storage.googleapis.com/cdn_dlhf_vn/public/products/AFFM/AFFMIXD681/1746704852_681c99d42f087.png",
-            price: "1.300.000đ",
+            price: 1300000,
             unit: "Giỏ",
         },
 
@@ -61,6 +64,8 @@ const sectionData = {
 };
 
 const ProductGrid = ({ title }) => {
+    const dispatch = useDispatch();
+
     return (
         <Box
             sx={{
@@ -130,6 +135,10 @@ const ProductGrid = ({ title }) => {
                                     color="error"
                                     endIcon={<ShoppingCartIcon />}
                                     sx={{ borderRadius: 5, px: 2 }}
+                                    onClick={e => {
+                                        e.preventDefault(); // Không chuyển trang khi bấm nút
+                                        dispatch(addToCart(item));
+                                    }}
                                 >
                                     Mua Ngay
                                 </Button>
