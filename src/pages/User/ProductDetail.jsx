@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, TextField } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
-import { getProductById, getProductsByCategory } from "../services/productService";
+import { getProductById, getProductsByCategory } from "../../services/productService";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../store/cartSlice";
+import { addToCart } from "../../store/cartSlice";
 
 const ProductDetail = () => {
     const { id } = useParams();

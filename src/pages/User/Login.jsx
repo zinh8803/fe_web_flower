@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { setUser } from "../../store/userSlice";
 import { Box, Button, Typography } from "@mui/material";
 
 const Login = () => {

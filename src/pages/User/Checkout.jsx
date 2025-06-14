@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { createOrder } from "../services/orderService";
+import { createOrder } from "../../services/orderService";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/material";
-import { clearCart } from "../store/cartSlice";
+import { clearCart } from "../../store/cartSlice";
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
     const user = useSelector(state => state.user.user.data);

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Container } from "@mui/material";
-import ProductGrid from "../component/home/ProductGrid";
-import LoginDialog from "../component/auth/LoginDialog";
+import ProductGrid from "../../component/home/ProductGrid";
+import LoginDialog from "../../component/auth/LoginDialog";
 
 const Home = () => {
     return (

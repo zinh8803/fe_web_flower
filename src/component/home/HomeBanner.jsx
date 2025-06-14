@@ -10,7 +10,9 @@ import {
     ListItemText
 } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getCategory } from "../../services/categoryService";
+import { Link } from "react-router-dom";
 
 const HomeBanner = () => {
     const bannerImages = [
@@ -22,17 +24,13 @@ const HomeBanner = () => {
     const [currentImage, setCurrentImage] = useState(0);
     const [slideDirection, setSlideDirection] = useState('left');
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const categories = [
-        "Dâu Tây Hasfarm",
-        "Hoa Cưới",
-        "Bình Hoa",
-        "Hoa Chúc Mừng",
-        "Hoa Chia Buồn",
-        // "Hoa Xinh Giá Tốt",
-        // "E-Gift Voucher",
-        // "Phụ Liệu Hoa",
-    ];
+    const [categories, setCategories] = useState([]);
 
+    useEffect(() => {
+        getCategory().then(res => {
+            setCategories(res.data.data || []);
+        });
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -92,7 +90,7 @@ const HomeBanner = () => {
                 <Paper
                     elevation={2}
                     sx={{
-                        height: 260,  // Fixed height to match banner
+                        height: 260,
                         display: 'flex',
                         flexDirection: 'column',
                         overflow: 'hidden'
@@ -106,19 +104,19 @@ const HomeBanner = () => {
                             bgcolor: "#16a34a",
                             p: 1.5,
                             textAlign: 'center',
-                            flexShrink: 0 // Prevents header from shrinking
+                            flexShrink: 0
                         }}
                     >
                         DANH MỤC
                     </Typography>
                     <Box sx={{
-                        flex: 1,  // Takes remaining space
-                        overflowY: 'auto' // Adds scroll when content overflows
+                        flex: 1,
+                        overflowY: 'auto'
                     }}>
                         <List sx={{ p: 0 }}>
-                            {categories.map((item, index) => (
+                            {categories.map((item) => (
                                 <ListItem
-                                    key={index}
+                                    key={item.id}
                                     sx={{
                                         py: 0.5,
                                         px: 2,
@@ -128,9 +126,11 @@ const HomeBanner = () => {
                                             cursor: 'pointer'
                                         }
                                     }}
+                                    component={Link}
+                                    to={`/category/${item.id}`}
                                 >
                                     <ListItemText
-                                        primary={item}
+                                        primary={item.name}
                                         primaryTypographyProps={{
                                             fontSize: '0.9rem'
                                         }}

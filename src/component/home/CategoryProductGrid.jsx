@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     Box,
     Button,
@@ -12,17 +12,9 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
-import { getProducts } from "../../services/productService"; // Thêm dòng này
 
-const ProductGrid = ({ title }) => {
+const CategoryProductGrid = ({ products, title }) => {
     const dispatch = useDispatch();
-    const [products, setProducts] = useState([]);
-
-    useEffect(() => {
-        getProducts().then(res => {
-            setProducts(res.data.data); 
-        });
-    }, []);
 
     return (
         <Box
@@ -109,17 +101,8 @@ const ProductGrid = ({ title }) => {
                     </Link>
                 ))}
             </Box>
-
-            <Box textAlign="center" mt={4}>
-                <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "orange", borderRadius: 10 }}
-                >
-                    Xem tất cả
-                </Button>
-            </Box>
         </Box>
     );
 };
 
-export default ProductGrid;
+export default CategoryProductGrid;
