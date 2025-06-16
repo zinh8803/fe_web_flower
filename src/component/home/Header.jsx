@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper } from "@mui/material";
+import { Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper, Avatar } from "@mui/material";
 import { ShoppingCart, Menu as MenuIcon, Search } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
 import LoginDialog from "../auth/LoginDialog";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
+    const [searchValue, setSearchValue] = useState("");
     const user = useSelector((state) => state.user.user);
     const cartCount = useSelector(state => state.cart.items.reduce((sum, i) => sum + i.quantity, 0));
+    const navigate = useNavigate();
 
     const handleLoginDialogClose = (shouldReopen = false) => {
         setShowLogin(shouldReopen);
@@ -40,6 +42,13 @@ const Header = () => {
                 <Box flex={1} px={4} maxWidth={500}>
                     <Paper
                         component="form"
+                        onSubmit={e => {
+                            e.preventDefault();
+                            if (searchValue.trim()) {
+                                navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+                            }
+                        }
+                        }
                         sx={{
                             display: "flex",
                             alignItems: "center",
@@ -53,9 +62,11 @@ const Header = () => {
                             sx={{ ml: 2, flex: 1 }}
                             placeholder="Tìm kiếm"
                             inputProps={{ "aria-label": "search" }}
+                            value={searchValue}
+                            onChange={e => setSearchValue(e.target.value)}
                         />
                         <IconButton
-                            type="button"
+                            type="submit"
                             sx={{
                                 backgroundColor: "#16a34a",
                                 color: "#fff",
@@ -63,10 +74,6 @@ const Header = () => {
                                 border: "1px solid #fff",
                                 "&:hover": { backgroundColor: "#15803d" },
                                 m: 0.5,
-                            }}
-                            onClick={() => {
-                                // Thêm logic tìm kiếm ở đây
-                                console.log("Search clicked");
                             }}
                         >
                             <Search />
@@ -99,7 +106,7 @@ const Header = () => {
                         <UserMenu
                             user={{
                                 name: user.name,
-                                avatar: user.avatar_url || "https://i.pravatar.cc/40"
+                                image_url: user.image_url
                             }}
                         />
                     ) : (
@@ -119,7 +126,7 @@ const Header = () => {
                     <LoginDialog open={showLogin} onClose={handleLoginDialogClose} />
                 </Box>
             </Box>
-        </Box>
+        </Box >
     );
 };
 

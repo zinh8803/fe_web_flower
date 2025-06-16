@@ -8,6 +8,10 @@ import Cart from "../component/Cart/Cart";
 import ProductDetail from "../pages/User/ProductDetail";
 import Checkout from "../pages/User/Checkout";
 import CategoryProductDetail from "../pages/User/Category_product_detail";
+import OrderDetail from "../pages/User/OrderDetail";
+import OrderHistory from "../pages/User/OrderHistory";
+import Profile from "../pages/User/Profile";
+import ProductSearch from "../pages/User/ProductSearch";
 
 const AppRoutes = () => (
     <Router>
@@ -21,6 +25,10 @@ const AppRoutes = () => (
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/category/:id" element={<CategoryProductDetail />} />
+                <Route path="/orders/history" element={<OrderHistory />} />
+                <Route path="/order/:id" element={<OrderDetail />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/search" element={<ProductSearch />} />
             </Routes>
         </MainLayout>
     </Router>

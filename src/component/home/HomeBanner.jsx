@@ -124,7 +124,8 @@ const HomeBanner = () => {
                                             color: '#16a34a',
                                             bgcolor: 'rgba(22, 163, 74, 0.1)',
                                             cursor: 'pointer'
-                                        }
+                                        },
+                                        color: '#000',
                                     }}
                                     component={Link}
                                     to={`/category/${item.id}`}
