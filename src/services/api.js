@@ -21,7 +21,7 @@ api.interceptors.response.use(
             if (refreshToken) {
                 try {
                     const res = await api.post("/refresh-token", { refresh_token: refreshToken });
-                    const newToken = res.data.token;
+                    const newToken = res.data.data.token;
                     const user = JSON.parse(localStorage.getItem("user"));
                     store.dispatch(setUser({
                         user,
@@ -29,8 +29,8 @@ api.interceptors.response.use(
                         refresh_token: refreshToken,
                     }));
                     localStorage.setItem("token", newToken);
-                    if (res.data.refresh_token) {
-                        localStorage.setItem("refresh_token", res.data.refresh_token);
+                    if (res.data.data.refresh_token) {
+                        localStorage.setItem("refresh_token", res.data.data.refresh_token);
                     }
                     originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
                     return api(originalRequest);
