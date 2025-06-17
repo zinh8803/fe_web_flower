@@ -49,7 +49,11 @@ const LoginDialog = ({ open, onClose }) => {
             const profileRes = await getProfile(token);
             const userData = profileRes.data.data;
 
-            dispatch(setUser({ user: userData, token }));
+            dispatch(setUser({
+                user: res.data.data,
+                token: res.data.token,
+                refresh_token: res.data.refresh_token,
+            }));
 
             localStorage.setItem("user", JSON.stringify(userData));
             localStorage.setItem("token", token);
@@ -58,7 +62,7 @@ const LoginDialog = ({ open, onClose }) => {
             onClose(false);
         } catch (error) {
             console.error("Login failed:", error);
-            
+
             alert("Đăng nhập thất bại!");
         }
     };

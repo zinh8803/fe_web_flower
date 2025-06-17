@@ -10,29 +10,32 @@ api.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
-        // Nếu lỗi là 401 và chưa thử refresh
         if (
             error.response &&
             error.response.status === 401 &&
-            !originalRequest._retry
+            !originalRequest._retry &&
+            !originalRequest.url.includes("/refresh-token")
         ) {
             originalRequest._retry = true;
-            // Lấy refresh_token từ localStorage
             const refreshToken = localStorage.getItem("refresh_token");
             if (refreshToken) {
                 try {
-                    // Gọi API refresh
                     const res = await api.post("/refresh-token", { refresh_token: refreshToken });
                     const newToken = res.data.token;
-                    // Lưu lại token mới vào localStorage và Redux
+                    const user = JSON.parse(localStorage.getItem("user"));
+                    store.dispatch(setUser({
+                        user,
+                        token: newToken,
+                        refresh_token: refreshToken,
+                    }));
                     localStorage.setItem("token", newToken);
-                    store.dispatch(setUser({ token: newToken }));
-                    // Gắn token mới vào header và retry lại request cũ
+                    if (res.data.refresh_token) {
+                        localStorage.setItem("refresh_token", res.data.refresh_token);
+                    }
                     originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
                     return api(originalRequest);
                 } catch (refreshError) {
                     console.error("Refresh token failed:", refreshError);
-                    // Nếu refresh cũng lỗi thì logout
                     store.dispatch(logout());
                     localStorage.removeItem("refresh_token");
                 }
