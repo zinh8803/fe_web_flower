@@ -46,14 +46,11 @@ const LoginDialog = ({ open, onClose }) => {
             const res = await login(email, password);
             const token = res.data.token;
 
-            // Lấy thông tin profile
             const profileRes = await getProfile(token);
-            const userData = profileRes.data;
+            const userData = profileRes.data.data;
 
-            // Lưu vào Redux
             dispatch(setUser({ user: userData, token }));
 
-            // Lưu vào localStorage (thêm dòng này)
             localStorage.setItem("user", JSON.stringify(userData));
             localStorage.setItem("token", token);
 

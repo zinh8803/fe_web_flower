@@ -3,7 +3,7 @@ import Home from "../pages/User/Home";
 import About from "../pages/User/About";
 import NotFound from "../pages/User/NotFound";
 import MainLayout from "../layouts/MainLayout";
-import Login from "../pages/User/Login";
+//import Login from "../pages/User/Login";
 import Cart from "../component/Cart/Cart";
 import ProductDetail from "../pages/User/ProductDetail";
 import Checkout from "../pages/User/Checkout";
@@ -20,7 +20,7 @@ const AppRoutes = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="*" element={<NotFound />} />
-                <Route path="/login" element={<Login />} />
+                {/* <Route path="/login" element={<Login />} /> */}
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/detail/:id" element={<ProductDetail />} />

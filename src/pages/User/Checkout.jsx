@@ -6,7 +6,7 @@ import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/mate
 import { clearCart } from "../../store/cartSlice";
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
-    const user = useSelector(state => state.user.user.data);
+    const user = useSelector(state => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -27,6 +27,7 @@ const Checkout = () => {
                 name: user.name || "",
                 email: user.email || "",
                 phone: user.phone || "",
+                address: user.address || "",
             }));
         }
     }, [user]);

@@ -4,6 +4,7 @@ import { logout } from "../../store/userSlice";
 import { Menu, MenuItem, IconButton, Avatar } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+//import { getProfile } from "../../api/profileApi"; // Import your API function
 
 const UserMenu = ({ user }) => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -32,6 +33,15 @@ const UserMenu = ({ user }) => {
         handleClose();
         navigate("/orders/history");
     };
+
+    // This function can be called after a successful login
+    // const handleLoginSuccess = (token) => {
+    //     localStorage.setItem("token", token);
+    //     // Call API to get profile
+    //     getProfile(token).then(profileRes => {
+    //         dispatch(setUser({ user: profileRes.data.data, token }));
+    //     });
+    // };
 
     return (
         <div>
