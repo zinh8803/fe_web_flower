@@ -20,7 +20,7 @@ const ProductGrid = ({ title }) => {
 
     useEffect(() => {
         getProducts().then(res => {
-            setProducts(res.data.data); 
+            setProducts(res.data.data);
         });
     }, []);
 

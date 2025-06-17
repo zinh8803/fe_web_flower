@@ -103,18 +103,20 @@ const Header = () => {
 
                     {/* Đăng nhập / User */}
                     {user ? (
+
                         <>
+                            <>
+                                <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', lg: 'block' } }}>
+                                    Xin chào, {user.name}
+                                </Typography>
+                            </>
                             <UserMenu
                                 user={{
                                     name: user.name,
                                     image_url: user.image_url
                                 }}
                             />
-                            <>
-                                <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', lg: 'block' } }}>
-                                    Xin chào, {user.name}
-                                </Typography>
-                            </>
+
                         </>
                     ) : (
                         <Button color="success" variant="contained" size="small"

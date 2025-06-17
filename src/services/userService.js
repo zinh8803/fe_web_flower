@@ -17,6 +17,10 @@ export const getProfile = (token) =>
 //         },
 //     });
 
+export const refreshToken = (refreshToken) =>
+    api.post("/refresh-token", { refresh_token: refreshToken });
+
+
 export const getOrderUserdetail = (token, id) =>
     api.get(`orders/user/${id}`, {
         headers: {

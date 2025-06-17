@@ -45,7 +45,7 @@ const LoginDialog = ({ open, onClose }) => {
         try {
             const res = await login(email, password);
             const token = res.data.token;
-
+            const refreshToken = res.data.refresh_token;
             const profileRes = await getProfile(token);
             const userData = profileRes.data.data;
 
@@ -53,10 +53,12 @@ const LoginDialog = ({ open, onClose }) => {
 
             localStorage.setItem("user", JSON.stringify(userData));
             localStorage.setItem("token", token);
+            localStorage.setItem("refresh_token", refreshToken);
 
             onClose(false);
         } catch (error) {
             console.error("Login failed:", error);
+            
             alert("Đăng nhập thất bại!");
         }
     };
