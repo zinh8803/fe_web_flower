@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createOrder } from "../../services/orderService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/material";
 import { clearCart } from "../../store/cartSlice";
+//import { checkCodeValidity } from "../../services/discountService";
+
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
     const user = useSelector(state => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [form, setForm] = useState({
         name: "",
@@ -19,6 +22,21 @@ const Checkout = () => {
         payment_method: "cod",
         discount_id: null,
     });
+    const [discountCode, setDiscountCode] = useState("");
+    const [discountAmount, setDiscountAmount] = useState(0);
+    const [discountId, setDiscountId] = useState(null);
+
+    useEffect(() => {
+        if (location.state) {
+            setDiscountId(location.state.discountId || null);
+            setDiscountAmount(location.state.discountAmount || 0);
+            setDiscountCode(location.state.discountCode || "");
+            setForm(prevForm => ({
+                ...prevForm,
+                discount_id: location.state.discountId || null,
+            }));
+        }
+    }, [location.state]);
 
     useEffect(() => {
         if (user) {
@@ -41,6 +59,9 @@ const Checkout = () => {
         0
     );
 
+    // subtotal đã có
+    const total = subtotal - discountAmount;
+
     const handlePlaceOrder = async () => {
         try {
             const orderData = {
@@ -50,6 +71,7 @@ const Checkout = () => {
                     product_id: item.id,
                     quantity: item.quantity,
                 })),
+                discount_id: discountId || null, // Đảm bảo gửi discount_id
             };
 
             console.log("Sending order data:", orderData);
@@ -86,6 +108,33 @@ const Checkout = () => {
             }
         }
     };
+
+    // const handleApplyDiscount = async () => {
+    //     try {
+    //         const res = await checkCodeValidity(discountCode);
+    //         if (res.data && res.data.data && res.data.data.length > 0) {
+    //             const discount = res.data.data[0];
+    //             setDiscountAmount(
+    //                 discount.type === "percent"
+    //                     ? subtotal * (parseFloat(discount.value) / 100)
+    //                     : parseFloat(discount.value)
+    //             );
+    //             setDiscountId(discount.id); // Lưu discount_id
+    //             alert("Áp dụng mã giảm giá thành công!");
+    //         } else {
+    //             console.log("code:", discountCode, "is not valid");
+    //             console.log(res.data.data);
+    //             setDiscountAmount(0);
+    //             setDiscountId(null);
+    //             alert("Mã giảm giá không hợp lệ!");
+    //         }
+    //     } catch (err) {
+    //         console.error("Error checking discount code:", err);
+    //         setDiscountAmount(0);
+    //         setDiscountId(null);
+    //         alert("Lỗi khi kiểm tra mã giảm giá!");
+    //     }
+    // };
 
     console.log("user in checkout:", user);
 
@@ -162,12 +211,28 @@ const Checkout = () => {
                 </Box>
             ))}
             <Divider sx={{ my: 2 }} />
+
+            {/* Hiển thị giảm giá nếu có */}
+            {discountAmount > 0 && (
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Typography fontWeight={600} color="green">
+                        Giảm giá ({discountCode}):
+                    </Typography>
+                    <Typography fontWeight={600} color="green">
+                        -{discountAmount.toLocaleString()}đ
+                    </Typography>
+                </Box>
+            )}
+
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography fontWeight={700}>Tổng cộng:</Typography>
                 <Typography fontWeight={700} color="error" fontSize={20}>
-                    {subtotal.toLocaleString()}đ
+                    {total.toLocaleString()}đ
                 </Typography>
             </Box>
+
+            {/* KHÔNG hiện ô nhập mã giảm giá và nút áp dụng nữa */}
+
             <Button
                 variant="contained"
                 color="error"

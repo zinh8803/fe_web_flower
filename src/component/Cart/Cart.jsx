@@ -19,6 +19,7 @@ import { Minus, Plus, Trash2, MapPin } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity } from "../../store/cartSlice";
 import { useNavigate } from "react-router-dom";
+import { checkCodeValidity } from "../../services/discountService";
 
 
 const Cart = () => {
@@ -28,6 +29,7 @@ const Cart = () => {
 
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
+    const [discountId, setDiscountId] = useState(null);
 
     const handleQuantityChange = (id, delta) => {
         const item = cartItems.find(i => i.id === id);
@@ -40,15 +42,27 @@ const Cart = () => {
         dispatch(removeFromCart(id));
     };
 
-    const handleApplyDiscount = () => {
-        if (discountCode === "FLOWER10") {
-            setDiscountAmount(subtotal * 0.1);
-            console.log("Áp dụng mã giảm giá FLOWER10: Giảm 10%");
-        }
-        if (discountCode === "500k") {
-            setDiscountAmount(500000);
-        } else {
+    const handleApplyDiscount = async () => {
+        try {
+            const res = await checkCodeValidity(discountCode);
+            const discount = res.data.data;
+            if (discount && discount.id) {
+                setDiscountId(discount.id);
+                let amount = 0;
+                if (discount.type === "percent") {
+                    amount = subtotal * (parseFloat(discount.value) / 100);
+                } else {
+                    amount = parseFloat(discount.value);
+                }
+                setDiscountAmount(amount);
+                alert("Áp dụng mã giảm giá thành công!");
+            }
+        } catch (err) {
+
+            console.error("Error checking discount code:", err);
             setDiscountAmount(0);
+            setDiscountId(null);
+            alert("Mã giảm giá không hợp lệ!");
         }
     };
 
@@ -338,7 +352,13 @@ const Cart = () => {
                                         textTransform: 'none',
                                         fontSize: '1.1rem'
                                     }}
-                                    onClick={() => navigate("/checkout")}
+                                    onClick={() => navigate("/checkout", {
+                                        state: {
+                                            discountId,
+                                            discountAmount,
+                                            discountCode
+                                        }
+                                    })}
                                 >
                                     Tiến hành thanh toán
                                 </Button>

@@ -31,6 +31,9 @@ const OrderDetail = () => {
                 <Typography><b>Ghi chú:</b> {order.note}</Typography>
                 <Typography><b>Trạng thái:</b> {order.status}</Typography>
                 <Typography><b>Ngày mua:</b> {order.buy_at}</Typography>
+                <Typography><b>Phương thức thanh toán:</b> {order.payment_method}</Typography>
+                <Typography><b>Mã giảm giá:</b> {order.discount ? order.discount.name : "Không có"}</Typography>
+                <Typography><b>Giá trị mã giảm giá:</b> {order.discount ? `${order.discount.value}đ` : "0đ"}</Typography>
                 <Typography><b>Tổng tiền:</b> <span style={{ color: "red", fontWeight: 700 }}>{order.total_price}đ</span></Typography>
             </Box>
             <Divider sx={{ my: 2 }} />

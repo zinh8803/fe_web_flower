@@ -3,7 +3,6 @@ import Home from "../pages/User/Home";
 import About from "../pages/User/About";
 import NotFound from "../pages/User/NotFound";
 import MainLayout from "../layouts/MainLayout";
-//import Login from "../pages/User/Login";
 import Cart from "../component/Cart/Cart";
 import ProductDetail from "../pages/User/ProductDetail";
 import Checkout from "../pages/User/Checkout";
@@ -12,6 +11,7 @@ import OrderDetail from "../pages/User/OrderDetail";
 import OrderHistory from "../pages/User/OrderHistory";
 import Profile from "../pages/User/Profile";
 import ProductSearch from "../pages/User/ProductSearch";
+import PrivateRoute from "./PrivateRoute";
 
 const AppRoutes = () => (
     <Router>
@@ -20,15 +20,22 @@ const AppRoutes = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="*" element={<NotFound />} />
-                {/* <Route path="/login" element={<Login />} /> */}
                 <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/category/:id" element={<CategoryProductDetail />} />
-                <Route path="/orders/history" element={<OrderHistory />} />
-                <Route path="/order/:id" element={<OrderDetail />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/search" element={<ProductSearch />} />
+                {/* <Route path="/profile" element={<Profile />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/orders/history" element={<OrderHistory />} />
+                <Route path="/order/:id" element={<OrderDetail />} /> */}
+                {/* cần token */}
+                <Route element={<PrivateRoute />}>
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/orders/history" element={<OrderHistory />} />
+                    <Route path="/order/:id" element={<OrderDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                </Route>
+
             </Routes>
         </MainLayout>
     </Router>
