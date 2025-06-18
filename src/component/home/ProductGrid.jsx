@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
 import { getProducts } from "../../services/productService"; // Thêm dòng này
+import { showNotification } from "../../store/notificationSlice";
 
 const ProductGrid = ({ title }) => {
     const dispatch = useDispatch();
@@ -23,7 +24,10 @@ const ProductGrid = ({ title }) => {
             setProducts(res.data.data);
         });
     }, []);
-
+    const handleAddToCart = (item) => {
+        dispatch(addToCart(item));
+        dispatch(showNotification({ message: "Thêm vào giỏ hàng thành công!", severity: "success" }));
+    };
     return (
         <Box
             sx={{
@@ -93,13 +97,13 @@ const ProductGrid = ({ title }) => {
                                     sx={{ borderRadius: 5, px: 2 }}
                                     onClick={e => {
                                         e.preventDefault();
-                                        dispatch(addToCart({
+                                        handleAddToCart({
                                             id: item.id,
                                             name: item.name,
                                             price: Number(item.price),
                                             image: item.image_url,
                                             quantity: 1,
-                                        }));
+                                        });
                                     }}
                                 >
                                     Mua Ngay

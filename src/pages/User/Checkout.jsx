@@ -4,6 +4,7 @@ import { createOrder } from "../../services/orderService";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/material";
 import { clearCart } from "../../store/cartSlice";
+import { showNotification } from "../../store/notificationSlice";
 //import { checkCodeValidity } from "../../services/discountService";
 
 const Checkout = () => {
@@ -71,7 +72,7 @@ const Checkout = () => {
                     product_id: item.id,
                     quantity: item.quantity,
                 })),
-                discount_id: discountId || null, // Đảm bảo gửi discount_id
+                discount_id: discountId || null,
             };
 
             console.log("Sending order data:", orderData);
@@ -81,7 +82,7 @@ const Checkout = () => {
 
             if (res.data && res.data.data) {
                 dispatch(clearCart());
-                alert("Đặt hàng thành công!");
+                dispatch(showNotification({ message: "Đặt hàng thành công!", severity: "success" }));
                 navigate("/");
             }
         } catch (err) {
@@ -92,19 +93,19 @@ const Checkout = () => {
                 console.error("API Error Status:", err.response.status);
 
                 if (err.response.data && err.response.data.message) {
-                    alert("Đặt hàng thất bại: " + err.response.data.message);
+                    dispatch(showNotification({ message: "Đặt hàng thất bại: " + err.response.data.message, severity: "error" }));
                 } else if (err.response.data && err.response.data.errors) {
                     const errorMessages = Object.values(err.response.data.errors).flat();
-                    alert("Đặt hàng thất bại:\n" + errorMessages.join("\n"));
+                    dispatch(showNotification({ message: "Đặt hàng thất bại:\n" + errorMessages.join("\n"), severity: "error" }));
                 } else {
-                    alert("Đặt hàng thất bại!");
+                    dispatch(showNotification({ message: "Đặt hàng thất bại!", severity: "error" }));
                 }
             } else if (err.request) {
                 console.error("No response received:", err.request);
-                alert("Không nhận được phản hồi từ server!");
+                dispatch(showNotification({ message: "Không nhận được phản hồi từ server!", severity: "error" }));
             } else {
                 console.error("Error setting up request:", err.message);
-                alert("Lỗi khi gửi yêu cầu: " + err.message);
+                dispatch(showNotification({ message: "Lỗi khi gửi yêu cầu: " + err.message, severity: "error" }));
             }
         }
     };
