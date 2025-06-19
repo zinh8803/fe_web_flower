@@ -1,18 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { getOrderHistory } from "../../services/userService";
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const OrderHistory = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        getOrderHistory(token)
-            .then(res => setOrders(res.data.data || []))
+        setLoading(true);
+        getOrderHistory(token, page)
+            .then(res => {
+                setOrders(res.data.data || []);
+                setTotalPages(res.data.meta.last_page || 1);
+            })
             .finally(() => setLoading(false));
-    }, []);
+    }, [page]);
+
+    const handlePageChange = (event, value) => {
+        setPage(value);
+    };
 
     if (loading) return <Typography>Đang tải...</Typography>;
 
@@ -24,39 +34,49 @@ const OrderHistory = () => {
             {orders.length === 0 ? (
                 <Typography>Chưa có đơn hàng nào.</Typography>
             ) : (
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Mã đơn</TableCell>
-                                <TableCell>Ngày mua</TableCell>
-                                <TableCell>Trạng thái</TableCell>
-                                <TableCell>Tổng tiền</TableCell>
-                                <TableCell>Chi tiết</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {orders.map(order => (
-                                <TableRow key={order.id}>
-                                    <TableCell>{order.id}</TableCell>
-                                    <TableCell>{order.buy_at}</TableCell>
-                                    <TableCell>{order.status}</TableCell>
-                                    <TableCell>{order.total_price}đ</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            component={Link}
-                                            to={`/order/${order.id}`}
-                                            variant="outlined"
-                                            size="small"
-                                        >
-                                            Xem chi tiết
-                                        </Button>
-                                    </TableCell>
+                <>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Mã đơn</TableCell>
+                                    <TableCell>Ngày mua</TableCell>
+                                    <TableCell>Trạng thái</TableCell>
+                                    <TableCell>Tổng tiền</TableCell>
+                                    <TableCell>Chi tiết</TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {orders.map(order => (
+                                    <TableRow key={order.id}>
+                                        <TableCell>{order.id}</TableCell>
+                                        <TableCell>{order.buy_at}</TableCell>
+                                        <TableCell>{order.status}</TableCell>
+                                        <TableCell>{Number(order.total_price).toLocaleString()}đ</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                component={Link}
+                                                to={`/order/${order.id}`}
+                                                variant="outlined"
+                                                size="small"
+                                            >
+                                                Xem chi tiết
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <Box display="flex" justifyContent="center" mt={3}>
+                        <Pagination
+                            count={totalPages}
+                            page={page}
+                            onChange={handlePageChange}
+                            color="primary"
+                        />
+                    </Box>
+                </>
             )}
         </Box>
     );

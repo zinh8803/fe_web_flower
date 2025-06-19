@@ -28,8 +28,8 @@ export const getOrderUserdetail = (token, id) =>
         },
     });
 
-export const getOrderHistory = (token) =>
-    api.get("/orders/details", {
+export const getOrderHistory = (token, page = 1) =>
+    api.get(`/orders/details?page=${page}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
 export const getUpdateProfile = (token, data) =>
@@ -41,3 +41,6 @@ export const getUpdateProfile = (token, data) =>
 export const getUsers = () => api.get("/users");
 
 export const register = (data) => api.post("/register", data);
+
+export const getAllUsers = (page = 1) =>
+    api.get(`/users/getall?page=${page}`);

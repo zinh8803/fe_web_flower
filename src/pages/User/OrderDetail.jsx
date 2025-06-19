@@ -32,9 +32,26 @@ const OrderDetail = () => {
                 <Typography><b>Trạng thái:</b> {order.status}</Typography>
                 <Typography><b>Ngày mua:</b> {order.buy_at}</Typography>
                 <Typography><b>Phương thức thanh toán:</b> {order.payment_method}</Typography>
-                <Typography><b>Mã giảm giá:</b> {order.discount ? order.discount.name : "Không có"}</Typography>
-                <Typography><b>Giá trị mã giảm giá:</b> {order.discount ? `${order.discount.value}đ` : "0đ"}</Typography>
-                <Typography><b>Tổng tiền:</b> <span style={{ color: "red", fontWeight: 700 }}>{order.total_price}đ</span></Typography>
+                <Typography>
+                    <b>Mã giảm giá:</b> {order.discount ? order.discount.name : "Không có"}
+                    {order.discount && (
+                        <>
+                            <br />
+                            <b>Giá trị mã giảm giá:</b>{" "}
+                            {order.discount.type === "fixed"
+                                ? `${Number(order.discount.value).toLocaleString()}đ`
+                                : order.discount.type === "percent"
+                                    ? `${order.discount.value}%`
+                                    : "0đ"}
+                        </>
+                    )}
+                </Typography>
+                <Typography>
+                    <b>Tổng tiền:</b>{" "}
+                    <span style={{ color: "red", fontWeight: 700 }}>
+                        {Number(order.total_price).toLocaleString()}đ
+                    </span>
+                </Typography>
             </Box>
             <Divider sx={{ my: 2 }} />
             <Typography variant="h6" fontWeight={700} mb={2}>

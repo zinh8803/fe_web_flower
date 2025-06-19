@@ -48,7 +48,7 @@ const ProductGrid = ({ title }) => {
                     display: "flex",
                     flexWrap: "wrap",
                     justifyContent: "flex-start",
-                    gap: "20px",
+                    gap: "40px",
                 }}
             >
                 {products.map((item) => (

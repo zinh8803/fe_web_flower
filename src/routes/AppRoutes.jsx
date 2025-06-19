@@ -18,6 +18,7 @@ import AdminCategory from "../pages/Admin/AdminCategory";
 import AdminOrder from "../pages/Admin/AdminOrder";
 import AdminUser from "../pages/Admin/AdminUser";
 import Admin from "../pages/Admin/Admin";
+import AdminLogin from "../pages/Admin/AdminLogin";
 
 const AppRoutes = () => (
     <Router>
@@ -38,6 +39,7 @@ const AppRoutes = () => (
                     <Route path="/profile" element={<Profile />} />
                 </Route>
             </Route>
+            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Admin layout */}
             <Route path="/admin" element={<AdminLayout />}>

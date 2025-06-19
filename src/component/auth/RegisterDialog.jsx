@@ -1,22 +1,13 @@
 // src/component/LoginDialog.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
-    Dialog,
-    DialogContent,
-    TextField,
-    Button,
-    Typography,
-    Box,
-    Link,
-    IconButton,
-    RadioGroup,
-    Radio,
-    FormControlLabel,
+    Dialog, DialogContent, TextField, Button, Typography, Box, Link, IconButton, CircularProgress
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch } from "react-redux";
 import { setUser } from "../../store/userSlice";
 import { register, getProfile } from "../../services/userService";
+import { sendOtpMail } from "../../services/mailService";
 
 const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
     const [form, setForm] = useState({
@@ -25,8 +16,11 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
         email: "",
         password: "",
         password_confirmation: "",
-        // gender: "male",
+        otp: ""
     });
+    const [otpTimer, setOtpTimer] = useState(0);
+    const [loadingOtp, setLoadingOtp] = useState(false);
+    const timerRef = useRef(null);
 
     const dispatch = useDispatch();
 
@@ -38,20 +32,67 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
         });
     };
 
+    const handleSendOtp = async () => {
+        if (!form.email) {
+            alert("Vui lòng nhập email trước!");
+            return;
+        }
+        setLoadingOtp(true);
+        try {
+            await sendOtpMail(form.email);
+            setOtpTimer(60);
+            timerRef.current = setInterval(() => {
+                setOtpTimer(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timerRef.current);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        } catch (err) {
+            console.error(err);
+            alert("Gửi mã OTP thất bại!");
+        }
+        setLoadingOtp(false);
+    };
+
     const handleRegister = async () => {
         try {
             const res = await register(form);
-
-            if (res.data && res.data.token) {
+            if (res.data && res.data.token && res.data.refresh_token) {
                 const profileRes = await getProfile(res.data.token);
-                dispatch(setUser({ user: profileRes.data, token: res.data.token }));
+                // Lấy đúng user object
+                const userData = profileRes.data.data;
+                dispatch(setUser({
+                    user: userData,
+                    token: res.data.token,
+                    refresh_token: res.data.refresh_token,
+                }));
+                localStorage.setItem("user", JSON.stringify(userData));
+                localStorage.setItem("token", res.data.token);
+                localStorage.setItem("refresh_token", res.data.refresh_token);
                 onClose();
             }
         } catch (err) {
             console.error(err);
+            // quăng lỗi json ra
+            if (err.response && err.response.data) {
+                const errorMessage = err.response.data.message || "Đăng ký thất bại";
+                alert(errorMessage);
+                return;
+            }
             alert("Đăng ký thất bại");
         }
     };
+
+    // Clear timer khi đóng dialog
+    React.useEffect(() => {
+        if (!open) {
+            clearInterval(timerRef.current);
+            setOtpTimer(0);
+        }
+    }, [open]);
 
     return (
         <Dialog open={open} onClose={onClose}>
@@ -102,13 +143,43 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                 <Typography variant="body1" fontWeight="bold">
                     Email
                 </Typography>
+                <Box display="flex" gap={1} alignItems="center">
+                    <TextField
+                        fullWidth
+                        label="Nhập email"
+                        variant="outlined"
+                        margin="normal"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ minWidth: 120, height: 40, mt: 1 }}
+                        onClick={handleSendOtp}
+                        disabled={otpTimer > 0 || loadingOtp}
+                    >
+                        {loadingOtp ? <CircularProgress size={20} color="inherit" /> :
+                            (otpTimer > 0 ? `Gửi lại (${otpTimer}s)` : "Gửi mã")}
+                    </Button>
+                </Box>
+                {otpTimer > 0 && (
+                    <Typography color="primary" fontSize={14} mt={0.5} ml={1}>
+                        Vui lòng kiểm tra email. Bạn có thể gửi lại mã sau {otpTimer}s
+                    </Typography>
+                )}
+
+                <Typography variant="body1" fontWeight="bold" mt={2}>
+                    Mã OTP
+                </Typography>
                 <TextField
                     fullWidth
-                    label="Nhập email"
+                    label="Nhập mã OTP"
                     variant="outlined"
                     margin="normal"
-                    name="email"
-                    value={form.email}
+                    name="otp"
+                    value={form.otp}
                     onChange={handleChange}
                 />
 
@@ -139,14 +210,6 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     value={form.password_confirmation}
                     onChange={handleChange}
                 />
-
-                {/* <Typography variant="body1" fontWeight="bold" mt={2}>
-                    Giới tính
-                </Typography>
-                <RadioGroup row value={form.gender} onChange={handleChange} name="gender">
-                    <FormControlLabel value="male" control={<Radio />} label="Nam" />
-                    <FormControlLabel value="female" control={<Radio />} label="Nữ" />
-                </RadioGroup> */}
 
                 <Box display="flex" justifyContent="center" mt={3}>
                     <Button
