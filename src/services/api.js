@@ -1,10 +1,9 @@
 import axios from "axios";
 import store from "../store"; // import store để dispatch
 import { setUser, logout } from "../store/userSlice";
-
+const API_URL = import.meta.env.VITE_API_URL;
 const api = axios.create({
-    //baseURL: "http://127.0.0.1:8000/api",
-    baseURL: "https://be-api-flower.onrender.com/api",
+    baseURL: API_URL,
     timeout: 5000,
 });
 api.interceptors.response.use(

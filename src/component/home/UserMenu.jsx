@@ -1,11 +1,10 @@
 // components/UserMenu.jsx
 import { useDispatch } from "react-redux";
-import { logout } from "../../store/userSlice";
 import { Menu, MenuItem, IconButton, Avatar } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 //import { getProfile } from "../../api/profileApi"; // Import your API function
-
+import { logoutAndClearCart } from "../../store/userSlice";
 const UserMenu = ({ user }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -21,7 +20,8 @@ const UserMenu = ({ user }) => {
     };
 
     const handleLogout = () => {
-        dispatch(logout());
+
+        dispatch(logoutAndClearCart());
     };
 
     const handleProfile = () => {

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+import { clearCart } from "./cartSlice"; 
 const storedUser = JSON.parse(localStorage.getItem("user")) || null;
 const storedToken = localStorage.getItem("token") || null;
 const storedRefreshToken = localStorage.getItem("refresh_token") || null;
@@ -29,12 +29,16 @@ const userSlice = createSlice({
             state.user = null;
             state.token = null;
             state.refresh_token = null;
+            localStorage.removeItem("cart");
             localStorage.removeItem("user");
             localStorage.removeItem("token");
             localStorage.removeItem("refresh_token");
         },
     },
 });
-
+export const logoutAndClearCart = () => (dispatch) => {
+    dispatch(userSlice.actions.logout());
+    dispatch(clearCart());
+};
 export const { setUser, logout } = userSlice.actions;
 export default userSlice.reducer;

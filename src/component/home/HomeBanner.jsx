@@ -86,11 +86,12 @@ const HomeBanner = () => {
     return (
         <Grid container spacing={2} justifyContent="center" alignItems="stretch" sx={{ mt: 2 }}>
             {/* Sidebar */}
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} md={3} order={{ xs: 2, md: 1 }}>
                 <Paper
                     elevation={2}
                     sx={{
-                        height: 260,
+                        height: { xs: "auto", md: 260 },
+                        mb: { xs: 2, md: 0 },
                         display: 'flex',
                         flexDirection: 'column',
                         overflow: 'hidden'
@@ -143,12 +144,12 @@ const HomeBanner = () => {
                 </Paper>
             </Grid>
 
-            {/* Banner with slide effect */}
-            <Grid item xs={12} sm={6}>
+            {/* Banner */}
+            <Grid item xs={12} md={6} order={{ xs: 1, md: 2 }}>
                 <Paper
                     elevation={2}
                     sx={{
-                        height: 260,
+                        height: { xs: 180, sm: 220, md: 260 },
                         overflow: "hidden",
                         borderRadius: "15px",
                         position: "relative"
@@ -220,16 +221,16 @@ const HomeBanner = () => {
             </Grid>
 
             {/* Features */}
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} md={3} order={{ xs: 3, md: 3 }}>
                 <Grid
                     container
                     spacing={1}
                     sx={{
-                        height: 260,
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 1fr)',
-                        gridTemplateRows: 'repeat(2, 1fr)',
-                        gap: '8px'
+                        height: { xs: "auto", md: 260 },
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr 1fr", md: "1fr 1fr" },
+                        gridTemplateRows: { xs: "auto auto", md: "1fr 1fr" },
+                        gap: "8px"
                     }}
                 >
                     {features.map((item, idx) => (
