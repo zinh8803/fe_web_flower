@@ -47,12 +47,14 @@ const AdminOrder = () => {
                             <TableCell>Giảm giá</TableCell>
                             <TableCell>Tổng tiền</TableCell>
                             <TableCell>Trạng thái</TableCell>
+                            <TableCell>Hành động</TableCell>
+
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {orders.map(order => (
                             <TableRow key={order.id}>
-                                <TableCell>{order.id}</TableCell>
+                                <TableCell>{order.order_code}</TableCell>
                                 <TableCell>{order.name}</TableCell>
                                 <TableCell>{order.email}</TableCell>
                                 <TableCell>{order.phone}</TableCell>
@@ -73,6 +75,13 @@ const AdminOrder = () => {
                                 </TableCell>
                                 <TableCell>
                                     <Chip label={order.status} color="info" size="small" />
+                                </TableCell>
+                                <TableCell>
+                                    {/* Placeholder for action buttons */}
+                                    <Box display="flex" gap={1}>
+                                        <Chip label="Chi tiết" color="primary" size="small" />
+                                        <Chip label="Xóa" color="error" size="small" />
+                                    </Box>
                                 </TableCell>
                             </TableRow>
                         ))}

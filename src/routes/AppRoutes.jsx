@@ -19,6 +19,11 @@ import AdminOrder from "../pages/Admin/AdminOrder";
 import AdminUser from "../pages/Admin/AdminUser";
 import Admin from "../pages/Admin/Admin";
 import AdminLogin from "../pages/Admin/AdminLogin";
+import AdminReceipt from "../pages/Admin/AdminReceipt";
+import AdminDiscount from "../pages/Admin/AdminDiscount";
+import AdminFlowerType from "../pages/Admin/AdminFlowerType";
+import AdminFlower from "../pages/Admin/AdminFlower";
+import AdminDashboard from "../pages/Admin/AdminDashbroad";
 
 const AppRoutes = () => (
     <Router>
@@ -41,14 +46,21 @@ const AppRoutes = () => (
             </Route>
             <Route path="/admin/login" element={<AdminLogin />} />
 
+            <Route path="/admin/login" element={<AdminLogin />} />
+
             {/* Admin layout */}
             <Route path="/admin" element={<AdminLayout />}>
-                <Route element={<Admin />}>
-                    <Route path="products" element={<AdminProduct />} />
-                    <Route path="categories" element={<AdminCategory />} />
-                    <Route path="orders" element={<AdminOrder />} />
-                    <Route path="users" element={<AdminUser />} />
-                </Route>
+                <Route index element={<Admin />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="*" element={<NotFound />} />
+                <Route path="products" element={<AdminProduct />} />
+                <Route path="categories" element={<AdminCategory />} />
+                <Route path="orders" element={<AdminOrder />} />
+                <Route path="users" element={<AdminUser />} />
+                <Route path="flowers" element={<AdminFlower />} />
+                <Route path="flower-types" element={<AdminFlowerType />} />
+                <Route path="discounts" element={<AdminDiscount />} />
+                <Route path="receipts" element={<AdminReceipt />} />
             </Route>
         </Routes>
     </Router>

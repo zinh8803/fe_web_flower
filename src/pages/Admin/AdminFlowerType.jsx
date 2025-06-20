@@ -5,40 +5,40 @@ import {
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import {
-    getCategory,
-    createCategory,
-    updateCategory,
-    deleteCategory
-} from "../../services/categoryService";
+    getFlowerTypes,
+    createFlowerType,
+    updateFlowerType,
+    deleteFlowerType
+} from "../../services/flowerTypeService";
 
-const AdminCategory = () => {
-    const [categories, setCategories] = useState([]);
+const AdminFlowerType = () => {
+    const [types, setTypes] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
-    const [editCategory, setEditCategory] = useState(null);
+    const [editType, setEditType] = useState(null);
     const [form, setForm] = useState({ name: "" });
 
-    const fetchCategories = async () => {
+    const fetchTypes = async () => {
         try {
-            const res = await getCategory();
-            setCategories(res.data.data || []);
+            const res = await getFlowerTypes();
+            setTypes(res.data.data || []);
         } catch {
-            alert("Lỗi khi tải danh mục");
+            alert("Lỗi khi tải loại hoa");
         }
     };
 
     useEffect(() => {
-        fetchCategories();
+        fetchTypes();
     }, []);
 
     const handleOpenAdd = () => {
-        setEditCategory(null);
+        setEditType(null);
         setForm({ name: "" });
         setOpenDialog(true);
     };
 
-    const handleOpenEdit = (cat) => {
-        setEditCategory(cat);
-        setForm({ name: cat.name });
+    const handleOpenEdit = (type) => {
+        setEditType(type);
+        setForm({ name: type.name });
         setOpenDialog(true);
     };
 
@@ -48,53 +48,53 @@ const AdminCategory = () => {
 
     const handleSubmit = async () => {
         try {
-            if (editCategory) {
-                await updateCategory(editCategory.id, form);
+            if (editType) {
+                await updateFlowerType(editType.id, form);
             } else {
-                await createCategory(form);
+                await createFlowerType(form);
             }
             setOpenDialog(false);
-            fetchCategories();
+            fetchTypes();
         } catch {
-            alert("Lỗi khi lưu danh mục");
+            alert("Lỗi khi lưu loại hoa");
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa?")) return;
         try {
-            await deleteCategory(id);
-            fetchCategories();
+            await deleteFlowerType(id);
+            fetchTypes();
         } catch {
-            alert("Lỗi khi xóa danh mục");
+            alert("Lỗi khi xóa loại hoa");
         }
     };
 
     return (
         <Box maxWidth="700px" mx="auto" mt={4}>
             <Typography variant="h5" fontWeight={700} mb={3}>
-                Quản lý danh mục
+                Quản lý loại hoa
             </Typography>
             <Button variant="contained" color="success" onClick={handleOpenAdd} sx={{ mb: 2 }}>
-                Thêm danh mục
+                Thêm loại hoa
             </Button>
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Tên danh mục</TableCell>
+                            <TableCell>Tên loại hoa</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {categories.map((cat) => (
-                            <TableRow key={cat.id}>
-                                <TableCell>{cat.name}</TableCell>
+                        {types.map((type) => (
+                            <TableRow key={type.id}>
+                                <TableCell>{type.name}</TableCell>
                                 <TableCell>
-                                    <IconButton color="primary" onClick={() => handleOpenEdit(cat)}>
+                                    <IconButton color="primary" onClick={() => handleOpenEdit(type)}>
                                         <Edit />
                                     </IconButton>
-                                    <IconButton color="error" onClick={() => handleDelete(cat.id)}>
+                                    <IconButton color="error" onClick={() => handleDelete(type.id)}>
                                         <Delete />
                                     </IconButton>
                                 </TableCell>
@@ -105,10 +105,10 @@ const AdminCategory = () => {
             </TableContainer>
 
             <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>{editCategory ? "Sửa danh mục" : "Thêm danh mục"}</DialogTitle>
+                <DialogTitle>{editType ? "Sửa loại hoa" : "Thêm loại hoa"}</DialogTitle>
                 <DialogContent>
                     <TextField
-                        label="Tên danh mục"
+                        label="Tên loại hoa"
                         name="name"
                         value={form.name}
                         onChange={handleChange}
@@ -127,4 +127,4 @@ const AdminCategory = () => {
     );
 };
 
-export default AdminCategory;
+export default AdminFlowerType;

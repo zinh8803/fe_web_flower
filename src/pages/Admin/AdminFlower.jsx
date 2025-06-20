@@ -5,40 +5,40 @@ import {
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import {
-    getCategory,
-    createCategory,
-    updateCategory,
-    deleteCategory
-} from "../../services/categoryService";
+    getFlower,
+    createFlower,
+    updateFlower,
+    deleteFlower
+} from "../../services/flowerService";
 
-const AdminCategory = () => {
-    const [categories, setCategories] = useState([]);
+const AdminFlower = () => {
+    const [flowers, setFlowers] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
-    const [editCategory, setEditCategory] = useState(null);
-    const [form, setForm] = useState({ name: "" });
+    const [editFlower, setEditFlower] = useState(null);
+    const [form, setForm] = useState({ name: "", description: "" });
 
-    const fetchCategories = async () => {
+    const fetchFlowers = async () => {
         try {
-            const res = await getCategory();
-            setCategories(res.data.data || []);
+            const res = await getFlower();
+            setFlowers(res.data.data || []);
         } catch {
-            alert("Lỗi khi tải danh mục");
+            alert("Lỗi khi tải hoa");
         }
     };
 
     useEffect(() => {
-        fetchCategories();
+        fetchFlowers();
     }, []);
 
     const handleOpenAdd = () => {
-        setEditCategory(null);
-        setForm({ name: "" });
+        setEditFlower(null);
+        setForm({ name: "", description: "" });
         setOpenDialog(true);
     };
 
-    const handleOpenEdit = (cat) => {
-        setEditCategory(cat);
-        setForm({ name: cat.name });
+    const handleOpenEdit = (flower) => {
+        setEditFlower(flower);
+        setForm({ name: flower.name, description: flower.description || "" });
         setOpenDialog(true);
     };
 
@@ -48,53 +48,55 @@ const AdminCategory = () => {
 
     const handleSubmit = async () => {
         try {
-            if (editCategory) {
-                await updateCategory(editCategory.id, form);
+            if (editFlower) {
+                await updateFlower(editFlower.id, form);
             } else {
-                await createCategory(form);
+                await createFlower(form);
             }
             setOpenDialog(false);
-            fetchCategories();
+            fetchFlowers();
         } catch {
-            alert("Lỗi khi lưu danh mục");
+            alert("Lỗi khi lưu hoa");
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa?")) return;
         try {
-            await deleteCategory(id);
-            fetchCategories();
+            await deleteFlower(id);
+            fetchFlowers();
         } catch {
-            alert("Lỗi khi xóa danh mục");
+            alert("Lỗi khi xóa hoa");
         }
     };
 
     return (
         <Box maxWidth="700px" mx="auto" mt={4}>
             <Typography variant="h5" fontWeight={700} mb={3}>
-                Quản lý danh mục
+                Quản lý hoa
             </Typography>
             <Button variant="contained" color="success" onClick={handleOpenAdd} sx={{ mb: 2 }}>
-                Thêm danh mục
+                Thêm hoa
             </Button>
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Tên danh mục</TableCell>
+                            <TableCell>Tên hoa</TableCell>
+                            <TableCell>Mô tả</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {categories.map((cat) => (
-                            <TableRow key={cat.id}>
-                                <TableCell>{cat.name}</TableCell>
+                        {flowers.map((flower) => (
+                            <TableRow key={flower.id}>
+                                <TableCell>{flower.name}</TableCell>
+                                <TableCell>{flower.description}</TableCell>
                                 <TableCell>
-                                    <IconButton color="primary" onClick={() => handleOpenEdit(cat)}>
+                                    <IconButton color="primary" onClick={() => handleOpenEdit(flower)}>
                                         <Edit />
                                     </IconButton>
-                                    <IconButton color="error" onClick={() => handleDelete(cat.id)}>
+                                    <IconButton color="error" onClick={() => handleDelete(flower.id)}>
                                         <Delete />
                                     </IconButton>
                                 </TableCell>
@@ -105,15 +107,25 @@ const AdminCategory = () => {
             </TableContainer>
 
             <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>{editCategory ? "Sửa danh mục" : "Thêm danh mục"}</DialogTitle>
+                <DialogTitle>{editFlower ? "Sửa hoa" : "Thêm hoa"}</DialogTitle>
                 <DialogContent>
                     <TextField
-                        label="Tên danh mục"
+                        label="Tên hoa"
                         name="name"
                         value={form.name}
                         onChange={handleChange}
                         fullWidth
                         margin="normal"
+                    />
+                    <TextField
+                        label="Mô tả"
+                        name="description"
+                        value={form.description}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        multiline
+                        rows={3}
                     />
                 </DialogContent>
                 <DialogActions>
@@ -127,4 +139,4 @@ const AdminCategory = () => {
     );
 };
 
-export default AdminCategory;
+export default AdminFlower;

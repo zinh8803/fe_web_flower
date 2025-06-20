@@ -21,7 +21,7 @@ const OrderDetail = () => {
     return (
         <Box maxWidth="1000px" mx="auto" mt={4}>
             <Typography variant="h5" fontWeight={700} mb={2}>
-                Chi tiết đơn hàng #{order.id}
+                Chi tiết đơn hàng #{order.order_code}
             </Typography>
             <Box mb={2}>
                 <Typography><b>Khách hàng:</b> {order.name}</Typography>

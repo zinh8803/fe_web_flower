@@ -15,12 +15,12 @@ const AdminMenu = () => {
 
     return (
         <List component="nav">
-            {/* Dashbroad */}
+            {/* Dashboard */}
             <ListItem
                 button
                 component={Link}
-                to="/admin"
-                selected={location.pathname === "/admin"}
+                to="/admin/dashboard"
+                selected={location.pathname === "/admin/dashboard"}
                 sx={{
                     "&.Mui-selected, &.Mui-selected:hover": {
                         bgcolor: "#e0f2f1",
@@ -30,7 +30,7 @@ const AdminMenu = () => {
                 }}
             >
                 <ListItemIcon sx={{ color: "green" }}><Dashboard /></ListItemIcon>
-                <ListItemText primary="Dashbroad" sx={{ color: "black" }} />
+                <ListItemText primary="Dashboard" sx={{ color: "black" }} />
             </ListItem>
 
             {/* Quản lý loại hoa */}

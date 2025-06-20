@@ -49,7 +49,7 @@ const OrderHistory = () => {
                             <TableBody>
                                 {orders.map(order => (
                                     <TableRow key={order.id}>
-                                        <TableCell>{order.id}</TableCell>
+                                        <TableCell>{order.order_code}</TableCell>
                                         <TableCell>{order.buy_at}</TableCell>
                                         <TableCell>{order.status}</TableCell>
                                         <TableCell>{Number(order.total_price).toLocaleString()}đ</TableCell>
