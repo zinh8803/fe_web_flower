@@ -82,13 +82,15 @@ const AdminFlowerType = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell>STT</TableCell>
                             <TableCell>Tên loại hoa</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {types.map((type) => (
+                        {types.map((type, index) => (
                             <TableRow key={type.id}>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>{type.name}</TableCell>
                                 <TableCell>
                                     <IconButton color="primary" onClick={() => handleOpenEdit(type)}>

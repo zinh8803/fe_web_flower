@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getProfile, getUpdateProfile } from "../../services/userService";
-import { Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../store/userSlice";
 import ProfileForm from "../../component/user/ProfileForm";
+import { showNotification } from "../../store/notificationSlice";
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
@@ -35,6 +36,7 @@ const Profile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // Bắt đầu loading khi bấm Lưu
         const token = localStorage.getItem("token");
         const formData = new FormData();
         formData.append("_method", "PUT");
@@ -51,14 +53,23 @@ const Profile = () => {
                 setProfile(res.data.data);
                 setForm(res.data.data);
                 dispatch(setUser({ user: res.data.data, token }));
+                dispatch(showNotification({ message: "Cập nhật thông tin thành công!", severity: "success" }));
+                setLoading(false); // Kết thúc loading khi thành công
             });
         } catch (error) {
             console.error("Cập nhật thông tin thất bại:", error);
             alert("Cập nhật thất bại!");
+            setLoading(false); // Kết thúc loading khi lỗi
         }
     };
 
-    if (loading) return <Typography>Đang tải...</Typography>;
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <CircularProgress color="primary" />
+            </Box>
+        );
+    }
     if (!profile) return <Typography>Không tìm thấy thông tin tài khoản.</Typography>;
 
     return (

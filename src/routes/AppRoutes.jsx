@@ -25,6 +25,7 @@ import AdminFlowerType from "../pages/Admin/AdminFlowerType";
 import AdminFlower from "../pages/Admin/AdminFlower";
 import AdminDashboard from "../pages/Admin/AdminDashbroad";
 import VnpayReturn from "../pages/User/VnaypayReturn";
+import AdminRoute from "./AdminRoute";
 
 const AppRoutes = () => (
     <Router>
@@ -48,20 +49,21 @@ const AppRoutes = () => (
             </Route>
             <Route path="/admin/login" element={<AdminLogin />} />
 
-
-            {/* Admin layout */}
-            <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<Admin />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="*" element={<NotFound />} />
-                <Route path="products" element={<AdminProduct />} />
-                <Route path="categories" element={<AdminCategory />} />
-                <Route path="orders" element={<AdminOrder />} />
-                <Route path="users" element={<AdminUser />} />
-                <Route path="flowers" element={<AdminFlower />} />
-                <Route path="flower-types" element={<AdminFlowerType />} />
-                <Route path="discounts" element={<AdminDiscount />} />
-                <Route path="receipts" element={<AdminReceipt />} />
+            {/* Admin: kiểm tra quyền trước, nếu đúng mới render layout và các page */}
+            <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Admin />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProduct />} />
+                    <Route path="categories" element={<AdminCategory />} />
+                    <Route path="orders" element={<AdminOrder />} />
+                    <Route path="users" element={<AdminUser />} />
+                    <Route path="flowers" element={<AdminFlower />} />
+                    <Route path="flower-types" element={<AdminFlowerType />} />
+                    <Route path="discounts" element={<AdminDiscount />} />
+                    <Route path="receipts" element={<AdminReceipt />} />
+                    <Route path="*" element={<NotFound />} />
+                </Route>
             </Route>
         </Routes>
     </Router>

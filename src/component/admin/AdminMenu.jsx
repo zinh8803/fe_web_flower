@@ -7,12 +7,18 @@ import {
     ExpandLess, ExpandMore, Add, Edit, Delete, LocalFlorist, ReceiptLong, Spa
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
+import LogoutIcon from "@mui/icons-material/Logout";
+import { logoutAndClearCart } from "../../store/userSlice";
+import { useDispatch } from "react-redux";
 const AdminMenu = () => {
     const location = useLocation();
     const [openProduct, setOpenProduct] = useState(false);
     const navigate = useNavigate();
-
+    const dispatch = useDispatch();
+    const handleLogout = () => {
+        dispatch(logoutAndClearCart());
+        window.location.href = "/admin/login";
+    };
     return (
         <List component="nav">
             {/* Dashboard */}
@@ -68,7 +74,23 @@ const AdminMenu = () => {
                 <ListItemIcon sx={{ color: "green" }}><LocalFlorist /></ListItemIcon>
                 <ListItemText primary="Quản lý hoa" sx={{ color: "black" }} />
             </ListItem>
-
+            {/* Các menu khác */}
+            <ListItem
+                button
+                component={Link}
+                to="/admin/categories"
+                selected={location.pathname.startsWith("/admin/categories")}
+                sx={{
+                    "&.Mui-selected, &.Mui-selected:hover": {
+                        bgcolor: "#e0f2f1",
+                        color: "black"
+                    },
+                    color: "black"
+                }}
+            >
+                <ListItemIcon sx={{ color: "green" }}><Category /></ListItemIcon>
+                <ListItemText primary="Quản lý danh mục" />
+            </ListItem>
             {/* Quản lý sản phẩm xổ xuống */}
             <ListItem
                 button
@@ -176,23 +198,7 @@ const AdminMenu = () => {
                 <ListItemText primary="Quản lý mã giảm giá" />
             </ListItem>
 
-            {/* Các menu khác */}
-            <ListItem
-                button
-                component={Link}
-                to="/admin/categories"
-                selected={location.pathname.startsWith("/admin/categories")}
-                sx={{
-                    "&.Mui-selected, &.Mui-selected:hover": {
-                        bgcolor: "#e0f2f1",
-                        color: "black"
-                    },
-                    color: "black"
-                }}
-            >
-                <ListItemIcon sx={{ color: "green" }}><Category /></ListItemIcon>
-                <ListItemText primary="Quản lý danh mục" />
-            </ListItem>
+
             <ListItem
                 button
                 component={Link}
@@ -224,6 +230,23 @@ const AdminMenu = () => {
             >
                 <ListItemIcon sx={{ color: "green" }}><People /></ListItemIcon>
                 <ListItemText primary="Quản lý người dùng" />
+            </ListItem>
+            <ListItem
+                button
+                onClick={handleLogout}
+                sx={{
+                    mt: 2,
+                    color: "black",
+                    "&:hover": {
+                        bgcolor: "#ffeaea",
+                        color: "red"
+                    },
+                    cursor: "pointer",
+                }}
+
+            >
+                <ListItemIcon sx={{ color: "red" }}><LogoutIcon /></ListItemIcon>
+                <ListItemText primary="Đăng xuất" />
             </ListItem>
         </List>
     );

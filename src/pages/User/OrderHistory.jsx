@@ -27,7 +27,7 @@ const OrderHistory = () => {
     if (loading) return <Typography>Đang tải...</Typography>;
 
     return (
-        <Box maxWidth="900px" mx="auto" mt={4}>
+        <Box maxWidth="1500px" mx="auto" mt={4}>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Lịch sử đơn hàng
             </Typography>
