@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton
+    Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, FormControlLabel, Switch
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import {
@@ -13,10 +13,16 @@ import {
 
 const AdminDiscount = () => {
     const [discounts, setDiscounts] = useState([]);
-    // Removed unused loading state
     const [openDialog, setOpenDialog] = useState(false);
     const [editDiscount, setEditDiscount] = useState(null);
-    const [form, setForm] = useState({ name: "", value: "", type: "fixed" });
+    const [form, setForm] = useState({
+        name: "",
+        value: "",
+        type: "fixed",
+        start_date: "",
+        end_date: "",
+        status: true,
+    });
 
     const fetchDiscounts = async () => {
         try {
@@ -33,8 +39,16 @@ const AdminDiscount = () => {
     }, []);
 
     const handleOpenAdd = () => {
+        const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
         setEditDiscount(null);
-        setForm({ name: "", value: "", type: "fixed" });
+        setForm({
+            name: "",
+            value: "",
+            type: "fixed",
+            start_date: today,
+            end_date: "",
+            status: true,
+        });
         setOpenDialog(true);
     };
 
@@ -43,7 +57,10 @@ const AdminDiscount = () => {
         setForm({
             name: discount.name,
             value: discount.value,
-            type: discount.type
+            type: discount.type,
+            start_date: discount.start_date ? discount.start_date.slice(0, 10) : "",
+            end_date: discount.end_date ? discount.end_date.slice(0, 10) : "",
+            status: discount.status === 1 || discount.status === true,
         });
         setOpenDialog(true);
     };
@@ -53,16 +70,23 @@ const AdminDiscount = () => {
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm({ ...form, [name]: value });
+        const { name, value, type, checked } = e.target;
+        setForm({
+            ...form,
+            [name]: type === "checkbox" ? checked : value,
+        });
     };
 
     const handleSubmit = async () => {
         try {
+            const data = {
+                ...form,
+                status: form.status ? 1 : 0,
+            };
             if (editDiscount) {
-                await updateDiscount(editDiscount.id, form);
+                await updateDiscount(editDiscount.id, data);
             } else {
-                await createDiscount(form);
+                await createDiscount(data);
             }
             setOpenDialog(false);
             fetchDiscounts();
@@ -84,7 +108,7 @@ const AdminDiscount = () => {
     };
 
     return (
-        <Box maxWidth="900px" mx="auto" mt={4}>
+        <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý mã giảm giá
             </Typography>
@@ -95,21 +119,31 @@ const AdminDiscount = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell>STT</TableCell>
                             <TableCell>Tên mã</TableCell>
                             <TableCell>Loại</TableCell>
                             <TableCell>Giá trị</TableCell>
+                            <TableCell>Ngày bắt đầu</TableCell>
+                            <TableCell>Ngày kết thúc</TableCell>
+                            <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {discounts.map((d) => (
+                        {discounts.map((d, index) => (
                             <TableRow key={d.id}>
+                                <TableCell>{index + 1}</TableCell>
                                 <TableCell>{d.name}</TableCell>
                                 <TableCell>{d.type === "fixed" ? "Tiền mặt" : "Phần trăm"}</TableCell>
                                 <TableCell>
                                     {d.type === "fixed"
                                         ? Number(d.value).toLocaleString() + "đ"
                                         : d.value + "%"}
+                                </TableCell>
+                                <TableCell>{d.start_date ? d.start_date.slice(0, 10) : ""}</TableCell>
+                                <TableCell>{d.end_date ? d.end_date.slice(0, 10) : ""}</TableCell>
+                                <TableCell>
+                                    {d.status ? "Đang hoạt động" : "Ngừng hoạt động"}
                                 </TableCell>
                                 <TableCell>
                                     <IconButton color="primary" onClick={() => handleOpenEdit(d)}>
@@ -158,6 +192,40 @@ const AdminDiscount = () => {
                         margin="normal"
                         type="number"
                     />
+                    <TextField
+                        label="Ngày bắt đầu"
+                        name="start_date"
+                        type="date"
+                        value={form.start_date}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        label="Ngày kết thúc"
+                        name="end_date"
+                        type="date"
+                        value={form.end_date}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    {editDiscount && (
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={form.status}
+                                    onChange={handleChange}
+                                    name="status"
+                                    color="success"
+                                />
+                            }
+                            label="Đang hoạt động"
+                            sx={{ mt: 2 }}
+                        />
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Hủy</Button>

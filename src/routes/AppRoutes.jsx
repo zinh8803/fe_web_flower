@@ -24,6 +24,7 @@ import AdminDiscount from "../pages/Admin/AdminDiscount";
 import AdminFlowerType from "../pages/Admin/AdminFlowerType";
 import AdminFlower from "../pages/Admin/AdminFlower";
 import AdminDashboard from "../pages/Admin/AdminDashbroad";
+import VnpayReturn from "../pages/User/VnaypayReturn";
 
 const AppRoutes = () => (
     <Router>
@@ -38,6 +39,7 @@ const AppRoutes = () => (
                 <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/search" element={<ProductSearch />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/vnpay_return" element={<VnpayReturn />} />
                 <Route element={<PrivateRoute />}>
                     <Route path="/orders/history" element={<OrderHistory />} />
                     <Route path="/order/:id" element={<OrderDetail />} />
@@ -46,7 +48,6 @@ const AppRoutes = () => (
             </Route>
             <Route path="/admin/login" element={<AdminLogin />} />
 
-            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Admin layout */}
             <Route path="/admin" element={<AdminLayout />}>

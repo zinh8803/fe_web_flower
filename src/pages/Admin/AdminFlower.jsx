@@ -71,7 +71,7 @@ const AdminFlower = () => {
     };
 
     return (
-        <Box maxWidth="700px" mx="auto" mt={4}>
+        <Box >
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý hoa
             </Typography>

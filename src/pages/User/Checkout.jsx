@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/material";
 import { clearCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
-//import { checkCodeValidity } from "../../services/discountService";
+import { getPayments } from "../../services/paymentService";
 
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
@@ -60,82 +60,59 @@ const Checkout = () => {
         0
     );
 
-    // subtotal đã có
     const total = subtotal - discountAmount;
 
     const handlePlaceOrder = async () => {
-        try {
-            const orderData = {
-                ...form,
-                user_id: user?.id || null,
-                products: cartItems.map(item => ({
-                    product_id: item.id,
-                    quantity: item.quantity,
-                })),
-                discount_id: discountId || null,
-            };
+        if (form.payment_method === "cod") {
+            try {
+                const orderData = {
+                    ...form,
+                    user_id: user?.id || null,
+                    products: cartItems.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                    })),
+                    discount_id: discountId || null,
+                };
 
-            console.log("Sending order data:", orderData);
+                const res = await createOrder(orderData);
 
-            const res = await createOrder(orderData);
-            console.log("Order success response:", res.data);
-
-            if (res.data && res.data.data) {
-                dispatch(clearCart());
-                dispatch(showNotification({ message: "Đặt hàng thành công!", severity: "success" }));
-                navigate("/");
-            }
-        } catch (err) {
-            console.error("Order failed:", err);
-
-            if (err.response) {
-                console.error("API Error Response:", err.response.data);
-                console.error("API Error Status:", err.response.status);
-
-                if (err.response.data && err.response.data.message) {
-                    dispatch(showNotification({ message: "Đặt hàng thất bại: " + err.response.data.message, severity: "error" }));
-                } else if (err.response.data && err.response.data.errors) {
-                    const errorMessages = Object.values(err.response.data.errors).flat();
-                    dispatch(showNotification({ message: "Đặt hàng thất bại:\n" + errorMessages.join("\n"), severity: "error" }));
-                } else {
-                    dispatch(showNotification({ message: "Đặt hàng thất bại!", severity: "error" }));
+                if (res.data && res.data.data) {
+                    dispatch(clearCart());
+                    dispatch(showNotification({ message: "Đặt hàng thành công!", severity: "success" }));
+                    navigate("/");
                 }
-            } else if (err.request) {
-                console.error("No response received:", err.request);
-                dispatch(showNotification({ message: "Không nhận được phản hồi từ server!", severity: "error" }));
-            } else {
-                console.error("Error setting up request:", err.message);
-                dispatch(showNotification({ message: "Lỗi khi gửi yêu cầu: " + err.message, severity: "error" }));
+            } catch (err) {
+                console.error("Error placing order:", err);
+                dispatch(showNotification({ message: "Lỗi khi đặt hàng!", severity: "error" }));
+            }
+        } else if (form.payment_method === "vnpay") {
+            try {
+                const orderData = {
+                    ...form,
+                    user_id: user?.id || null,
+                    products: cartItems.map(item => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                    })),
+                    discount_id: discountId || null,
+                };
+                localStorage.setItem("pendingOrder", JSON.stringify(orderData));
+
+                const amount = total;
+                const res = await getPayments({ amount });
+                if (res.data && res.data.payment_url) {
+                    window.location.href = res.data.payment_url;
+                } else {
+                    dispatch(showNotification({ message: "Không lấy được link thanh toán!", severity: "error" }));
+                }
+            } catch (err) {
+                console.error("Error creating VNPAY payment:", err);
+                dispatch(showNotification({ message: "Lỗi khi tạo thanh toán VNPAY!", severity: "error" }));
             }
         }
     };
 
-    // const handleApplyDiscount = async () => {
-    //     try {
-    //         const res = await checkCodeValidity(discountCode);
-    //         if (res.data && res.data.data && res.data.data.length > 0) {
-    //             const discount = res.data.data[0];
-    //             setDiscountAmount(
-    //                 discount.type === "percent"
-    //                     ? subtotal * (parseFloat(discount.value) / 100)
-    //                     : parseFloat(discount.value)
-    //             );
-    //             setDiscountId(discount.id); // Lưu discount_id
-    //             alert("Áp dụng mã giảm giá thành công!");
-    //         } else {
-    //             console.log("code:", discountCode, "is not valid");
-    //             console.log(res.data.data);
-    //             setDiscountAmount(0);
-    //             setDiscountId(null);
-    //             alert("Mã giảm giá không hợp lệ!");
-    //         }
-    //     } catch (err) {
-    //         console.error("Error checking discount code:", err);
-    //         setDiscountAmount(0);
-    //         setDiscountId(null);
-    //         alert("Lỗi khi kiểm tra mã giảm giá!");
-    //     }
-    // };
 
     console.log("user in checkout:", user);
 
@@ -194,7 +171,7 @@ const Checkout = () => {
                 margin="normal"
             >
                 <MenuItem value="cod">Thanh toán khi nhận hàng (COD)</MenuItem>
-                <MenuItem value="bank">Chuyển khoản ngân hàng</MenuItem>
+                <MenuItem value="vnpay">Thanh toán VNPAY</MenuItem>
             </TextField>
 
             <Divider sx={{ my: 2 }} />
@@ -232,7 +209,6 @@ const Checkout = () => {
                 </Typography>
             </Box>
 
-            {/* KHÔNG hiện ô nhập mã giảm giá và nút áp dụng nữa */}
 
             <Button
                 variant="contained"

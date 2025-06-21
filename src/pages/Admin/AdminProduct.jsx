@@ -5,9 +5,10 @@ import {
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { getProducts, deleteProduct } from "../../services/productService";
-
+import { getCategory } from "../../services/categoryService";
 const AdminProduct = () => {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const fetchProducts = async () => {
         try {
             const res = await getProducts();
@@ -16,9 +17,18 @@ const AdminProduct = () => {
             alert("Error loading product list");
         }
     };
+    const fetchCategories = async () => {
+        try {
+            const res = await getCategory();
+            setCategories(res.data.data || []);
+        } catch {
+            alert("Error loading categories");
+        }
+    };
 
     useEffect(() => {
         fetchProducts();
+        fetchCategories();
     }, []);
 
     const handleDelete = async (id) => {
@@ -31,9 +41,12 @@ const AdminProduct = () => {
             alert("Lỗi khi xóa sản phẩm");
         }
     };
-
+    const getCategoryName = (id) => {
+        const cat = categories.find(c => c.id === id);
+        return cat ? cat.name : "";
+    };
     return (
-        <Box maxWidth="1100px" mx="auto" mt={4}>
+        <Box >
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý sản phẩm
             </Typography>
@@ -52,7 +65,7 @@ const AdminProduct = () => {
                             <TableCell>Ảnh</TableCell>
                             <TableCell>Tên sản phẩm</TableCell>
                             <TableCell>Giá</TableCell>
-                            <TableCell>Loại</TableCell>
+                            <TableCell>Danh mục</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
@@ -65,7 +78,7 @@ const AdminProduct = () => {
                                 </TableCell>
                                 <TableCell>{p.name}</TableCell>
                                 <TableCell>{Number(p.price).toLocaleString()}đ</TableCell>
-                                <TableCell>{p.category?.name || ""}</TableCell>
+                                <TableCell>{getCategoryName(p.category_id)}</TableCell>
                                 <TableCell>
                                     {p.status ? (
                                         <span style={{ color: "green" }}>Hiện</span>
