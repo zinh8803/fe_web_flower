@@ -69,8 +69,9 @@ const Checkout = () => {
                     ...form,
                     user_id: user?.id || null,
                     products: cartItems.map(item => ({
-                        product_id: item.id,
+                        product_id: item.product_id,
                         quantity: item.quantity,
+                        product_size_id: item.product_size_id,
                     })),
                     discount_id: discountId || null,
                 };
@@ -83,7 +84,10 @@ const Checkout = () => {
                     navigate("/");
                 }
             } catch (err) {
-                console.error("Error placing order:", err);
+                if (err.response && err.response.data) {
+                    console.log("Lỗi đặt hàng:", err.response.data);
+                    alert(JSON.stringify(err.response.data.errors));
+                }
                 dispatch(showNotification({ message: "Lỗi khi đặt hàng!", severity: "error" }));
             }
         } else if (form.payment_method === "vnpay") {
@@ -92,8 +96,9 @@ const Checkout = () => {
                     ...form,
                     user_id: user?.id || null,
                     products: cartItems.map(item => ({
-                        product_id: item.id,
+                        product_id: item.product_id,
                         quantity: item.quantity,
+                        product_size_id: item.product_size_id,
                     })),
                     discount_id: discountId || null,
                 };

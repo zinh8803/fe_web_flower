@@ -85,7 +85,9 @@ const ProductGrid = ({ title }) => {
                                     {item.name}
                                 </Typography>
                                 <Typography color="error" fontWeight={700}>
-                                    {Number(item.price).toLocaleString()}đ
+                                    {item.sizes && item.sizes.length > 0
+                                        ? Number(item.sizes[0].price).toLocaleString() + "đ"
+                                        : "Liên hệ"}
                                 </Typography>
                             </CardContent>
                             <CardActions sx={{ justifyContent: "center", pb: 2 }}>
@@ -97,12 +99,18 @@ const ProductGrid = ({ title }) => {
                                     sx={{ borderRadius: 5, px: 2 }}
                                     onClick={e => {
                                         e.preventDefault();
+                                        if (!item.sizes || item.sizes.length === 0) {
+                                            dispatch(showNotification({ message: "Sản phẩm chưa có size!", severity: "warning" }));
+                                            return;
+                                        }
                                         handleAddToCart({
                                             id: item.id,
                                             name: item.name,
-                                            price: Number(item.price),
+                                            price: Number(item.sizes[0].price),
                                             image: item.image_url,
                                             quantity: 1,
+                                            size: item.sizes[0].size,
+                                            product_size_id: item.sizes[0].id,
                                         });
                                     }}
                                 >

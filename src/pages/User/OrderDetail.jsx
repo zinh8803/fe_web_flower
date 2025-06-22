@@ -69,8 +69,16 @@ const OrderDetail = () => {
                             />
                             <CardContent>
                                 <Typography fontWeight={600}>{detail.product.name}</Typography>
+                                {/* Hiển thị kích thước nếu có */}
+                                {detail.product_size && detail.product_size.size && (
+                                    <Typography variant="body2" color="text.secondary">
+                                        Kích thước: <b>{detail.product_size.size}</b>
+                                    </Typography>
+                                )}
                                 <Typography>Số lượng: {detail.quantity}</Typography>
-                                <Typography>Đơn giá: {Number(detail.product_price).toLocaleString()}đ</Typography>
+                                {/* <Typography>
+                                    Đơn giá: {Number(detail.price ?? detail.product_price).toLocaleString()}đ
+                                </Typography> */}
                                 <Typography color="error" fontWeight={700}>
                                     Thành tiền: {Number(detail.subtotal).toLocaleString()}đ
                                 </Typography>

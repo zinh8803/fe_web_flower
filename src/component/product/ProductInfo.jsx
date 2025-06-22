@@ -9,6 +9,11 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart }) => {
             <Typography variant="h5" fontWeight={700} mb={2}>
                 {product.name}
             </Typography>
+            {product.size && (
+                <Typography variant="subtitle1" mb={1}>
+                    Kích thước: <b>{product.size}</b>
+                </Typography>
+            )}
             <Typography variant="h6" color="error" mb={2}>
                 {Number(product.price).toLocaleString()}đ
             </Typography>
@@ -29,6 +34,19 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart }) => {
                     {total.toLocaleString()}đ
                 </span>
             </Typography>
+            {/* Hiển thị chi tiết hoa nếu có */}
+            {product.receipt_details && product.receipt_details.length > 0 && (
+                <Box mb={2}>
+                    <Typography fontWeight={600}>Chi tiết hoa:</Typography>
+                    <ul>
+                        {product.receipt_details.map((f, idx) => (
+                            <li key={idx}>
+                                {f.flower_name} - SL: {f.quantity} ({Number(f.import_price).toLocaleString()}đ)
+                            </li>
+                        ))}
+                    </ul>
+                </Box>
+            )}
             <Button
                 variant="contained"
                 color="error"

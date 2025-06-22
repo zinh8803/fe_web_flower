@@ -152,15 +152,23 @@ const Cart = () => {
                                                                 border: '1px solid #e0e0e0'
                                                             }}
                                                         />
-                                                        <Typography
-                                                            variant="body1"
-                                                            sx={{
-                                                                maxWidth: 300,
-                                                                fontWeight: 500
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </Typography>
+                                                        <Box>
+                                                            <Typography
+                                                                variant="body1"
+                                                                sx={{
+                                                                    maxWidth: 300,
+                                                                    fontWeight: 500
+                                                                }}
+                                                            >
+                                                                {item.name}
+                                                            </Typography>
+                                                            {/* Hiển thị kích thước nếu có */}
+                                                            {item.size && (
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    Kích thước: <b>{item.size}</b>
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell>
