@@ -1,192 +1,262 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox
+    Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, IconButton, CircularProgress
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import { getProducts, deleteProduct, updateProduct } from "../../services/productService";
+import { getProducts, deleteProduct, updateProduct, createProduct } from "../../services/productService";
 import { getCategory } from "../../services/categoryService";
-import { getFlower } from "../../services/flowerService";
+import { getImportReceipts } from "../../services/importReceiptsService";
+
+const defaultProduct = {
+    name: "",
+    description: "",
+    category_id: "",
+    status: 1,
+    image: null,
+    sizes: [
+        { size: "Nhỏ", price: "", recipes: [] },
+        { size: "Lớn", price: "", recipes: [] }
+    ]
+};
 
 const AdminProduct = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [flowers, setFlowers] = useState([]);
-    const [editOpen, setEditOpen] = useState(false);
-    const [editProduct, setEditProduct] = useState(null);
-    const [addOpen, setAddOpen] = useState(false);
-    const [addProduct, setAddProduct] = useState({
-        name: "",
-        description: "",
-        category_id: "",
-        status: 1,
-        sizes: [
-            { size: "Nhỏ", price: "", recipes: [] },
-            { size: "Lớn", price: "", recipes: [] }
-        ]
-    });
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [addDialogOpen, setAddDialogOpen] = useState(false);
+    const [editProduct, setEditProduct] = useState(null); // null: thêm, object: sửa
+    const [addProduct, setAddProduct] = useState({ ...defaultProduct });
+    const [loading, setLoading] = useState(false);
+
+    // Fetch data
+    useEffect(() => {
+        fetchProducts();
+        getCategory().then(res => setCategories(res.data.data || []));
+        fetchFlowersFromReceipts();
+    }, []);
 
     const fetchProducts = async () => {
         try {
             const res = await getProducts();
             setProducts(res.data.data || []);
         } catch {
-            alert("Error loading product list");
+            alert("Lỗi khi tải sản phẩm");
         }
     };
-    const fetchCategories = async () => {
+
+    const fetchFlowersFromReceipts = async () => {
         try {
-            const res = await getCategory();
-            setCategories(res.data.data || []);
+            const res = await getImportReceipts();
+            // Tổng hợp tồn kho từng hoa
+            const flowerMap = {};
+            (res.data.data || []).forEach(receipt => {
+                (receipt.details || []).forEach(detail => {
+                    if (!flowerMap[detail.flower_id]) {
+                        flowerMap[detail.flower_id] = {
+                            id: detail.flower_id,
+                            name: detail.flower_name,
+                            remaining_quantity: 0
+                        };
+                    }
+                    flowerMap[detail.flower_id].remaining_quantity += Number(detail.remaining_quantity);
+                });
+            });
+            setFlowers(Object.values(flowerMap));
         } catch {
-            alert("Error loading categories");
+            alert("Lỗi khi tải hoa từ phiếu nhập");
         }
     };
 
-    useEffect(() => {
-        fetchProducts();
-        fetchCategories();
-        // Lấy danh sách hoa
-        getFlower().then(res => setFlowers(res.data.data || []));
-    }, []);
+    // Mở popup Thêm
+    const handleAddOpen = () => {
+        setAddProduct({ ...defaultProduct });
+        setAddDialogOpen(true);
+    };
 
+    // Mở popup Sửa
+    const handleEditOpen = (product) => {
+        setEditProduct({
+            ...product,
+            image: null, // reset image để chọn lại nếu muốn
+            sizes: product.sizes?.length
+                ? product.sizes.map(s => ({
+                    ...s,
+                    recipes: s.recipes || []
+                }))
+                : [
+                    { size: "Nhỏ", price: "", recipes: [] },
+                    { size: "Lớn", price: "", recipes: [] }
+                ]
+        });
+        setDialogOpen(true);
+    };
+
+    // Đóng popup
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+        setAddDialogOpen(false);
+        setEditProduct(null);
+        setAddProduct({ ...defaultProduct });
+    };
+
+    // Xử lý thay đổi trường chung
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEditProduct(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddChange = (e) => {
+        const { name, value } = e.target;
+        setAddProduct(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Đổi hình
+    const handleImageChange = (e) => {
+        setEditProduct(prev => ({ ...prev, image: e.target.files[0] }));
+    };
+
+    // Thay đổi tên size
+    const handleSizeNameChange = (idx, value) => {
+        setEditProduct(prev => {
+            const sizes = [...prev.sizes];
+            sizes[idx].size = value;
+            return { ...prev, sizes };
+        });
+    };
+
+    const handleAddSizeNameChange = (idx, value) => {
+        setAddProduct(prev => {
+            const sizes = [...prev.sizes];
+            sizes[idx].size = value;
+            return { ...prev, sizes };
+        });
+    };
+
+    // Thay đổi giá size (chỉ cho sửa)
+    const handleSizePriceChange = (idx, value) => {
+        setEditProduct(prev => {
+            const sizes = [...prev.sizes];
+            sizes[idx].price = value;
+            return { ...prev, sizes };
+        });
+    };
+
+    // Thay đổi số lượng hoa cho size
+    const handleRecipeChange = (sizeIdx, flowerId, value) => {
+        setEditProduct(prev => {
+            const sizes = [...prev.sizes];
+            let recipes = sizes[sizeIdx].recipes || [];
+            const idx = recipes.findIndex(r => r.flower_id === flowerId);
+            if (idx > -1) {
+                recipes[idx].quantity = value;
+            } else {
+                recipes.push({ flower_id: flowerId, quantity: value });
+            }
+            sizes[sizeIdx].recipes = recipes;
+            return { ...prev, sizes };
+        });
+    };
+
+    const handleAddRecipeChange = (sizeIdx, flowerId, value) => {
+        setAddProduct(prev => {
+            const sizes = [...prev.sizes];
+            let recipes = sizes[sizeIdx].recipes || [];
+            const idx = recipes.findIndex(r => r.flower_id === flowerId);
+            if (idx > -1) {
+                recipes[idx].quantity = value;
+            } else {
+                recipes.push({ flower_id: flowerId, quantity: value });
+            }
+            sizes[sizeIdx].recipes = recipes;
+            return { ...prev, sizes };
+        });
+    };
+
+    // Lưu sản phẩm (thêm hoặc sửa)
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const formData = new FormData();
+
+            if (editProduct.id) {
+                formData.append("_method", "PUT");
+            }
+
+            formData.append("name", editProduct.name);
+            formData.append("description", editProduct.description);
+            formData.append("category_id", editProduct.category_id);
+            formData.append("status", editProduct.status);
+            if (editProduct.image) {
+                formData.append("image", editProduct.image);
+            }
+            // Nếu là thêm thì bỏ giá size
+            const sizes = editProduct.sizes.map(s => ({
+                ...s,
+                price: editProduct.id ? s.price : undefined // chỉ gửi price khi sửa
+            }));
+            formData.append("sizes", JSON.stringify(sizes));
+            if (editProduct.id) {
+                await updateProduct(editProduct.id, formData);
+            } else {
+                await createProduct(formData);
+            }
+            setDialogOpen(false);
+            fetchProducts();
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi khi lưu sản phẩm");
+        }
+        setLoading(false);
+    };
+
+    // Xóa sản phẩm
     const handleDelete = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) return;
         try {
             await deleteProduct(id);
             fetchProducts();
-        } catch (e) {
-            console.error("Error deleting product:", e);
+        } catch {
             alert("Lỗi khi xóa sản phẩm");
         }
     };
 
-    const getCategoryName = (id) => {
-        const cat = categories.find(c => c.id === id);
-        return cat ? cat.name : "";
-    };
+    // Lấy tên danh mục
+    const getCategoryName = (id) => categories.find(c => c.id === id)?.name || "";
 
-    // Mở popup sửa
-    const handleEditOpen = (product) => {
-        setEditProduct({ ...product }); // clone để chỉnh sửa
-        setEditOpen(true);
-    };
-
-    // Đóng popup
-    const handleEditClose = () => {
-        setEditOpen(false);
-        setEditProduct(null);
-    };
-
-    // Lưu thay đổi
-    const handleEditSave = async () => {
-        try {
-            await updateProduct(editProduct.id, editProduct);
-            setEditOpen(false);
-            setEditProduct(null);
-            fetchProducts();
-        } catch (e) {
-            console.error("Error updating product:", e);
-            alert("Lỗi khi cập nhật sản phẩm");
-        }
-    };
-
-    // Xử lý thay đổi trường
-    const handleEditChange = (e) => {
-        setEditProduct({ ...editProduct, [e.target.name]: e.target.value });
-    };
-
-    // Xử lý thay đổi giá size
-    const handleSizePriceChange = (idx, value) => {
-        const sizes = [...editProduct.sizes];
-        sizes[idx].price = value;
-        setEditProduct({ ...editProduct, sizes });
-    };
-
-    const handleCheckFlower = (sizeIdx, flower) => {
-        const sizes = [...editProduct.sizes];
-        const recipes = sizes[sizeIdx].recipes || [];
-        const exists = recipes.find(r => r.flower_id === flower.id);
-        if (exists) {
-            sizes[sizeIdx].recipes = recipes.filter(r => r.flower_id !== flower.id);
-        } else {
-            sizes[sizeIdx].recipes = [
-                ...recipes,
-                { flower_id: flower.id, quantity: 1 }
-            ];
-        }
-        setEditProduct({ ...editProduct, sizes });
-    };
-
-    const handleRecipeChange = (sizeIdx, flower_id, value) => {
-        const sizes = [...editProduct.sizes];
-        sizes[sizeIdx].recipes = sizes[sizeIdx].recipes.map(r =>
-            r.flower_id === flower_id ? { ...r, quantity: value } : r
-        );
-        setEditProduct({ ...editProduct, sizes });
-    };
-
-    const handleAddOpen = () => {
-        setAddProduct({
-            name: "",
-            description: "",
-            category_id: "",
-            status: 1,
-            sizes: [
-                { size: "Nhỏ", price: "", recipes: [] },
-                { size: "Lớn", price: "", recipes: [] }
-            ]
+    const handleFlowerCheck = (sizeIdx, flowerId, checked) => {
+        setEditProduct(prev => {
+            const sizes = [...prev.sizes];
+            let recipes = sizes[sizeIdx].recipes || [];
+            const idx = recipes.findIndex(r => r.flower_id === flowerId);
+            if (checked) {
+                // Nếu chưa có thì thêm với quantity mặc định 1
+                if (idx === -1) recipes.push({ flower_id: flowerId, quantity: 1 });
+            } else {
+                // Bỏ tích thì xóa khỏi mảng
+                recipes = recipes.filter(r => r.flower_id !== flowerId);
+            }
+            sizes[sizeIdx].recipes = recipes;
+            return { ...prev, sizes };
         });
-        setAddOpen(true);
-    };
-    const handleAddClose = () => setAddOpen(false);
-
-    // Xử lý thay đổi trường thêm sản phẩm
-    const handleAddChange = (e) => {
-        setAddProduct({ ...addProduct, [e.target.name]: e.target.value });
     };
 
-    // Xử lý thay đổi giá size thêm sản phẩm
-    const handleAddSizePriceChange = (idx, value) => {
-        const sizes = [...addProduct.sizes];
-        sizes[idx].price = value;
-        setAddProduct({ ...addProduct, sizes });
-    };
-
-    // Xử lý chọn hoa cho size thêm sản phẩm
-    const handleAddCheckFlower = (sizeIdx, flower) => {
-        const sizes = [...addProduct.sizes];
-        const recipes = sizes[sizeIdx].recipes || [];
-        const exists = recipes.find(r => r.flower_id === flower.id);
-        if (exists) {
-            sizes[sizeIdx].recipes = recipes.filter(r => r.flower_id !== flower.id);
-        } else {
-            sizes[sizeIdx].recipes = [
-                ...recipes,
-                { flower_id: flower.id, quantity: 1 }
-            ];
-        }
-        setAddProduct({ ...addProduct, sizes });
-    };
-
-    // Xử lý thay đổi số lượng hoa trong công thức thêm sản phẩm
-    const handleAddRecipeChange = (sizeIdx, flower_id, value) => {
-        const sizes = [...addProduct.sizes];
-        sizes[sizeIdx].recipes = sizes[sizeIdx].recipes.map(r =>
-            r.flower_id === flower_id ? { ...r, quantity: value } : r
-        );
-        setAddProduct({ ...addProduct, sizes });
-    };
-
-    const handleAddSave = async () => {
-        try {
-            await updateProduct(null, addProduct); // hoặc gọi createProduct tuỳ API
-            setAddOpen(false);
-            fetchProducts();
-        } catch (e) {
-            console.error("Error adding product:", e);
-            alert("Lỗi khi thêm sản phẩm");
-        }
+    const handleAddFlowerCheck = (sizeIdx, flowerId, checked) => {
+        setAddProduct(prev => {
+            const sizes = [...prev.sizes];
+            let recipes = sizes[sizeIdx].recipes || [];
+            const idx = recipes.findIndex(r => r.flower_id === flowerId);
+            if (checked) {
+                // Nếu chưa có thì thêm với quantity mặc định 1
+                if (idx === -1) recipes.push({ flower_id: flowerId, quantity: 1 });
+            } else {
+                // Bỏ tích thì xóa khỏi mảng
+                recipes = recipes.filter(r => r.flower_id !== flowerId);
+            }
+            sizes[sizeIdx].recipes = recipes;
+            return { ...prev, sizes };
+        });
     };
 
     return (
@@ -254,9 +324,9 @@ const AdminProduct = () => {
                 </Table>
             </TableContainer>
 
-            {/* Popup sửa sản phẩm */}
-            <Dialog open={editOpen} onClose={handleEditClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Sửa sản phẩm</DialogTitle>
+            {/* Popup Thêm/Sửa */}
+            <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="md" fullWidth>
+                <DialogTitle>{editProduct?.id ? "Sửa sản phẩm" : "Thêm sản phẩm"}</DialogTitle>
                 <DialogContent>
                     {editProduct && (
                         <Box>
@@ -264,7 +334,7 @@ const AdminProduct = () => {
                                 label="Tên sản phẩm"
                                 name="name"
                                 value={editProduct.name}
-                                onChange={handleEditChange}
+                                onChange={handleChange}
                                 fullWidth
                                 sx={{ mb: 2 }}
                             />
@@ -272,7 +342,7 @@ const AdminProduct = () => {
                                 label="Mô tả"
                                 name="description"
                                 value={editProduct.description}
-                                onChange={handleEditChange}
+                                onChange={handleChange}
                                 fullWidth
                                 multiline
                                 rows={2}
@@ -283,7 +353,7 @@ const AdminProduct = () => {
                                 name="category_id"
                                 select
                                 value={editProduct.category_id}
-                                onChange={handleEditChange}
+                                onChange={handleChange}
                                 fullWidth
                                 sx={{ mb: 2 }}
                             >
@@ -291,161 +361,274 @@ const AdminProduct = () => {
                                     <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
                                 ))}
                             </TextField>
+                            {/* Đổi hình (chỉ sửa mới có ảnh cũ) */}
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                sx={{ mb: 2, mr: 2 }}
+                            >
+                                {editProduct.image ? "Đã chọn ảnh mới" : "Đổi ảnh"}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={handleImageChange}
+                                />
+                            </Button>
+                            {editProduct.id && editProduct.image_url && (
+                                <img src={editProduct.image_url} alt="Ảnh cũ" style={{ width: 60, height: 60, objectFit: "cover", marginLeft: 8 }} />
+                            )}
+                            <TextField
+                                label="Trạng thái"
+                                name="status"
+                                select
+                                value={editProduct.status}
+                                onChange={handleChange}
+                                fullWidth
+                                sx={{ mb: 2, mt: 2 }}
+                            >
+                                <MenuItem value={1}>Hiện</MenuItem>
+                                <MenuItem value={0}>Ẩn</MenuItem>
+                            </TextField>
                             {/* Danh sách size */}
-                            {editProduct.sizes && editProduct.sizes.map((size, idx) => (
-                                <Box key={size.id || idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
-                                    <Typography fontWeight={600}>Kích thước: {size.size}</Typography>
-                                    <TextField
-                                        label="Giá"
-                                        value={size.price}
-                                        onChange={e => handleSizePriceChange(idx, e.target.value)}
-                                        sx={{ mb: 1, ml: 2 }}
-                                    />
-                                    <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
-                                    <Table size="small">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell />
-                                                <TableCell>Tên hoa</TableCell>
-                                                <TableCell>Số lượng</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {flowers.map(flower => {
-                                                const recipe = (size.recipes || []).find(r => r.flower_id === flower.id);
-                                                return (
-                                                    <TableRow key={flower.id}>
-                                                        <TableCell>
-                                                            <Checkbox
-                                                                checked={!!recipe}
-                                                                onChange={() => handleCheckFlower(idx, flower)}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>{flower.name}</TableCell>
-                                                        <TableCell>
-                                                            <TextField
-                                                                type="number"
-                                                                size="small"
-                                                                value={recipe ? recipe.quantity : ""}
-                                                                onChange={e => handleRecipeChange(idx, flower.id, e.target.value)}
-                                                                disabled={!recipe}
-                                                                inputProps={{ min: 1 }}
-                                                            />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                </Box>
-                            ))}
+                            {editProduct.sizes && editProduct.sizes.map((size, idx) => {
+                                // Nếu là sửa thì merge receipt_details và recipes, nếu thêm thì chỉ dùng flowers
+                                const mergedFlowers = editProduct.id
+                                    ? [
+                                        ...(size.receipt_details || []),
+                                        ...(size.recipes || [])
+                                            .filter(r => !(size.receipt_details || []).some(f => Number(f.flower_id) === Number(r.flower_id)))
+                                            .map(r => ({
+                                                flower_id: r.flower_id,
+                                                flower_name: r.flower_name || `Hoa ID ${r.flower_id}`,
+                                                remaining_quantity: 0
+                                            }))
+                                    ]
+                                    : flowers.map(flower => ({
+                                        flower_id: flower.id,
+                                        flower_name: flower.name,
+                                        remaining_quantity: flower.remaining_quantity
+                                    }));
+
+                                return (
+                                    <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
+                                        <TextField
+                                            label="Tên size"
+                                            value={size.size}
+                                            onChange={e => handleSizeNameChange(idx, e.target.value)}
+                                            sx={{ mb: 1, mr: 2 }}
+                                        />
+                                        {editProduct.id && (
+                                            <TextField
+                                                label="Giá"
+                                                value={size.price}
+                                                onChange={e => handleSizePriceChange(idx, e.target.value)}
+                                                sx={{ mb: 1 }}
+                                            />
+                                        )}
+                                        <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
+                                        <Table size="small">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell></TableCell>
+                                                    <TableCell>Tên hoa</TableCell>
+                                                    <TableCell>Số lượng</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {mergedFlowers.map(flower => {
+                                                    const recipe = size.recipes?.find(r => Number(r.flower_id) === Number(flower.flower_id));
+                                                    const checked = !!recipe;
+                                                    return (
+                                                        <TableRow key={flower.flower_id}>
+                                                            <TableCell>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={checked}
+                                                                    onChange={e => handleFlowerCheck(idx, flower.flower_id, e.target.checked)}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {flower.flower_name}
+                                                                <span style={{ color: "#888", fontSize: 12, marginLeft: 8 }}>
+                                                                    (Tồn: {flower.remaining_quantity})
+                                                                </span>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <TextField
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={recipe ? recipe.quantity : ""}
+                                                                    onChange={e => handleRecipeChange(idx, flower.flower_id, e.target.value)}
+                                                                    inputProps={{
+                                                                        min: 1,
+                                                                        max: flower.remaining_quantity
+                                                                    }}
+                                                                    sx={{ width: 80 }}
+                                                                    disabled={!checked || flower.remaining_quantity === 0}
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+                                );
+                            })}
+
                         </Box>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleEditClose}>Hủy</Button>
-                    <Button onClick={handleEditSave} variant="contained" color="primary">Lưu</Button>
+                    <Button onClick={handleDialogClose}>Hủy</Button>
+                    <Button
+                        onClick={handleSave}
+                        variant="contained"
+                        color="primary"
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+                    >
+                        {loading ? "Đang lưu..." : "Lưu"}
+                    </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Popup thêm sản phẩm */}
-            <Dialog open={addOpen} onClose={handleAddClose} maxWidth="sm" fullWidth>
+            {/* Popup Thêm sản phẩm */}
+            <Dialog open={addDialogOpen} onClose={handleDialogClose} maxWidth="md" fullWidth>
                 <DialogTitle>Thêm sản phẩm</DialogTitle>
                 <DialogContent>
-                    <Box>
-                        <TextField
-                            label="Tên sản phẩm"
-                            name="name"
-                            value={addProduct.name}
-                            onChange={handleAddChange}
-                            fullWidth
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Mô tả"
-                            name="description"
-                            value={addProduct.description}
-                            onChange={handleAddChange}
-                            fullWidth
-                            multiline
-                            rows={2}
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Danh mục"
-                            name="category_id"
-                            select
-                            value={addProduct.category_id}
-                            onChange={handleAddChange}
-                            fullWidth
-                            sx={{ mb: 2 }}
-                        >
-                            {categories.map(cat => (
-                                <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-                            ))}
-                        </TextField>
-                        {/* Danh sách size */}
-                        {addProduct.sizes && addProduct.sizes.map((size, idx) => (
-                            <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
-                                <TextField
-                                    label="Tên size"
-                                    value={size.size}
-                                    onChange={e => {
-                                        const sizes = [...addProduct.sizes];
-                                        sizes[idx].size = e.target.value;
-                                        setAddProduct({ ...addProduct, sizes });
-                                    }}
-                                    sx={{ mb: 1, mr: 2 }}
-                                />
-                                <TextField
-                                    label="Giá"
-                                    value={size.price}
-                                    onChange={e => handleAddSizePriceChange(idx, e.target.value)}
-                                    sx={{ mb: 1 }}
-                                />
-                                <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
-                                <Table size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell />
-                                            <TableCell>Tên hoa</TableCell>
-                                            <TableCell>Số lượng</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {flowers.map(flower => {
-                                            const recipe = (size.recipes || []).find(r => r.flower_id === flower.id);
-                                            return (
-                                                <TableRow key={flower.id}>
-                                                    <TableCell>
-                                                        <Checkbox
-                                                            checked={!!recipe}
-                                                            onChange={() => handleAddCheckFlower(idx, flower)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>{flower.name}</TableCell>
-                                                    <TableCell>
-                                                        <TextField
-                                                            type="number"
-                                                            size="small"
-                                                            value={recipe ? recipe.quantity : ""}
-                                                            onChange={e => handleAddRecipeChange(idx, flower.id, e.target.value)}
-                                                            disabled={!recipe}
-                                                            inputProps={{ min: 1 }}
-                                                        />
-                                                    </TableCell>
-                                                </TableRow>
-                                            );
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </Box>
+                    <TextField
+                        label="Tên sản phẩm"
+                        name="name"
+                        value={addProduct.name}
+                        onChange={handleAddChange}
+                        fullWidth
+                        sx={{ mb: 2 }}
+                    />
+                    <TextField
+                        label="Mô tả"
+                        name="description"
+                        value={addProduct.description}
+                        onChange={handleAddChange}
+                        fullWidth
+                        multiline
+                        rows={2}
+                        sx={{ mb: 2 }}
+                    />
+                    <TextField
+                        label="Danh mục"
+                        name="category_id"
+                        select
+                        value={addProduct.category_id}
+                        onChange={handleAddChange}
+                        fullWidth
+                        sx={{ mb: 2 }}
+                    >
+                        {categories.map(cat => (
+                            <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
                         ))}
-                    </Box>
+                    </TextField>
+                    {/* Đổi hình (chỉ sửa mới có ảnh cũ) */}
+                    <Button
+                        variant="outlined"
+                        component="label"
+                        sx={{ mb: 2, mr: 2 }}
+                    >
+                        {addProduct.image ? "Đã chọn ảnh mới" : "Đổi ảnh"}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={handleImageChange}
+                        />
+                    </Button>
+                    {addProduct.id && addProduct.image_url && (
+                        <img src={addProduct.image_url} alt="Ảnh cũ" style={{ width: 60, height: 60, objectFit: "cover", marginLeft: 8 }} />
+                    )}
+                    <TextField
+                        label="Trạng thái"
+                        name="status"
+                        select
+                        value={addProduct.status}
+                        onChange={handleAddChange}
+                        fullWidth
+                        sx={{ mb: 2, mt: 2 }}
+                    >
+                        <MenuItem value={1}>Hiện</MenuItem>
+                        <MenuItem value={0}>Ẩn</MenuItem>
+                    </TextField>
+                    {/* Danh sách size */}
+                    {addProduct.sizes && addProduct.sizes.map((size, idx) => (
+                        <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
+                            <TextField
+                                label="Tên size"
+                                value={size.size}
+                                onChange={e => handleAddSizeNameChange(idx, e.target.value)}
+                                sx={{ mb: 1, mr: 2 }}
+                            />
+                            <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell></TableCell>
+                                        <TableCell>Tên hoa</TableCell>
+                                        <TableCell>Số lượng</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {flowers.map(flower => {
+                                        const recipe = size.recipes?.find(r => Number(r.flower_id) === Number(flower.id));
+                                        const checked = !!recipe;
+                                        return (
+                                            <TableRow key={flower.id}>
+                                                <TableCell>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        onChange={e => handleAddFlowerCheck(idx, flower.id, e.target.checked)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {flower.name}
+                                                    <span style={{ color: "#888", fontSize: 12, marginLeft: 8 }}>
+                                                        (Tồn: {flower.remaining_quantity})
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        size="small"
+                                                        value={recipe ? recipe.quantity : ""}
+                                                        onChange={e => handleAddRecipeChange(idx, flower.id, e.target.value)}
+                                                        inputProps={{
+                                                            min: 1,
+                                                            max: flower.remaining_quantity
+                                                        }}
+                                                        sx={{ width: 80 }}
+                                                        disabled={!checked || flower.remaining_quantity === 0}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </Box>
+                    ))}
+
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleAddClose}>Hủy</Button>
-                    <Button onClick={handleAddSave} variant="contained" color="primary">Lưu</Button>
+                    <Button onClick={handleDialogClose}>Hủy</Button>
+                    <Button
+                        onClick={handleSave}
+                        variant="contained"
+                        color="primary"
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+                    >
+                        {loading ? "Đang lưu..." : "Lưu"}
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Box>
