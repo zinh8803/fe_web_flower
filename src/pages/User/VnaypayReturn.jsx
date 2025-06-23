@@ -15,22 +15,23 @@ const VnpayReturn = () => {
         const responseCode = params.get("vnp_ResponseCode");
         if (responseCode === "00") {
             const orderData = JSON.parse(localStorage.getItem("pendingOrder"));
-            if (orderData) {
+            const sentFlag = localStorage.getItem("pendingOrderSent");
+            if (orderData && !sentFlag) {
+                localStorage.setItem("pendingOrderSent", "1");
                 createOrder(orderData)
                     .then(() => {
-
                         dispatch(clearCart());
                         dispatch(showNotification({ message: "Thanh toán thành công!", severity: "success" }));
                         localStorage.removeItem("pendingOrder");
+                        localStorage.removeItem("pendingOrderSent");
                         setTimeout(() => navigate("/"), 2000);
                     })
                     .catch(() => {
-                        console.error("Error creating order:", orderData);
                         dispatch(showNotification({ message: "Lỗi khi lưu đơn hàng!", severity: "error" }));
+                        localStorage.removeItem("pendingOrderSent");
                         setTimeout(() => navigate("/checkout"), 2000);
                     });
-            } else {
-                console.error("Không tìm thấy thông tin đơn hàng trong localStorage");
+            } else if (!orderData) {
                 dispatch(showNotification({ message: "Không tìm thấy thông tin đơn hàng!", severity: "error" }));
                 setTimeout(() => navigate("/checkout"), 2000);
             }

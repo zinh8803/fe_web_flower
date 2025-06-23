@@ -13,7 +13,7 @@ const Checkout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-
+    const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -63,6 +63,7 @@ const Checkout = () => {
     const total = subtotal - discountAmount;
 
     const handlePlaceOrder = async () => {
+        setLoading(true);
         if (form.payment_method === "cod") {
             try {
                 const orderData = {
@@ -89,6 +90,8 @@ const Checkout = () => {
                     alert(JSON.stringify(err.response.data.errors));
                 }
                 dispatch(showNotification({ message: "Lỗi khi đặt hàng!", severity: "error" }));
+            } finally {
+                setLoading(false);
             }
         } else if (form.payment_method === "vnpay") {
             try {
@@ -114,12 +117,16 @@ const Checkout = () => {
             } catch (err) {
                 console.error("Error creating VNPAY payment:", err);
                 dispatch(showNotification({ message: "Lỗi khi tạo thanh toán VNPAY!", severity: "error" }));
+            } finally {
+                setLoading(false);
             }
         }
     };
 
-
     console.log("user in checkout:", user);
+
+    // Đảm bảo total không nhỏ hơn 0
+    const displayTotal = total < 0 ? 0 : total;
 
     return (
         <Box maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
@@ -210,10 +217,9 @@ const Checkout = () => {
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography fontWeight={700}>Tổng cộng:</Typography>
                 <Typography fontWeight={700} color="error" fontSize={20}>
-                    {total.toLocaleString()}đ
+                    {displayTotal.toLocaleString()}đ
                 </Typography>
             </Box>
-
 
             <Button
                 variant="contained"
@@ -222,9 +228,9 @@ const Checkout = () => {
                 fullWidth
                 sx={{ borderRadius: 2, fontWeight: 600, fontSize: "1.1rem" }}
                 onClick={handlePlaceOrder}
-                disabled={cartItems.length === 0}
+                disabled={cartItems.length === 0 || loading}
             >
-                Đặt hàng
+                {loading ? "Đang gửi đơn hàng..." : "Đặt hàng"}
             </Button>
         </Box>
     );

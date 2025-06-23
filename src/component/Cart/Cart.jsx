@@ -71,6 +71,8 @@ const Cart = () => {
         0
     );
 
+    const total = Math.max(0, subtotal - discountAmount);
+
     return (
         <Box
             sx={{
@@ -344,7 +346,7 @@ const Cart = () => {
                                         Tổng cộng:
                                     </Typography>
                                     <Typography variant="h5" fontWeight="700" color="error">
-                                        {(subtotal - discountAmount).toLocaleString()}đ
+                                        {total.toLocaleString()}đ
                                     </Typography>
                                 </Box>
 
