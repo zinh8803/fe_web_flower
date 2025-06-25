@@ -36,7 +36,7 @@ const RelatedProducts = ({ related }) => {
                                 {item.name}
                             </Typography>
                             <Typography color="error" fontWeight={700}>
-                                {Number(item.price).toLocaleString()}đ
+                                {Number(item.sizes[0].price).toLocaleString()}đ
                             </Typography>
                         </Box>
                     </Link>

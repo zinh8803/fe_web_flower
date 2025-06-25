@@ -12,7 +12,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
-import { getProducts } from "../../services/productService"; // Thêm dòng này
+import { getProducts } from "../../services/productService";
 import { showNotification } from "../../store/notificationSlice";
 
 const ProductGrid = ({ title }) => {
@@ -103,14 +103,17 @@ const ProductGrid = ({ title }) => {
                                             dispatch(showNotification({ message: "Sản phẩm chưa có size!", severity: "warning" }));
                                             return;
                                         }
+                                        const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
+                                        console.log(smallSize);
                                         handleAddToCart({
-                                            id: item.id,
+                                            id: item.id + '-' + smallSize.id,
                                             name: item.name,
-                                            price: Number(item.sizes[0].price),
+                                            price: Number(smallSize.price),
                                             image: item.image_url,
+                                            product_id: item.id,
                                             quantity: 1,
-                                            size: item.sizes[0].size,
-                                            product_size_id: item.sizes[0].id,
+                                            size: smallSize.size,
+                                            product_size_id: smallSize.id,
                                         });
                                     }}
                                 >

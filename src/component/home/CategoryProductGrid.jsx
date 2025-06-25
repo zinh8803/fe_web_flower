@@ -73,7 +73,7 @@ const CategoryProductGrid = ({ products, title }) => {
                                     {item.name}
                                 </Typography>
                                 <Typography color="error" fontWeight={700}>
-                                    {Number(item.price).toLocaleString()}đ
+                                    {Number(item.sizes[0].price).toLocaleString()}đ
                                 </Typography>
                             </CardContent>
                             <CardActions sx={{ justifyContent: "center", pb: 2 }}>
@@ -85,12 +85,20 @@ const CategoryProductGrid = ({ products, title }) => {
                                     sx={{ borderRadius: 5, px: 2 }}
                                     onClick={e => {
                                         e.preventDefault();
+                                        if (!item.sizes || item.sizes.length === 0) {
+                                            alert("Sản phẩm này không có kích thước nào. Vui lòng chọn sản phẩm khác.");
+                                            return;
+                                        }
+                                        const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
                                         dispatch(addToCart({
-                                            id: item.id,
+                                            id: item.id + '-' + smallSize.id,
                                             name: item.name,
-                                            price: Number(item.price),
+                                            price: Number(smallSize.price),
+                                            product_id: item.id,
                                             image: item.image_url,
                                             quantity: 1,
+                                            size: smallSize.size,
+                                            product_size_id: smallSize.id,
                                         }));
                                     }}
                                 >

@@ -24,7 +24,6 @@ const ProductDetail = () => {
             .then(res => {
                 setProduct(res.data.data);
                 setQuantity(1);
-                // Chọn size đầu tiên mặc định nếu có
                 if (res.data.data.sizes && res.data.data.sizes.length > 0) {
                     setSelectedSize(res.data.data.sizes[0]);
                 }
@@ -58,9 +57,9 @@ const ProductDetail = () => {
             return;
         }
         dispatch(addToCart({
-            id: product.id + '-' + selectedSize.id, 
-            product_id: product.id,                
-            product_size_id: selectedSize.id,      
+            id: product.id + '-' + selectedSize.id,
+            product_id: product.id,
+            product_size_id: selectedSize.id,
             name: product.name,
             price: Number(selectedSize.price),
             image: product.image_url,
