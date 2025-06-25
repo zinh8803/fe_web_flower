@@ -1,14 +1,21 @@
 import api from "./api";
 
 export const login = (email, password) =>
-    api.post("/login", { email, password });
-
-export const getProfile = (token) =>
-    api.get("/profile", {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+    api.post("/login", { email, password }, {
+        withCredentials: true,
     });
+
+export const refreshToken = (refreshToken) =>
+    api.post("/refresh-token", { refresh_token: refreshToken }, {
+        headers: { withCredentials: true },
+    });
+
+export const getProfile = () =>
+    api.get("/profile",
+        {
+            withCredentials: true,
+        }
+    );
 
 // export const getOrderUser = (token) =>
 //     api.get("/orders/details", {
@@ -16,10 +23,6 @@ export const getProfile = (token) =>
 //             Authorization: `Bearer ${token}`,
 //         },
 //     });
-
-export const refreshToken = (refreshToken) =>
-    api.post("/refresh-token", { refresh_token: refreshToken });
-
 
 export const getOrderUserdetail = (token, id) =>
     api.get(`orders/user/${id}`, {

@@ -43,26 +43,20 @@ const LoginDialog = ({ open, onClose }) => {
 
     const handleLogin = async () => {
         try {
-            const res = await login(email, password);
-            const token = res.data.token;
-            const refreshToken = res.data.refresh_token;
-            const profileRes = await getProfile(token);
+            await login(email, password);
+            console.log("Login successful");
+            const profileRes = await getProfile();
             const userData = profileRes.data.data;
 
             dispatch(setUser({
-                user: res.data.data,
-                token: res.data.token,
-                refresh_token: res.data.refresh_token,
+                user: userData,
             }));
 
             localStorage.setItem("user", JSON.stringify(userData));
-            localStorage.setItem("token", token);
-            localStorage.setItem("refresh_token", refreshToken);
 
             onClose(false);
         } catch (error) {
             console.error("Login failed:", error);
-
             alert("Đăng nhập thất bại!");
         }
     };

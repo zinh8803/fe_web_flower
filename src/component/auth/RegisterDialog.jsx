@@ -59,24 +59,19 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
 
     const handleRegister = async () => {
         try {
-            const res = await register(form);
-            if (res.data && res.data.token && res.data.refresh_token) {
-                const profileRes = await getProfile(res.data.token);
-                // Lấy đúng user object
-                const userData = profileRes.data.data;
-                dispatch(setUser({
-                    user: userData,
-                    token: res.data.token,
-                    refresh_token: res.data.refresh_token,
-                }));
-                localStorage.setItem("user", JSON.stringify(userData));
-                localStorage.setItem("token", res.data.token);
-                localStorage.setItem("refresh_token", res.data.refresh_token);
-                onClose();
-            }
+            await register(form);
+            const profileRes = await getProfile();
+            const userData = profileRes.data.data;
+
+            dispatch(setUser({
+                user: userData,
+            }));
+
+            localStorage.setItem("user", JSON.stringify(userData));
+
+            onClose();
         } catch (err) {
             console.error(err);
-            // quăng lỗi json ra
             if (err.response && err.response.data) {
                 const errorMessage = err.response.data.message || "Đăng ký thất bại";
                 alert(errorMessage);
