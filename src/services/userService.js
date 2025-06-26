@@ -36,14 +36,18 @@ export const getOrderHistory = (token, page = 1) =>
         headers: { Authorization: `Bearer ${token}` }
     });
 export const getUpdateProfile = (token, data) =>
-    api.post("/user/update", data, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    api.post("/user/update", data,
+        {
+            withCredentials: true,
+        }
+    );
 
 
 export const getUsers = () => api.get("/users");
 
-export const register = (data) => api.post("/register", data);
+export const register = (data) => api.post("/register", data, {
+    withCredentials: true,
+});
 
 export const getAllUsers = (page = 1) =>
     api.get(`/users/getall?page=${page}`);
