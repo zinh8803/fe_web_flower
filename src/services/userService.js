@@ -6,9 +6,9 @@ export const login = (email, password) =>
     });
 
 export const refreshToken = (refreshToken) =>
-    api.post("/refresh-token", { refresh_token: refreshToken }, {
-        headers: { withCredentials: true },
-    });
+    api.post("/refresh-token", { refresh_token: refreshToken },
+        { withCredentials: true },
+    );
 
 export const getProfile = () =>
     api.get("/profile",
@@ -25,16 +25,18 @@ export const getProfile = () =>
 //     });
 
 export const getOrderUserdetail = (token, id) =>
-    api.get(`orders/user/${id}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    api.get(`orders/user/${id}`,
+        {
+            withCredentials: true,
+        }
+    );
 
 export const getOrderHistory = (token, page = 1) =>
-    api.get(`/orders/details?page=${page}`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    api.get(`/orders/details?page=${page}`,
+        {
+            withCredentials: true,
+        }
+    );
 export const getUpdateProfile = (token, data) =>
     api.post("/user/update", data,
         {
@@ -50,4 +52,8 @@ export const register = (data) => api.post("/register", data, {
 });
 
 export const getAllUsers = (page = 1) =>
-    api.get(`/users/getall?page=${page}`);
+    api.get(`/users/getall?page=${page}`,
+        {
+            withCredentials: true,
+        }
+    );

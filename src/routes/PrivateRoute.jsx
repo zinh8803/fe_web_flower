@@ -1,10 +1,10 @@
-import Cookies from "js-cookie";
+import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 
 const PrivateRoute = () => {
-    const token = Cookies.get("access_token");
+    const user = useSelector(state => state.user.user);
 
-    if (!token) {
+    if (!user) {
         return <Navigate to="/" replace />;
     }
     return <Outlet />;

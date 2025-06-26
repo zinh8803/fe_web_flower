@@ -17,29 +17,17 @@ api.interceptors.response.use(
             !originalRequest.url.includes("/refresh-token")
         ) {
             originalRequest._retry = true;
-            const refreshToken = localStorage.getItem("refresh_token");
-            if (refreshToken) {
-                try {
-                    const res = await api.post("/refresh-token", { refresh_token: refreshToken });
-                    const newToken = res.data.data.token;
-                    const user = JSON.parse(localStorage.getItem("user"));
-                    store.dispatch(setUser({
-                        user,
-                        token: newToken,
-                        refresh_token: refreshToken,
-                    }));
-                    localStorage.setItem("token", newToken);
-                    if (res.data.data.refresh_token) {
-                        localStorage.setItem("refresh_token", res.data.data.refresh_token);
-                    }
-                    originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-                    return api(originalRequest);
-                } catch (refreshError) {
-                    console.error("Refresh token failed:", refreshError);
-                    store.dispatch(logout());
-                    localStorage.removeItem("refresh_token");
-                }
-            } else {
+            try {
+                const res = await api.post("/refresh-token", {}, { withCredentials: true });
+                const newToken = res.data.data.access_token;
+                const user = JSON.parse(localStorage.getItem("user"));
+                store.dispatch(setUser({
+                    user,
+                }));
+                originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+                return api(originalRequest);
+            } catch (refreshError) {
+                console.error("Refresh token failed:", refreshError);
                 store.dispatch(logout());
             }
         }
