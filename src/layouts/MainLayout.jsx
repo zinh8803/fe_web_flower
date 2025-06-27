@@ -1,26 +1,3 @@
-// import React from "react";
-// import { Container, Box, Typography } from "@mui/material";
-// import Header from "../component/home/Header";
-// import HomeBanner from "../component/home/HomeBanner";
-// import Footer from "../component/home/Footer";
-// import NotificationSnackbar from "../component/NotificationSnackbar";
-
-// const MainLayout = ({ children }) => {
-//     return (
-//         <Box minHeight="100vh" bgcolor="#f9fafb">
-//             <Header />
-//             <HomeBanner />
-//             <Container>{children}</Container>
-
-
-
-//             <Footer />
-//              <NotificationSnackbar /> {/* Thêm dòng này */}
-//         </Box>
-//     );
-// };
-
-// export default MainLayout;
 import React from "react";
 import { Container, Box } from "@mui/material";
 import Header from "../component/home/Header";

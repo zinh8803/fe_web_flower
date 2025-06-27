@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, IconButton,
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, Checkbox, TextField
+    Dialog, DialogTitle, DialogContent, DialogActions, Button, Checkbox, TextField,
+    Pagination
 } from "@mui/material";
 import { getImportReceiptById, getImportReceipts, importReceipts, updateImportReceipt } from "../../services/importReceiptsService";
 import { getFlower } from "../../services/flowerService";
@@ -10,7 +11,6 @@ import { Edit, KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 const AdminReceipt = () => {
     const [receipts, setReceipts] = useState([]);
     const [openRow, setOpenRow] = useState(null);
-
     const [openDialog, setOpenDialog] = useState(false);
     const [flowers, setFlowers] = useState([]);
     const [form, setForm] = useState({
@@ -18,16 +18,18 @@ const AdminReceipt = () => {
         note: "",
         details: []
     });
-    const [editReceipt, setEditReceipt] = useState(null); 
-
+    const [editReceipt, setEditReceipt] = useState(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     useEffect(() => {
-        fetchReceipts();
-    }, []);
+        fetchReceipts(page);
+    }, [page]);
 
-    const fetchReceipts = async () => {
+    const fetchReceipts = async (pageNum) => {
         try {
-            const res = await getImportReceipts();
+            const res = await getImportReceipts(pageNum);
             setReceipts(res.data.data || []);
+            setTotalPages(res.data.meta ? res.data.meta.last_page : 1);
         } catch {
             alert("Lỗi khi tải phiếu nhập");
         }
@@ -49,7 +51,9 @@ const AdminReceipt = () => {
             alert("Lỗi khi tải danh sách hoa");
         }
     };
-
+    const handlePageChange = (event, value) => {
+        setPage(value);
+    };
     const handleCloseDialog = () => setOpenDialog(false);
 
     // Xử lý chọn hoa
@@ -68,7 +72,7 @@ const AdminReceipt = () => {
                     {
                         flower_id: flower.id,
                         quantity: 1,
-                        import_price: flower.price || 0, 
+                        import_price: flower.price || 0,
                         status: "hoa tươi"
                     }
                 ]
@@ -91,7 +95,7 @@ const AdminReceipt = () => {
             if (editReceipt) {
                 await updateImportReceipt(editReceipt.id, form);
             } else {
-                await importReceipts(form); 
+                await importReceipts(form);
             }
             setOpenDialog(false);
             fetchReceipts();
@@ -103,7 +107,7 @@ const AdminReceipt = () => {
     // Xử lý mở form sửa
     const handleOpenEdit = async (receipt) => {
         try {
-            const res = await getImportReceiptById(receipt.id); 
+            const res = await getImportReceiptById(receipt.id);
             const data = res.data.data;
             setEditReceipt(data);
             setForm({
@@ -159,7 +163,7 @@ const AdminReceipt = () => {
                                             {openRow === receipt.id ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                                         </IconButton>
                                     </TableCell>
-                                    <TableCell>{receipt.id}</TableCell>
+                                    <TableCell>{receipt.import_code}</TableCell>
                                     <TableCell>{receipt.import_date}</TableCell>
                                     <TableCell>{receipt.note}</TableCell>
                                     <TableCell>
@@ -218,7 +222,14 @@ const AdminReceipt = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-
+            <Box display="flex" justifyContent="center" mt={3}>
+                <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
+            </Box>
             {/* Dialog thêm phiếu nhập */}
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
                 <DialogTitle>Thêm phiếu nhập</DialogTitle>
