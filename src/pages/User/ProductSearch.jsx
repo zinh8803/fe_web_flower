@@ -11,6 +11,7 @@ const ProductSearch = () => {
     const keyword = searchParams.get("q") || "";
 
     useEffect(() => {
+        document.title = `Tìm kiếm: ${keyword}`;
         if (!keyword) {
             setProducts([]);
             setLoading(false);

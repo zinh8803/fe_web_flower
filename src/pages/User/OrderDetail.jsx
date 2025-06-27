@@ -9,6 +9,7 @@ const OrderDetail = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = 'Chi tiết đơn hàng';
         const token = localStorage.getItem("token");
         getOrderUserdetail(token, id)
             .then(res => setOrder(res.data.data))

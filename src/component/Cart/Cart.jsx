@@ -23,6 +23,7 @@ import { checkCodeValidity } from "../../services/discountService";
 
 
 const Cart = () => {
+    document.title = 'Giỏ hàng';
     const cartItems = useSelector(state => state.cart.items);
     const dispatch = useDispatch();
     const navigate = useNavigate();

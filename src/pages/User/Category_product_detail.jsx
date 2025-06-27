@@ -10,6 +10,7 @@ const CategoryProductDetail = () => {
     const [category, setCategory] = useState(null);
 
     useEffect(() => {
+        document.title = 'Danh mục sản phẩm';
         getCategoryId(id)
             .then(res => setCategory(res.data.data))
             .catch(() => setCategory(null));

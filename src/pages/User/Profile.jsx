@@ -13,6 +13,7 @@ const Profile = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        document.title = 'Trang cá nhân';
         fetchProfile();
     }, []);
 

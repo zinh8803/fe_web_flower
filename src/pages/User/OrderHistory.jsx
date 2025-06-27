@@ -10,6 +10,7 @@ const OrderHistory = () => {
     const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
+        document.title = 'Lịch sử đơn hàng';
         const token = localStorage.getItem("token");
         setLoading(true);
         getOrderHistory(token, page)

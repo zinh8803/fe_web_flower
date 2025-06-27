@@ -28,6 +28,7 @@ const Checkout = () => {
     const [discountId, setDiscountId] = useState(null);
 
     useEffect(() => {
+        document.title = 'Thanh toán đơn hàng';
         if (location.state) {
             setDiscountId(location.state.discountId || null);
             setDiscountAmount(location.state.discountAmount || 0);

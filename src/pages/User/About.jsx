@@ -2,6 +2,8 @@ import React from "react";
 import { Box, Container, Typography } from "@mui/material";
 
 const About = () => {
+    document.title = 'Trang giới thiệu';
+
     return (
         <Box sx={{
             display: 'flex',

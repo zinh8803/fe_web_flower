@@ -19,6 +19,7 @@ const ProductDetail = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        document.title = 'Chi tiết sản phẩm';
         setLoading(true);
         getProductById(id)
             .then(res => {
