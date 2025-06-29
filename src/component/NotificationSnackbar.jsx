@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Snackbar, Alert, Slide } from "@mui/material";
 import { hideNotification } from "../store/notificationSlice";
 
-// Hàm hiệu ứng trượt từ phải sang trái
 function SlideTransition(props) {
     return <Slide {...props} direction="left" />;
 }
@@ -22,8 +21,8 @@ const NotificationSnackbar = () => {
             open={open}
             autoHideDuration={3000}
             onClose={handleClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }} // Đổi sang góc phải
-            TransitionComponent={SlideTransition} // Thêm hiệu ứng trượt
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            TransitionComponent={SlideTransition}
         >
             <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
                 {message}

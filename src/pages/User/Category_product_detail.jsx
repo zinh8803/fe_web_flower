@@ -22,7 +22,7 @@ const CategoryProductDetail = () => {
 
     return (
         <div>
-            <h2>{category?.name || "Sản phẩm"}</h2>
+
             {products.length === 0 ? (
                 <p>Không có sản phẩm nào trong danh mục này.</p>
             ) : (

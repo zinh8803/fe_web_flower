@@ -18,8 +18,7 @@ const Profile = () => {
     }, []);
 
     const fetchProfile = () => {
-        const token = localStorage.getItem("token");
-        getProfile(token)
+        getProfile()
             .then(res => {
                 setProfile(res.data.data);
                 setForm(res.data.data);
@@ -37,7 +36,7 @@ const Profile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); // Bắt đầu loading khi bấm Lưu
+        setLoading(true);
         const token = localStorage.getItem("token");
         const formData = new FormData();
         formData.append("_method", "PUT");
@@ -49,18 +48,17 @@ const Profile = () => {
         }
         try {
             await getUpdateProfile(token, formData);
-            // Lấy lại profile mới nhất
             getProfile(token).then(res => {
                 setProfile(res.data.data);
                 setForm(res.data.data);
                 dispatch(setUser({ user: res.data.data, token }));
                 dispatch(showNotification({ message: "Cập nhật thông tin thành công!", severity: "success" }));
-                setLoading(false); // Kết thúc loading khi thành công
+                setLoading(false);
             });
         } catch (error) {
             console.error("Cập nhật thông tin thất bại:", error);
             alert("Cập nhật thất bại!");
-            setLoading(false); // Kết thúc loading khi lỗi
+            setLoading(false);
         }
     };
 

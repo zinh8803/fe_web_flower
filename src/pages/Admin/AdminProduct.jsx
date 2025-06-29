@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox
+    IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox,
+    Pagination, CircularProgress // Thêm CircularProgress
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../../services/productService";
@@ -16,21 +17,32 @@ const AdminProduct = () => {
     const [editProduct, setEditProduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState("");
+
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loadingPage, setLoadingPage] = useState(false); // Thêm state cho loading trang
+    const rowsPerPage = 10;
+
     // Load dữ liệu
     useEffect(() => {
-        fetchProducts();
+        fetchProducts(page);
         fetchCategories();
         fetchFlowers();
-    }, []);
+    }, [page]);
 
-    const fetchProducts = async () => {
+    const fetchProducts = async (pageNumber) => {
         try {
-            const res = await getProducts();
+            setLoadingPage(true); // Bắt đầu loading
+            const res = await getProducts(pageNumber);
             setProducts(res.data.data || []);
+            setTotalPages(res.data.meta.last_page || 1);
         } catch {
             alert("Lỗi khi tải danh sách sản phẩm");
+        } finally {
+            setLoadingPage(false); // Kết thúc loading
         }
     };
+
     const fetchCategories = async () => {
         try {
             const res = await getCategory();
@@ -47,7 +59,22 @@ const AdminProduct = () => {
             alert("Lỗi khi tải danh sách hoa");
         }
     };
+    // Sửa hàm handlePageChange để chỉ cập nhật page sau khi data đã load xong
+    const handlePageChange = async (event, newPage) => {
+        if (loadingPage) return; // Ngăn chặn việc click liên tục khi đang loading
 
+        try {
+            setLoadingPage(true);
+            const res = await getProducts(newPage);
+            setProducts(res.data.data || []);
+            setTotalPages(res.data.meta.last_page || 1);
+            setPage(newPage); // Chỉ cập nhật page sau khi data đã load xong
+        } catch {
+            alert("Lỗi khi tải danh sách sản phẩm");
+        } finally {
+            setLoadingPage(false);
+        }
+    };
     // Mở popup thêm/sửa
     const handleOpenDialog = (product = null) => {
         if (product) {
@@ -60,8 +87,8 @@ const AdminProduct = () => {
                 category_id: "",
                 status: 1,
                 sizes: [
-                    { size: "Nhỏ", price: "", receipt_details: [] },
-                    { size: "Lớn", price: "", receipt_details: [] }
+                    { size: "Nhỏ", receipt_details: [] },
+                    { size: "Lớn", receipt_details: [] }
                 ]
             });
             setImagePreview("");
@@ -93,9 +120,9 @@ const AdminProduct = () => {
                     flower_id: flower.id,
                     flower_name: flower.name,
                     quantity: 1,
-                    import_price: flower.price || 0,
-                    import_date: new Date().toISOString().slice(0, 10),
-                    status: "hoa tươi"
+                    //import_price: flower.price || 0,
+                    // import_date: new Date().toISOString().slice(0, 10),
+                    //status: "hoa tươi"
                 }
             ];
         }
@@ -181,13 +208,16 @@ const AdminProduct = () => {
                 color="success"
                 sx={{ mb: 2 }}
                 onClick={() => handleOpenDialog()}
+                disabled={loadingPage} // Disable khi đang loading
             >
                 Thêm sản phẩm
             </Button>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell>STT</TableCell>
                             <TableCell>Ảnh</TableCell>
                             <TableCell>Tên sản phẩm</TableCell>
                             <TableCell>Giá</TableCell>
@@ -197,38 +227,62 @@ const AdminProduct = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {products.map((p) => (
-                            <TableRow key={p.id}>
-                                <TableCell>
-                                    <img src={p.image_url} alt={p.name} style={{ width: 60, height: 60, objectFit: "cover" }} />
-                                </TableCell>
-                                <TableCell>{p.name}</TableCell>
-                                <TableCell>
-                                    {p.sizes && p.sizes.length > 0
-                                        ? p.sizes.map(s => `${s.size}: ${Number(s.price).toLocaleString()}đ`).join(", ")
-                                        : "Liên hệ"}
-                                </TableCell>
-                                <TableCell>{getCategoryName(p.category_id)}</TableCell>
-                                <TableCell>
-                                    {p.status ? (
-                                        <span style={{ color: "green" }}>Hiện</span>
-                                    ) : (
-                                        <span style={{ color: "gray" }}>Ẩn</span>
-                                    )}
-                                </TableCell>
-                                <TableCell>
-                                    <IconButton color="primary" onClick={() => handleOpenDialog(p)}>
-                                        <Edit />
-                                    </IconButton>
-                                    <IconButton color="error" onClick={() => handleDelete(p.id)}>
-                                        <Delete />
-                                    </IconButton>
+                        {loadingPage ? (
+                            // Hiển thị skeleton loading hoặc hàng rỗng khi đang loading
+                            <TableRow>
+                                <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
+                                    <CircularProgress />
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : (
+                            // Hiển thị dữ liệu khi đã load xong
+                            products.map((p, index) => (
+                                <TableRow key={p.id}>
+                                    <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                                    <TableCell>
+                                        <img src={p.image_url} alt={p.name} style={{ width: 60, height: 60, objectFit: "cover" }} />
+                                    </TableCell>
+                                    <TableCell>{p.name}</TableCell>
+                                    <TableCell>
+                                        {p.sizes && p.sizes.length > 0
+                                            ? p.sizes.map(s => `${s.size}: ${Number(s.price).toLocaleString()}đ`).join(", ")
+                                            : "Liên hệ"}
+                                    </TableCell>
+                                    <TableCell>{getCategoryName(p.category_id)}</TableCell>
+                                    <TableCell>
+                                        {p.status ? (
+                                            <span style={{ color: "green" }}>Hiện</span>
+                                        ) : (
+                                            <span style={{ color: "gray" }}>Ẩn</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <IconButton color="primary" onClick={() => handleOpenDialog(p)} disabled={loadingPage}>
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton color="error" onClick={() => handleDelete(p.id)} disabled={loadingPage}>
+                                            <Delete />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <Box display="flex" justifyContent="center" mt={3} alignItems="center">
+                <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                    disabled={loadingPage} // Disable khi đang loading
+                />
+                {loadingPage && (
+                    <CircularProgress size={24} sx={{ ml: 2 }} />
+                )}
+            </Box>
 
             {/* Popup thêm/sửa sản phẩm */}
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
@@ -312,12 +366,15 @@ const AdminProduct = () => {
                                         onChange={e => handleSizeChange(idx, "size", e.target.value)}
                                         sx={{ mb: 1, mr: 2 }}
                                     />
-                                    <TextField
-                                        label="Giá"
-                                        value={size.price}
-                                        onChange={e => handleSizeChange(idx, "price", e.target.value)}
-                                        sx={{ mb: 1 }}
-                                    />
+                                    {editProduct.id && (
+                                        <TextField
+                                            label="Giá"
+                                            disabled
+                                            value={size.price}
+                                            onChange={e => handleSizeChange(idx, "price", e.target.value)}
+                                            sx={{ mb: 1 }}
+                                        />
+                                    )}
                                     <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
                                     <Table size="small">
                                         <TableHead>
@@ -325,9 +382,9 @@ const AdminProduct = () => {
                                                 <TableCell />
                                                 <TableCell>Tên hoa</TableCell>
                                                 <TableCell>Số lượng</TableCell>
-                                                <TableCell>Giá nhập</TableCell>
+                                                {/* <TableCell>Giá nhập</TableCell>
                                                 <TableCell>Ngày nhập</TableCell>
-                                                <TableCell>Trạng thái</TableCell>
+                                                <TableCell>Trạng thái</TableCell> */}
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -352,7 +409,7 @@ const AdminProduct = () => {
                                                                 inputProps={{ min: 1 }}
                                                             />
                                                         </TableCell>
-                                                        <TableCell>
+                                                        {/* <TableCell>
                                                             <TextField
                                                                 type="number"
                                                                 size="small"
@@ -378,7 +435,7 @@ const AdminProduct = () => {
                                                                 onChange={e => handleDetailChange(idx, flower.id, "status", e.target.value)}
                                                                 disabled={!detail}
                                                             />
-                                                        </TableCell>
+                                                        </TableCell> */}
                                                     </TableRow>
                                                 );
                                             })}
