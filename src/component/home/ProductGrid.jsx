@@ -202,20 +202,18 @@ const ProductGrid = ({ title }) => {
                                         color="error"
                                         fontWeight={700}
                                     >
-                                        {item.sizes && item.sizes.length > 0
-                                            ? Number(item.sizes[0].price).toLocaleString() + "đ"
-                                            : "Liên hệ"}
+
+                                        {Number(item.sizes[0].price).toLocaleString() + "đ"}
                                     </Typography>
                                 </CardContent>
 
-                                {/* Button container với chiều cao cố định */}
                                 <CardActions
                                     sx={{
                                         justifyContent: "center",
                                         height: {
-                                            xs: 50,    // Mobile
-                                            sm: 60,    // Tablet
-                                            md: 60     // Desktop
+                                            xs: 50,
+                                            sm: 60,
+                                            md: 60
                                         },
                                         p: 0,
                                         flexShrink: 0

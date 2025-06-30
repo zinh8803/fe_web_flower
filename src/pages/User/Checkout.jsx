@@ -88,9 +88,9 @@ const Checkout = () => {
             } catch (err) {
                 if (err.response && err.response.data) {
                     console.log("Lỗi đặt hàng:", err.response.data);
-                    alert(JSON.stringify(err.response.data.errors));
+                    //alert(JSON.stringify(err.response.data.message));
                 }
-                dispatch(showNotification({ message: "Lỗi khi đặt hàng!", severity: "error" }));
+                dispatch(showNotification({ message: err.response.data.message, severity: "error" }));
             } finally {
                 setLoading(false);
             }
