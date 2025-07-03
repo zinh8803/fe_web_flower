@@ -1,8 +1,9 @@
 import React from "react";
 import { Box, Typography, Button, TextField } from "@mui/material";
 
-const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart }) => {
+const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart, disableAddToCart }) => {
     const total = Number(product.price) * quantity;
+    const maxQuantity = product.max_quantity || 99;
 
     return (
         <Box sx={{ flex: 2 }}>
@@ -23,7 +24,7 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart }) => {
                     type="number"
                     value={quantity}
                     onChange={onQuantityChange}
-                    inputProps={{ min: 1 }}
+                    inputProps={{ min: 1, max: maxQuantity }}
                     size="small"
                     sx={{ width: 100 }}
                 />
@@ -34,7 +35,6 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart }) => {
                     {total.toLocaleString()}đ
                 </span>
             </Typography>
-            {/* Hiển thị chi tiết hoa nếu có */}
             {product.receipt_details && product.receipt_details.length > 0 && (
                 <Box mb={2}>
                     <Typography fontWeight={600}>Chi tiết hoa:</Typography>
@@ -52,8 +52,9 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart }) => {
                 color="error"
                 sx={{ borderRadius: 5 }}
                 onClick={onAddToCart}
+                disabled={disableAddToCart}
             >
-                Thêm vào giỏ hàng
+                {disableAddToCart ? "Hết hàng" : "Thêm vào giỏ hàng"}
             </Button>
         </Box>
     );

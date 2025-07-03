@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Box,
     Button,
@@ -7,220 +7,257 @@ import {
     CardContent,
     CardMedia,
     Typography,
+    Tooltip,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
+import { fetchStockAvailability } from "../../store/stockSlice";
 
 const ProductSearchGrid = ({ products, title }) => {
     const dispatch = useDispatch();
 
+    const stockState = useSelector(state => state.stock);
+    const cartItems = useSelector(state => state.cart.items);
+
+    useEffect(() => {
+        dispatch(fetchStockAvailability(cartItems.map(item => ({
+            product_size_id: item.product_size_id,
+            quantity: item.quantity
+        }))));
+    }, [dispatch]);
+
+    const isProductAvailable = (productId, sizeId) => {
+        const product = stockState.availableProducts.find(p => p.id === productId);
+        if (!product) return true; // Nếu chưa có thông tin, mặc định là có sẵn
+
+        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        return sizeInfo && sizeInfo.in_stock && sizeInfo.max_quantity > 0;
+    };
+
+    const getLimitingFlowerInfo = (productId, sizeId) => {
+        const product = stockState.availableProducts.find(p => p.id === productId);
+        if (!product) return null;
+
+        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        return sizeInfo ? sizeInfo.limiting_flower : null;
+    };
+
+    const handleAddToCart = (item) => {
+        dispatch(addToCart(item));
+        dispatch(showNotification({
+            message: "Thêm vào giỏ hàng thành công!",
+            severity: "success"
+        }));
+
+        const updatedCartItems = [...cartItems, item].map(cartItem => ({
+            product_size_id: cartItem.product_size_id,
+            quantity: cartItem.quantity
+        }));
+
+        dispatch(fetchStockAvailability(updatedCartItems));
+    };
+
     return (
-        <Box
-            sx={{
-                p: 4,
-                borderRadius: 2,
-                bgcolor: "#fff",
-                width: "100%",
-                maxWidth: "1400px",
-                mx: "auto",
-            }}
-        >
+        <Box sx={{ p: 4, borderRadius: 2, bgcolor: "#fff", width: "100%", maxWidth: "1400px", mx: "auto" }}>
             <Typography variant="h6" fontWeight={700} color="green" mb={4}>
                 {title}
             </Typography>
 
-            <Box
-                sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "flex-start",
-                    gap: {
-                        xs: "10px",   // Mobile: gap nhỏ
-                        sm: "15px",   // Tablet: gap trung bình  
-                        md: "20px"    // Desktop: gap lớn
-                    }
-                }}
-            >
-                {products.map((item) => (
-                    <Box
-                        key={item.id}
-                        sx={{
-                            // Kích thước container cố định
-                            width: {
-                                xs: "calc(50% - 5px)",    // Mobile: 2 sản phẩm/dòng
-                                sm: "calc(33.33% - 10px)", // Tablet: 3 sản phẩm/dòng
-                                md: "calc(25% - 15px)",    // Desktop: 4 sản phẩm/dòng
-                                lg: "calc(20% - 16px)"     // Desktop large: 5 sản phẩm/dòng
-                            },
-                            // Chiều cao cố định cho toàn bộ container
-                            height: {
-                                xs: 320,   // Mobile 
-                                sm: 350,   // Tablet
-                                md: 380    // Desktop
-                            }
-                        }}
-                    >
-                        <Link
-                            to={`/detail/${item.id}`}
-                            style={{
-                                textDecoration: "none",
-                                color: "inherit",
-                                display: "block",
-                                height: "100%"  // Link chiếm toàn bộ chiều cao container
+            <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start", gap: { xs: "10px", sm: "15px", md: "20px" } }}>
+                {products.map((item) => {
+                    const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
+                    const isAvailable = isProductAvailable(item.id, smallSize?.id);
+                    const limitingFlower = getLimitingFlowerInfo(item.id, smallSize?.id);
+
+                    return (
+                        <Box
+                            key={item.id}
+                            sx={{
+                                width: {
+                                    xs: "calc(50% - 5px)",
+                                    sm: "calc(33.33% - 10px)",
+                                    md: "calc(25% - 15px)",
+                                    lg: "calc(20% - 16px)"
+                                },
+                                height: {
+                                    xs: 320,
+                                    sm: 350,
+                                    md: 380
+                                }
                             }}
                         >
-                            <Card
-                                sx={{
-                                    width: "100%",        // Chiếm toàn bộ chiều rộng container
-                                    height: "100%",       // Chiếm toàn bộ chiều cao container
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    borderRadius: 2,
-                                    boxShadow: "0 0 10px rgba(0,0,0,0.05)",
-                                    transition: "transform 0.2s",
-                                    "&:hover": {
-                                        transform: "translateY(-4px)",
-                                    },
+                            <Link
+                                to={`/detail/${item.id}`}
+                                style={{
+                                    textDecoration: "none",
+                                    color: "inherit",
+                                    display: "block",
+                                    height: "100%"
                                 }}
                             >
-                                {/* Image container với chiều cao cố định */}
-                                <Box
+                                <Card
                                     sx={{
-                                        height: {
-                                            xs: 160,   // Mobile
-                                            sm: 170,   // Tablet
-                                            md: 180    // Desktop
-                                        },
-                                        overflow: "hidden",  // Ẩn phần ảnh thừa
-                                        position: "relative",
-                                        flexShrink: 0,      // Không co lại
-                                    }}
-                                >
-                                    <CardMedia
-                                        component="img"
-                                        image={item.image_url}
-                                        alt={item.name}
-                                        sx={{
-                                            width: "100%",
-                                            height: "100%",
-                                            objectFit: "contain",  // Giữ tỉ lệ ảnh
-                                            p: 1
-                                        }}
-                                    />
-                                </Box>
-
-                                {/* Content với chiều cao cố định */}
-                                <CardContent
-                                    sx={{
-                                        textAlign: "center",
-                                        flex: "1 0 auto",  // Flex grow, không shrink
+                                        width: "100%",
+                                        height: "100%",
                                         display: "flex",
                                         flexDirection: "column",
-                                        justifyContent: "center",
-                                        height: {
-                                            xs: 90,    // Mobile
-                                            sm: 100,   // Tablet
-                                            md: 120    // Desktop
+                                        borderRadius: 2,
+                                        boxShadow: "0 0 10px rgba(0,0,0,0.05)",
+                                        transition: "transform 0.2s",
+                                        "&:hover": {
+                                            transform: "translateY(-4px)",
                                         },
-                                        p: {
-                                            xs: 1,     // Mobile
-                                            md: 2      // Desktop
-                                        },
-                                        overflow: "hidden"  // Ẩn nội dung thừa
                                     }}
                                 >
-                                    <Typography
-                                        variant="body2"
-                                        fontWeight={600}
+                                    <Box
                                         sx={{
-                                            mb: 1,
-                                            // Text overflow ellipsis sau 2 dòng
+                                            height: {
+                                                xs: 160,
+                                                sm: 170,
+                                                md: 180
+                                            },
                                             overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            display: "-webkit-box",
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: "vertical",
-                                            lineHeight: 1.2,
-                                            minHeight: {
-                                                xs: 36,    // 2 dòng chiều cao cố định
-                                                sm: 38,
-                                                md: 40
-                                            }
+                                            position: "relative",
+                                            flexShrink: 0,
                                         }}
                                     >
-                                        {item.name}
-                                    </Typography>
-                                    <Typography
-                                        color="error"
-                                        fontWeight={700}
-                                    >
-                                        {item.sizes && item.sizes.length > 0
-                                            ? Number(item.sizes[0].price).toLocaleString() + "đ"
-                                            : "Liên hệ"}
-                                    </Typography>
-                                </CardContent>
+                                        <CardMedia
+                                            component="img"
+                                            image={item.image_url}
+                                            alt={item.name}
+                                            sx={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "contain",
+                                                p: 1
+                                            }}
+                                        />
+                                    </Box>
 
-                                {/* Button container với chiều cao cố định */}
-                                <CardActions
-                                    sx={{
-                                        justifyContent: "center",
-                                        height: {
-                                            xs: 50,    // Mobile
-                                            sm: 60,    // Tablet
-                                            md: 60     // Desktop
-                                        },
-                                        p: 0,
-                                        flexShrink: 0   // Không co lại
-                                    }}
-                                >
-                                    <Button
-                                        size="small"
-                                        variant="contained"
-                                        color="error"
-                                        endIcon={<ShoppingCartIcon />}
+                                    <CardContent
                                         sx={{
-                                            borderRadius: 5,
-                                            px: {
-                                                xs: 1,     // Mobile
-                                                md: 2      // Desktop
-                                            }
-                                        }}
-                                        onClick={e => {
-                                            e.preventDefault();
-                                            if (!item.sizes || item.sizes.length === 0) {
-                                                dispatch(showNotification({
-                                                    message: "Sản phẩm chưa có size!",
-                                                    severity: "warning"
-                                                }));
-                                                return;
-                                            }
-                                            const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
-                                            dispatch(addToCart({
-                                                id: item.id + '-' + smallSize.id,
-                                                name: item.name,
-                                                price: Number(smallSize.price),
-                                                image: item.image_url,
-                                                product_id: item.id,
-                                                quantity: 1,
-                                                size: smallSize.size,
-                                                product_size_id: smallSize.id,
-                                            }));
-                                            dispatch(showNotification({
-                                                message: "Thêm vào giỏ hàng thành công!",
-                                                severity: "success"
-                                            }));
+                                            textAlign: "center",
+                                            flex: "1 0 auto",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "center",
+                                            height: {
+                                                xs: 90,
+                                                sm: 100,
+                                                md: 120
+                                            },
+                                            p: {
+                                                xs: 1,
+                                                md: 2
+                                            },
+                                            overflow: "hidden"
                                         }}
                                     >
-                                        Mua Ngay
-                                    </Button>
-                                </CardActions>
-                            </Card>
-                        </Link>
-                    </Box>
-                ))}
+                                        <Typography
+                                            variant="body2"
+                                            fontWeight={600}
+                                            sx={{
+                                                mb: 1,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                display: "-webkit-box",
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: "vertical",
+                                                lineHeight: 1.2,
+                                                minHeight: {
+                                                    xs: 36,
+                                                    sm: 38,
+                                                    md: 40
+                                                }
+                                            }}
+                                        >
+                                            {item.name}
+                                        </Typography>
+                                        <Typography color="error" fontWeight={700}>
+                                            {item.sizes && item.sizes.length > 0
+                                                ? Number(smallSize.price).toLocaleString() + "đ"
+                                                : "Liên hệ"}
+                                        </Typography>
+
+                                        {/* Hiển thị thông tin tồn kho */}
+                                        {!isAvailable && (
+                                            <Typography
+                                                variant="caption"
+                                                color="error"
+                                                sx={{ mt: 0.5 }}
+                                            >
+                                                Hết hàng
+                                            </Typography>
+                                        )}
+                                    </CardContent>
+
+                                    <CardActions
+                                        sx={{
+                                            justifyContent: "center",
+                                            height: {
+                                                xs: 50,
+                                                sm: 60,
+                                                md: 60
+                                            },
+                                            p: 0,
+                                            flexShrink: 0
+                                        }}
+                                    >
+                                        <Tooltip
+                                            title={!isAvailable && limitingFlower
+                                                ? `Thiếu hoa ${limitingFlower.name}`
+                                                : ""}
+                                        >
+                                            <span>
+                                                <Button
+                                                    size="small"
+                                                    variant="contained"
+                                                    color="error"
+                                                    endIcon={<ShoppingCartIcon />}
+                                                    disabled={!isAvailable || !item.sizes || item.sizes.length === 0}
+                                                    sx={{
+                                                        borderRadius: 5,
+                                                        px: {
+                                                            xs: 1,
+                                                            md: 2
+                                                        }
+                                                    }}
+                                                    onClick={e => {
+                                                        e.preventDefault();
+                                                        if (!item.sizes || item.sizes.length === 0) {
+                                                            dispatch(showNotification({
+                                                                message: "Sản phẩm chưa có size!",
+                                                                severity: "warning"
+                                                            }));
+                                                            return;
+                                                        }
+
+                                                        const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
+                                                        handleAddToCart({
+                                                            id: item.id + '-' + smallSize.id,
+                                                            name: item.name,
+                                                            price: Number(smallSize.price),
+                                                            image: item.image_url,
+                                                            product_id: item.id,
+                                                            quantity: 1,
+                                                            size: smallSize.size,
+                                                            product_size_id: smallSize.id,
+                                                        });
+                                                    }}
+                                                >
+                                                    Mua Ngay
+                                                </Button>
+                                            </span>
+                                        </Tooltip>
+                                    </CardActions>
+                                </Card>
+                            </Link>
+                        </Box>
+                    );
+                })}
             </Box>
         </Box>
     );

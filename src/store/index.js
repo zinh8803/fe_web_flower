@@ -1,13 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./userSlice";
 import cartReducer from "./cartSlice";
-import notificationReducer from "./notificationSlice"; // Thêm dòng này
+import notificationReducer from "./notificationSlice";
+import stockReducer from "./stockSlice";
 
 const store = configureStore({
     reducer: {
         user: userReducer,
         cart: cartReducer,
-        notification: notificationReducer, // Thêm dòng này
+        notification: notificationReducer,
+        stock: stockReducer, // Thêm reducer stock
     },
 });
 
