@@ -23,9 +23,21 @@ const cartSlice = createSlice({
             localStorage.setItem("cart", JSON.stringify(state.items));
         },
         updateQuantity: (state, action) => {
-            const { id, quantity } = action.payload;
-            const item = state.items.find(i => i.id === id);
-            if (item) item.quantity = quantity;
+            const { id, quantity, newSizeId, newSize, newPrice } = action.payload;
+            const itemIndex = state.items.findIndex(item => item.id === id);
+
+            if (itemIndex !== -1) {
+                state.items[itemIndex].quantity = quantity;
+
+                if (newSizeId && newSize && newPrice !== undefined) {
+                    state.items[itemIndex].product_size_id = newSizeId;
+                    state.items[itemIndex].size = newSize;
+                    state.items[itemIndex].price = newPrice;
+
+                    const newId = state.items[itemIndex].product_id + '-' + newSizeId;
+                    state.items[itemIndex].id = newId;
+                }
+            }
             localStorage.setItem("cart", JSON.stringify(state.items));
         },
         clearCart: (state) => {

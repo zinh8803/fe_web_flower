@@ -10,6 +10,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { logoutAndClearCart } from "../../store/userSlice";
 import { useDispatch } from "react-redux";
+import { Warehouse } from "lucide-react";
 
 const AdminMenu = () => {
     const location = useLocation();
@@ -136,12 +137,12 @@ const AdminMenu = () => {
                         <ListItem
                             button
                             component={Link}
-                            to="/admin/products/add"
+                            to="/admin/products/stock"
                             sx={{ pl: 4 }}
-                            selected={location.pathname === "/admin/products/add"}
+                            selected={location.pathname === "/admin/products/stock"}
                         >
-                            <ListItemIcon sx={{ color: "green" }}><Add /></ListItemIcon>
-                            <ListItemText primary="Thêm sản phẩm" sx={{
+                            <ListItemIcon sx={{ color: "green" }}><Warehouse /></ListItemIcon>
+                            <ListItemText primary="Xem tồn kho" sx={{
                                 "&.Mui-selected, &.Mui-selected:hover": {
                                     bgcolor: "#e0f2f1",
                                     color: "black"
@@ -149,38 +150,7 @@ const AdminMenu = () => {
                                 color: "black"
                             }} />
                         </ListItem>
-                        <ListItem
-                            button
-                            component={Link}
-                            to="/admin/products/edit"
-                            sx={{ pl: 4 }}
-                            selected={location.pathname === "/admin/products/edit"}
-                        >
-                            <ListItemIcon sx={{ color: "green" }}><Edit /></ListItemIcon>
-                            <ListItemText primary="Sửa sản phẩm" sx={{
-                                "&.Mui-selected, &.Mui-selected:hover": {
-                                    bgcolor: "#e0f2f1",
-                                    color: "black"
-                                },
-                                color: "black"
-                            }} />
-                        </ListItem>
-                        <ListItem
-                            button
-                            component={Link}
-                            to="/admin/products/delete"
-                            sx={{ pl: 4 }}
-                            selected={location.pathname === "/admin/products/delete"}
-                        >
-                            <ListItemIcon sx={{ color: "green" }}><Delete /></ListItemIcon>
-                            <ListItemText primary="Xóa sản phẩm" sx={{
-                                "&.Mui-selected, &.Mui-selected:hover": {
-                                    bgcolor: "#e0f2f1",
-                                    color: "black"
-                                },
-                                color: "black"
-                            }} />
-                        </ListItem>
+
                     </List>
                 </Collapse>
 

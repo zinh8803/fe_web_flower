@@ -141,7 +141,7 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                 <Box display="flex" gap={1} alignItems="center">
                     <TextField
                         fullWidth
-                        label="Nhập email"
+                        label="Nhập Email"
                         variant="outlined"
                         margin="normal"
                         name="email"

@@ -26,6 +26,7 @@ import AdminFlower from "../pages/Admin/AdminFlower";
 import AdminDashboard from "../pages/Admin/AdminDashbroad";
 import VnpayReturn from "../pages/User/VnaypayReturn";
 import AdminRoute from "./AdminRoute";
+import StockProductAdmin from "../pages/Admin/StockProductAdmin";
 
 const AppRoutes = () => (
     <Router>
@@ -53,6 +54,7 @@ const AppRoutes = () => (
             <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Admin />} />
+                    <Route path="products/stock" element={<StockProductAdmin />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="products" element={<AdminProduct />} />
                     <Route path="categories" element={<AdminCategory />} />

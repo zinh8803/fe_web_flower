@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox,
-    Pagination, CircularProgress // Thêm CircularProgress
+    Pagination, CircularProgress 
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../../services/productService";
@@ -20,22 +20,25 @@ const AdminProduct = () => {
 
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [loadingPage, setLoadingPage] = useState(false); // Thêm state cho loading trang
+    const [loadingPage, setLoadingPage] = useState(false); 
+    const [search, setSearch] = useState("");
+    const [searchValue, setSearchValue] = useState("");
     const rowsPerPage = 10;
 
     // Load dữ liệu
     useEffect(() => {
-        fetchProducts(page);
+        fetchProducts(page, search);
         fetchCategories();
         fetchFlowers();
-    }, [page]);
+        // eslint-disable-next-line
+    }, [page, search]);
 
-    const fetchProducts = async (pageNumber) => {
+    const fetchProducts = async (pageNumber, searchTerm = search) => {
         try {
             setLoadingPage(true); // Bắt đầu loading
-            const res = await getProducts(pageNumber);
+            const res = await getProducts(pageNumber, searchTerm);
             setProducts(res.data.data || []);
-            setTotalPages(res.data.meta.last_page || 1);
+            setTotalPages(res.data.meta?.last_page || 1);
         } catch {
             alert("Lỗi khi tải danh sách sản phẩm");
         } finally {
@@ -198,11 +201,28 @@ const AdminProduct = () => {
         return cat ? cat.name : "";
     };
 
+    // Thêm hàm handleSearch
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setPage(1);
+        setSearch(searchValue);
+    };
+
     return (
         <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý sản phẩm
             </Typography>
+            {/* Thêm form tìm kiếm */}
+            <Box mb={2} component="form" onSubmit={handleSearch} display="flex" gap={2}>
+                <TextField
+                    label="Tìm kiếm sản phẩm"
+                    value={searchValue}
+                    onChange={e => setSearchValue(e.target.value)}
+                    size="small"
+                />
+                <Button type="submit" variant="contained">Tìm kiếm</Button>
+            </Box>
             <Button
                 variant="contained"
                 color="success"

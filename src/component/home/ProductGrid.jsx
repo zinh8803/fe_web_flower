@@ -306,6 +306,7 @@ const ProductGrid = ({ title }) => {
                                                             quantity: 1,
                                                             size: smallSize.size,
                                                             product_size_id: smallSize.id,
+                                                            sizes: item.sizes
                                                         });
                                                     }}
                                                 >

@@ -1,6 +1,10 @@
 import api from "./api";
 
-export const getProducts = (page = 1) => api.get(`/products?page=${page}`);
+export const getProducts = (page = 1, search = "") =>
+    api.get("/products", {
+        params: { page, name: search },
+        withCredentials: true
+    });
 
 export const getProductById = (id) => api.get(`/products/${id}`);
 export const getProductsByCategory = (category) => api.get(`/products/category/${category}`);
@@ -16,4 +20,10 @@ export const checkAllStock = () => api.get("/products/stock");
 
 export const checkStockById = (id) => api.get(`/products/${id}/stock`);
 
-export const checkStockAvailable = (data) => api.post(`/products/check-available-products`, data);
+export const checkStockAvailable = (data) => api.get(`/products/check-available-products`, { params: data });
+
+export const getStockWarning = (page = 1) =>
+    api.get(`/products/stock-warning?page=${page}`);
+export const searchStockWarning = (q = "", page = 1) =>
+    api.get(`/products/stock-warning/search?q=${encodeURIComponent(q)}&page=${page}`);
+

@@ -110,6 +110,7 @@ const ProductDetail = () => {
             image: product.image_url,
             quantity: quantity,
             size: selectedSize.size,
+            sizes: product.sizes, // Thêm mảng sizes để có thể đổi size
         }));
         dispatch(showNotification({ message: "Thêm vào giỏ hàng thành công!", severity: "success" }));
 

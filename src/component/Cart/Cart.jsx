@@ -13,7 +13,9 @@ import {
     Button,
     Paper,
     Divider,
-    Link
+    Link,
+    Select,
+    MenuItem,
 } from "@mui/material";
 import { Minus, Plus, Trash2, MapPin } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
@@ -42,7 +44,22 @@ const Cart = () => {
     const handleRemoveItem = (id) => {
         dispatch(removeFromCart(id));
     };
+    const handleChangeSize = (cartItemId, newSizeId) => {
+        const item = cartItems.find(i => i.id === cartItemId);
+        if (!item || !item.sizes) return;
 
+        const newSize = item.sizes.find(s => s.id === parseInt(newSizeId));
+        if (!newSize) return;
+
+        // Cập nhật thông tin size mới
+        dispatch(updateQuantity({
+            id: cartItemId,
+            quantity: item.quantity,
+            newSizeId: newSize.id,
+            newSize: newSize.size,
+            newPrice: Number(newSize.price)
+        }));
+    };
     const handleApplyDiscount = async () => {
         try {
             const res = await checkCodeValidity(discountCode);
@@ -140,7 +157,7 @@ const Cart = () => {
                                     </TableHead>
                                     <TableBody>
                                         {cartItems.map((item) => (
-                                            <TableRow key={item.id} sx={{ '&:hover': { bgcolor: '#f8f9fa' } }}>
+                                            <TableRow key={item.id} sx={{ '&:hover': { bgcolor: '#f9f9fa' } }}>
                                                 <TableCell sx={{ py: 3 }}>
                                                     <Box display="flex" alignItems="center" gap={3}>
                                                         <Box
@@ -166,11 +183,38 @@ const Cart = () => {
                                                                 {item.name}
                                                             </Typography>
                                                             {/* Hiển thị kích thước nếu có */}
-                                                            {item.size && (
+                                                            {/* {item.size && (
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Kích thước: <b>{item.size}</b>
                                                                 </Typography>
-                                                            )}
+                                                            )} */}
+                                                            {/* Dropdown chọn size */}
+                                                            {item.sizes && item.sizes.length > 0 ? (
+                                                                <Box mt={1}>
+                                                                    <Typography variant="body2" color="text.secondary" mb={0.5}>
+                                                                        Kích thước:
+                                                                    </Typography>
+                                                                    <Select
+                                                                        size="small"
+                                                                        value={item.product_size_id || ''}
+                                                                        onChange={(e) => handleChangeSize(item.id, e.target.value)}
+                                                                        sx={{
+                                                                            minWidth: 120,
+                                                                            fontSize: '0.875rem'
+                                                                        }}
+                                                                    >
+                                                                        {item.sizes.map(size => (
+                                                                            <MenuItem key={size.id} value={size.id}>
+                                                                                {size.size} - {Number(size.price).toLocaleString()}đ
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                </Box>
+                                                            ) : item.size ? (
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    Kích thước: <b>{item.size}</b>
+                                                                </Typography>
+                                                            ) : null}
                                                         </Box>
                                                     </Box>
                                                 </TableCell>

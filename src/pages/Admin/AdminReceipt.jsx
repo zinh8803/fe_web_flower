@@ -21,13 +21,15 @@ const AdminReceipt = () => {
     const [editReceipt, setEditReceipt] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
     useEffect(() => {
         fetchReceipts(page);
     }, [page]);
 
-    const fetchReceipts = async (pageNum) => {
+    const fetchReceipts = async (pageNum = 1) => {
         try {
-            const res = await getImportReceipts(pageNum);
+            const res = await getImportReceipts(pageNum, fromDate, toDate);
             setReceipts(res.data.data || []);
             setTotalPages(res.data.meta ? res.data.meta.last_page : 1);
         } catch {
@@ -137,6 +139,27 @@ const AdminReceipt = () => {
             <Button variant="contained" color="success" sx={{ mb: 2 }} onClick={() => handleOpenDialog()}>
                 Thêm phiếu nhập
             </Button>
+            <Box display="flex" gap={2} mb={2}>
+                <TextField
+                    label="Từ ngày"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={fromDate}
+                    onChange={e => setFromDate(e.target.value)}
+                />
+                <TextField
+                    label="Đến ngày"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={toDate}
+                    onChange={e => setToDate(e.target.value)}
+                />
+                <Button variant="contained" onClick={() => fetchReceipts(1)}>
+                    Lọc
+                </Button>
+            </Box>
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
