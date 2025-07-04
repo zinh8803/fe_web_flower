@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox,
-    Pagination, CircularProgress 
+    Pagination, CircularProgress
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../../services/productService";
@@ -20,7 +20,7 @@ const AdminProduct = () => {
 
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [loadingPage, setLoadingPage] = useState(false); 
+    const [loadingPage, setLoadingPage] = useState(false);
     const [search, setSearch] = useState("");
     const [searchValue, setSearchValue] = useState("");
     const rowsPerPage = 10;
@@ -35,14 +35,14 @@ const AdminProduct = () => {
 
     const fetchProducts = async (pageNumber, searchTerm = search) => {
         try {
-            setLoadingPage(true); // Bắt đầu loading
+            setLoadingPage(true);
             const res = await getProducts(pageNumber, searchTerm);
             setProducts(res.data.data || []);
             setTotalPages(res.data.meta?.last_page || 1);
         } catch {
             alert("Lỗi khi tải danh sách sản phẩm");
         } finally {
-            setLoadingPage(false); // Kết thúc loading
+            setLoadingPage(false);
         }
     };
 
@@ -62,16 +62,15 @@ const AdminProduct = () => {
             alert("Lỗi khi tải danh sách hoa");
         }
     };
-    // Sửa hàm handlePageChange để chỉ cập nhật page sau khi data đã load xong
     const handlePageChange = async (event, newPage) => {
-        if (loadingPage) return; // Ngăn chặn việc click liên tục khi đang loading
+        if (loadingPage) return;
 
         try {
             setLoadingPage(true);
             const res = await getProducts(newPage);
             setProducts(res.data.data || []);
             setTotalPages(res.data.meta.last_page || 1);
-            setPage(newPage); // Chỉ cập nhật page sau khi data đã load xong
+            setPage(newPage);
         } catch {
             alert("Lỗi khi tải danh sách sản phẩm");
         } finally {
@@ -82,7 +81,7 @@ const AdminProduct = () => {
     const handleOpenDialog = (product = null) => {
         if (product) {
             setEditProduct(JSON.parse(JSON.stringify(product)));
-            setImagePreview(""); // reset preview khi sửa
+            setImagePreview("");
         } else {
             setEditProduct({
                 name: "",
@@ -110,27 +109,27 @@ const AdminProduct = () => {
         setEditProduct({ ...editProduct, sizes });
     };
     // Chọn hoa cho từng size
-    const handleCheckFlower = (sizeIdx, flower) => {
-        const sizes = [...editProduct.sizes];
-        const details = sizes[sizeIdx].receipt_details || [];
-        const exists = details.find(d => d.flower_id === flower.id);
-        if (exists) {
-            sizes[sizeIdx].receipt_details = details.filter(d => d.flower_id !== flower.id);
-        } else {
-            sizes[sizeIdx].receipt_details = [
-                ...details,
-                {
-                    flower_id: flower.id,
-                    flower_name: flower.name,
-                    quantity: 1,
-                    //import_price: flower.price || 0,
-                    // import_date: new Date().toISOString().slice(0, 10),
-                    //status: "hoa tươi"
-                }
-            ];
-        }
-        setEditProduct({ ...editProduct, sizes });
-    };
+    // const handleCheckFlower = (sizeIdx, flower) => {
+    //     const sizes = [...editProduct.sizes];
+    //     const details = sizes[sizeIdx].receipt_details || [];
+    //     const exists = details.find(d => d.flower_id === flower.id);
+    //     if (exists) {
+    //         sizes[sizeIdx].receipt_details = details.filter(d => d.flower_id !== flower.id);
+    //     } else {
+    //         sizes[sizeIdx].receipt_details = [
+    //             ...details,
+    //             {
+    //                 flower_id: flower.id,
+    //                 flower_name: flower.name,
+    //                 quantity: 1,
+    //                 //import_price: flower.price || 0,
+    //                 // import_date: new Date().toISOString().slice(0, 10),
+    //                 //status: "hoa tươi"
+    //             }
+    //         ];
+    //     }
+    //     setEditProduct({ ...editProduct, sizes });
+    // };
     // Sửa chi tiết hoa
     const handleDetailChange = (sizeIdx, flower_id, field, value) => {
         const sizes = [...editProduct.sizes];
@@ -206,6 +205,53 @@ const AdminProduct = () => {
         e.preventDefault();
         setPage(1);
         setSearch(searchValue);
+    };
+
+    // State tìm kiếm hoa cho từng size
+    const [flowerSearches, setFlowerSearches] = useState(["", ""]);
+
+    // Khi mở dialog thì reset tìm kiếm hoa
+    useEffect(() => {
+        if (openDialog && editProduct && editProduct.sizes) {
+            setFlowerSearches(Array(editProduct.sizes.length).fill(""));
+        }
+    }, [openDialog, editProduct]);
+
+    // Hàm chọn hoa đồng bộ giữa các size
+    const handleCheckFlowerSync = (sizeIdx, flower) => {
+        const sizes = [...editProduct.sizes];
+        // Kiểm tra trạng thái hiện tại của hoa ở size này
+        const details = sizes[sizeIdx].receipt_details || [];
+        const exists = details.find(d => d.flower_id === flower.id);
+        if (exists) {
+            // Bỏ chọn ở tất cả các size
+            sizes.forEach((sz, i) => {
+                sizes[i].receipt_details = (sz.receipt_details || []).filter(d => d.flower_id !== flower.id);
+            });
+        } else {
+            // Thêm vào tất cả các size (nếu chưa có)
+            sizes.forEach((sz, i) => {
+                const szDetails = sz.receipt_details || [];
+                if (!szDetails.find(d => d.flower_id === flower.id)) {
+                    sizes[i].receipt_details = [
+                        ...szDetails,
+                        {
+                            flower_id: flower.id,
+                            flower_name: flower.name,
+                            quantity: 1
+                        }
+                    ];
+                }
+            });
+        }
+        setEditProduct({ ...editProduct, sizes });
+    };
+
+    // Tìm kiếm hoa cho từng size
+    const handleFlowerSearchChange = (idx, value) => {
+        const arr = [...flowerSearches];
+        arr[idx] = value;
+        setFlowerSearches(arr);
     };
 
     return (
@@ -378,91 +424,73 @@ const AdminProduct = () => {
                                 </Button>
                             </Box>
                             {/* Danh sách size */}
-                            {editProduct.sizes && editProduct.sizes.map((size, idx) => (
-                                <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
-                                    <TextField
-                                        label="Tên size"
-                                        value={size.size}
-                                        onChange={e => handleSizeChange(idx, "size", e.target.value)}
-                                        sx={{ mb: 1, mr: 2 }}
-                                    />
-                                    {editProduct.id && (
+                            {editProduct.sizes && editProduct.sizes.map((size, idx) => {
+                                const flowerSearch = flowerSearches[idx] || "";
+                                const filteredFlowers = flowers.filter(f => f.name.toLowerCase().includes(flowerSearch.toLowerCase()));
+                                return (
+                                    <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
                                         <TextField
-                                            label="Giá"
+                                            label="Tên size"
                                             disabled
-                                            value={size.price}
-                                            onChange={e => handleSizeChange(idx, "price", e.target.value)}
-                                            sx={{ mb: 1 }}
+                                            value={size.size}
+                                            onChange={e => handleSizeChange(idx, "size", e.target.value)}
+                                            sx={{ mb: 1, mr: 2 }}
                                         />
-                                    )}
-                                    <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
-                                    <Table size="small">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell />
-                                                <TableCell>Tên hoa</TableCell>
-                                                <TableCell>Số lượng</TableCell>
-                                                {/* <TableCell>Giá nhập</TableCell>
-                                                <TableCell>Ngày nhập</TableCell>
-                                                <TableCell>Trạng thái</TableCell> */}
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {flowers.map(flower => {
-                                                const detail = (size.receipt_details || []).find(d => d.flower_id === flower.id);
-                                                return (
-                                                    <TableRow key={flower.id}>
-                                                        <TableCell>
-                                                            <Checkbox
-                                                                checked={!!detail}
-                                                                onChange={() => handleCheckFlower(idx, flower)}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>{flower.name}</TableCell>
-                                                        <TableCell>
-                                                            <TextField
-                                                                type="number"
-                                                                size="small"
-                                                                value={detail ? detail.quantity : ""}
-                                                                onChange={e => handleDetailChange(idx, flower.id, "quantity", e.target.value)}
-                                                                disabled={!detail}
-                                                                inputProps={{ min: 1 }}
-                                                            />
-                                                        </TableCell>
-                                                        {/* <TableCell>
-                                                            <TextField
-                                                                type="number"
-                                                                size="small"
-                                                                value={detail ? detail.import_price : ""}
-                                                                onChange={e => handleDetailChange(idx, flower.id, "import_price", e.target.value)}
-                                                                disabled={!detail}
-                                                                inputProps={{ min: 0 }}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <TextField
-                                                                type="date"
-                                                                size="small"
-                                                                value={detail ? detail.import_date : ""}
-                                                                onChange={e => handleDetailChange(idx, flower.id, "import_date", e.target.value)}
-                                                                disabled={!detail}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <TextField
-                                                                size="small"
-                                                                value={detail ? detail.status : ""}
-                                                                onChange={e => handleDetailChange(idx, flower.id, "status", e.target.value)}
-                                                                disabled={!detail}
-                                                            />
-                                                        </TableCell> */}
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                </Box>
-                            ))}
+                                        {editProduct.id && (
+                                            <TextField
+                                                label="Giá"
+                                                disabled
+                                                value={size.price}
+                                                onChange={e => handleSizeChange(idx, "price", e.target.value)}
+                                                sx={{ mb: 1 }}
+                                            />
+                                        )}
+                                        <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
+                                        <TextField
+                                            size="small"
+                                            placeholder="Tìm kiếm hoa..."
+                                            value={flowerSearch}
+                                            onChange={e => handleFlowerSearchChange(idx, e.target.value)}
+                                            sx={{ mb: 1, width: 300 }}
+                                        />
+                                        <Table size="small">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell />
+                                                    <TableCell>Tên hoa</TableCell>
+                                                    <TableCell>Số lượng</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {filteredFlowers.map(flower => {
+                                                    const detail = (size.receipt_details || []).find(d => d.flower_id === flower.id);
+                                                    return (
+                                                        <TableRow key={flower.id}>
+                                                            <TableCell>
+                                                                <Checkbox
+                                                                    checked={!!detail}
+                                                                    onChange={() => handleCheckFlowerSync(idx, flower)}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>{flower.name}</TableCell>
+                                                            <TableCell>
+                                                                <TextField
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={detail ? detail.quantity : ""}
+                                                                    onChange={e => handleDetailChange(idx, flower.id, "quantity", e.target.value)}
+                                                                    disabled={!detail}
+                                                                    inputProps={{ min: 1 }}
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+                                );
+                            })}
                         </Box>
                     )}
                 </DialogContent>

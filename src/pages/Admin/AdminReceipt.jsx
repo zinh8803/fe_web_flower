@@ -10,6 +10,8 @@ import { Edit, KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 
 const AdminReceipt = () => {
     const [receipts, setReceipts] = useState([]);
+    // State tìm kiếm hoa cho popup
+    const [flowerSearch, setFlowerSearch] = useState("");
     const [openRow, setOpenRow] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [flowers, setFlowers] = useState([]);
@@ -48,6 +50,7 @@ const AdminReceipt = () => {
                 details: []
             });
             setEditReceipt(null);
+            setFlowerSearch(""); // reset tìm kiếm khi mở dialog
             setOpenDialog(true);
         } catch {
             alert("Lỗi khi tải danh sách hoa");
@@ -276,6 +279,13 @@ const AdminReceipt = () => {
                         margin="normal"
                     />
                     <Typography variant="subtitle1" mt={2} mb={1}>Chọn hoa nhập kho</Typography>
+                    <TextField
+                        size="small"
+                        placeholder="Tìm kiếm hoa..."
+                        value={flowerSearch}
+                        onChange={e => setFlowerSearch(e.target.value)}
+                        sx={{ mb: 1, width: 300 }}
+                    />
                     <Table size="small">
                         <TableHead>
                             <TableRow>
@@ -283,11 +293,10 @@ const AdminReceipt = () => {
                                 <TableCell>Tên hoa</TableCell>
                                 <TableCell>Số lượng</TableCell>
                                 <TableCell>Giá nhập</TableCell>
-                                <TableCell>Trạng thái</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {flowers.map(flower => {
+                            {flowers.filter(f => f.name.toLowerCase().includes(flowerSearch.toLowerCase())).map(flower => {
                                 const detail = form.details.find(d => d.flower_id === flower.id);
                                 return (
                                     <TableRow key={flower.id}>
@@ -316,14 +325,6 @@ const AdminReceipt = () => {
                                                 onChange={e => handleDetailChange(flower.id, "import_price", e.target.value)}
                                                 disabled={!detail}
                                                 inputProps={{ min: 0 }}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <TextField
-                                                size="small"
-                                                value={detail ? detail.status : ""}
-                                                onChange={e => handleDetailChange(flower.id, "status", e.target.value)}
-                                                disabled={!detail}
                                             />
                                         </TableCell>
                                     </TableRow>

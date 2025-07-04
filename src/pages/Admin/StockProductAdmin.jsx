@@ -81,7 +81,7 @@ const StockProductAdmin = () => {
                                 <TableCell>Hình ảnh</TableCell>
                                 <TableCell>Sản phẩm</TableCell>
                                 <TableCell>Kích thước & Tồn kho</TableCell>
-                                <TableCell>Hoa giới hạn</TableCell>
+                                <TableCell>Hoa gần hết</TableCell>
                                 <TableCell>Cảnh báo</TableCell>
                             </TableRow>
                         </TableHead>
