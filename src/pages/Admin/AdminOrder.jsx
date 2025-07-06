@@ -64,10 +64,10 @@ const AdminOrder = () => {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Khách hàng</TableCell>
-                            <TableCell>Email</TableCell>
+                            {/* <TableCell>Email</TableCell> */}
                             <TableCell>Điện thoại</TableCell>
-                            <TableCell>Địa chỉ</TableCell>
-                            <TableCell>Ghi chú</TableCell>
+                            {/* <TableCell>Địa chỉ</TableCell>
+                            <TableCell>Ghi chú</TableCell> */}
                             <TableCell>Ngày mua</TableCell>
                             <TableCell>Giảm giá</TableCell>
                             <TableCell>Tổng tiền</TableCell>
@@ -80,22 +80,22 @@ const AdminOrder = () => {
                             <TableRow key={order.id}>
                                 <TableCell>{order.order_code}</TableCell>
                                 <TableCell>{order.name}</TableCell>
-                                <TableCell>{order.email}</TableCell>
+                                {/* <TableCell>{order.email}</TableCell> */}
                                 <TableCell>{order.phone}</TableCell>
-                                <TableCell>{order.address}</TableCell>
-                                <TableCell>{order.note || "-"}</TableCell>
+                                {/* <TableCell>{order.address}</TableCell>
+                                <TableCell>{order.note || "-"}</TableCell> */}
                                 <TableCell>{order.buy_at}</TableCell>
                                 <TableCell>
                                     {order.discount ? (
                                         <Chip
-                                            label={`${order.discount.name} (${order.discount.type === "percent" ? `${order.discount.value}%` : `${parseInt(order.discount.value).toLocaleString()}đ`}) -${parseInt(order.discount.amount_applied).toLocaleString()}đ`}
+                                            label={`${order.discount.name} (${order.discount.type === "percent" ? `${order.discount.value}%` : `${parseInt(order.discount.value).toLocaleString()}đ`}) `}
                                             color="success"
                                             size="small"
                                         />
                                     ) : "-"}
                                 </TableCell>
                                 <TableCell>
-                                    {order.total_price}
+                                    {Number(order.total_price).toLocaleString()}đ
                                 </TableCell>
                                 <TableCell>
                                     <Chip label={order.status} color="info" size="small" />
@@ -203,8 +203,9 @@ const AdminOrder = () => {
                     >
                         <MenuItem value="đang xử lý">Đang xử lý</MenuItem>
                         <MenuItem value="đã xác nhận">Đã xác nhận</MenuItem>
-                        <MenuItem value="Đã giao hàng">Đã giao hàng</MenuItem>
-                        <MenuItem value="đã huỷ">Đã huỷ</MenuItem>
+                        <MenuItem value="Đang giao hàng">Đang giao hàng</MenuItem>
+                        <MenuItem value="hoàn thành">Hoàn thành</MenuItem>
+                        <MenuItem value="đã hủy">Đã hủy</MenuItem>
                     </Select>
                 </DialogContent>
                 <DialogActions>

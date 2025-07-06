@@ -27,9 +27,14 @@ const AdminProduct = () => {
 
     // Load dữ liệu
     useEffect(() => {
-        fetchProducts(page, search);
-        fetchCategories();
-        fetchFlowers();
+        const loadInitialData = async () => {
+            await Promise.all([
+                fetchCategories(),
+                fetchFlowers()
+            ]);
+            fetchProducts(page, search);
+        };
+        loadInitialData();
         // eslint-disable-next-line
     }, [page, search]);
 
@@ -89,8 +94,8 @@ const AdminProduct = () => {
                 category_id: "",
                 status: 1,
                 sizes: [
-                    { size: "Nhỏ", receipt_details: [] },
-                    { size: "Lớn", receipt_details: [] }
+                    { size: "Nhỏ", price: "", receipt_details: [] }, // Thêm price
+                    { size: "Lớn", price: "", receipt_details: [] }  // Thêm price
                 ]
             });
             setImagePreview("");
@@ -158,6 +163,7 @@ const AdminProduct = () => {
 
             editProduct.sizes.forEach((size, i) => {
                 formData.append(`sizes[${i}][size]`, size.size);
+                formData.append(`sizes[${i}][price]`, size.price); // Thêm dòng này
                 size.receipt_details.forEach((r, j) => {
                     formData.append(`sizes[${i}][recipes][${j}][flower_id]`, r.flower_id);
                     formData.append(`sizes[${i}][recipes][${j}][quantity]`, r.quantity);
@@ -429,22 +435,26 @@ const AdminProduct = () => {
                                 const filteredFlowers = flowers.filter(f => f.name.toLowerCase().includes(flowerSearch.toLowerCase()));
                                 return (
                                     <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
-                                        <TextField
-                                            label="Tên size"
-                                            disabled
-                                            value={size.size}
-                                            onChange={e => handleSizeChange(idx, "size", e.target.value)}
-                                            sx={{ mb: 1, mr: 2 }}
-                                        />
-                                        {editProduct.id && (
+                                        <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                                            <TextField
+                                                label="Tên size"
+                                                disabled
+                                                value={size.size}
+                                                onChange={e => handleSizeChange(idx, "size", e.target.value)}
+                                                sx={{ flex: 1 }}
+                                            />
                                             <TextField
                                                 label="Giá"
-                                                disabled
+                                                type="number"
                                                 value={size.price}
                                                 onChange={e => handleSizeChange(idx, "price", e.target.value)}
-                                                sx={{ mb: 1 }}
+                                                sx={{ flex: 1 }}
+                                                InputProps={{
+                                                    endAdornment: <span>đ</span>
+                                                }}
+                                                inputProps={{ min: 0, step: 1000 }}
                                             />
-                                        )}
+                                        </Box>
                                         <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
                                         <TextField
                                             size="small"
