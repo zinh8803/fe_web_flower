@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     Box,
     Grid,
@@ -16,34 +16,175 @@ import {
     Link,
     Select,
     MenuItem,
+    Tooltip,
+    Chip,
 } from "@mui/material";
 import { Minus, Plus, Trash2, MapPin } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity } from "../../store/cartSlice";
 import { useNavigate } from "react-router-dom";
 import { checkCodeValidity } from "../../services/discountService";
-
+import { fetchStockAvailability } from "../../store/stockSlice";
+import { showNotification } from "../../store/notificationSlice";
 
 const Cart = () => {
     document.title = 'Giỏ hàng';
     const cartItems = useSelector(state => state.cart.items);
+    const stockState = useSelector(state => state.stock);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
     const [discountId, setDiscountId] = useState(null);
+    const [loadingItemId, setLoadingItemId] = useState(null);
 
-    const handleQuantityChange = (id, delta) => {
+    const [totalMaxQuantities, setTotalMaxQuantities] = useState({});
+
+    const [currentQuantities, setCurrentQuantities] = useState({});
+    const [needsStockUpdate, setNeedsStockUpdate] = useState(false);
+
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            dispatch(fetchStockAvailability(cartItems.map(item => ({
+                product_size_id: item.product_size_id,
+                quantity: 0
+            })))).then(() => {
+                const maxQuantities = {};
+                cartItems.forEach(item => {
+                    const product = stockState.availableProducts.find(p => p.id === item.product_id);
+                    if (product) {
+                        const sizeInfo = product.sizes.find(s => s.size_id === item.product_size_id);
+                        if (sizeInfo) {
+                            maxQuantities[`${item.product_id}-${item.product_size_id}`] = sizeInfo.max_quantity;
+                        }
+                    }
+                });
+                setTotalMaxQuantities(maxQuantities);
+            });
+        }
+    }, [dispatch, cartItems]);
+
+    const isProductAvailable = (productId, sizeId) => {
+        const product = stockState.availableProducts.find(p => p.id === productId);
+        if (!product) return true;
+
+        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        return sizeInfo && sizeInfo.in_stock && sizeInfo.max_quantity > 0;
+    };
+
+    const getMaxQuantity = (productId, sizeId) => {
+        const totalMaxQty = totalMaxQuantities[`${productId}-${sizeId}`];
+        if (totalMaxQty) return totalMaxQty;
+
+        const product = stockState.availableProducts.find(p => p.id === productId);
+        if (!product) return 999;
+
+        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        if (!sizeInfo) return 999;
+
+        const currentQty = cartItems.find(
+            i => i.product_id === productId && i.product_size_id === sizeId
+        )?.quantity || 0;
+
+        return sizeInfo.max_quantity + currentQty;
+    };
+
+
+
+    useEffect(() => {
+        const quantities = {};
+        cartItems.forEach(item => {
+            quantities[item.id] = item.quantity;
+        });
+        setCurrentQuantities(quantities);
+    }, [cartItems]);
+
+    useEffect(() => {
+        if (needsStockUpdate && cartItems.length > 0) {
+            dispatch(fetchStockAvailability(cartItems.map(item => ({
+                product_size_id: item.product_size_id,
+                quantity: 0
+            })))).then(() => {
+                setNeedsStockUpdate(false);
+            });
+        }
+    }, [needsStockUpdate, dispatch, cartItems]);
+
+    const handleQuantityChange = useCallback((id, delta) => {
         const item = cartItems.find(i => i.id === id);
         if (!item) return;
-        const newQty = Math.max(1, item.quantity + delta);
+
+        const currentQty = currentQuantities[id] || item.quantity;
+        const newQty = Math.max(1, currentQty + delta);
+        const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
+
+        if (delta > 0 && newQty > maxQty) {
+            dispatch(showNotification({
+                message: `Không thể tăng số lượng. Tối đa: ${maxQty}`,
+                severity: "warning"
+            }));
+            return;
+        }
+
+        setCurrentQuantities(prev => ({
+            ...prev,
+            [id]: newQty
+        }));
+
+        setLoadingItemId(id);
+
         dispatch(updateQuantity({ id, quantity: newQty }));
-    };
+
+        setTimeout(() => {
+            setLoadingItemId(null);
+            setNeedsStockUpdate(true);
+        }, 300);
+    }, [currentQuantities, totalMaxQuantities, cartItems, stockState.availableProducts, dispatch]);
+
+    const handleQuantityInputChange = useCallback((id, event) => {
+        const item = cartItems.find(i => i.id === id);
+        if (!item) return;
+
+        let newQty = parseInt(event.target.value);
+
+        if (isNaN(newQty) || newQty < 1) {
+            setCurrentQuantities(prev => ({
+                ...prev,
+                [id]: item.quantity
+            }));
+            return;
+        }
+
+        const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
+
+        if (newQty > maxQty) {
+            newQty = maxQty;
+            dispatch(showNotification({
+                message: `Không thể vượt quá số lượng. Tối đa: ${maxQty}`,
+                severity: "warning"
+            }));
+        }
+
+        setCurrentQuantities(prev => ({
+            ...prev,
+            [id]: newQty
+        }));
+
+        setLoadingItemId(id);
+
+        dispatch(updateQuantity({ id, quantity: newQty }));
+
+        setTimeout(() => {
+            setLoadingItemId(null);
+            setNeedsStockUpdate(true);
+        }, 300);
+    }, [currentQuantities, totalMaxQuantities, cartItems, stockState.availableProducts, dispatch]);
 
     const handleRemoveItem = (id) => {
         dispatch(removeFromCart(id));
     };
+
     const handleChangeSize = (cartItemId, newSizeId) => {
         const item = cartItems.find(i => i.id === cartItemId);
         if (!item || !item.sizes) return;
@@ -51,7 +192,6 @@ const Cart = () => {
         const newSize = item.sizes.find(s => s.id === parseInt(newSizeId));
         if (!newSize) return;
 
-        // Cập nhật thông tin size mới
         dispatch(updateQuantity({
             id: cartItemId,
             quantity: item.quantity,
@@ -60,6 +200,7 @@ const Cart = () => {
             newPrice: Number(newSize.price)
         }));
     };
+
     const handleApplyDiscount = async () => {
         try {
             const res = await checkCodeValidity(discountCode);
@@ -73,14 +214,19 @@ const Cart = () => {
                     amount = parseFloat(discount.value);
                 }
                 setDiscountAmount(amount);
-                alert("Áp dụng mã giảm giá thành công!");
+                dispatch(showNotification({
+                    message: "Áp dụng mã giảm giá thành công!",
+                    severity: "success"
+                }));
             }
         } catch (err) {
-
             console.error("Error checking discount code:", err);
             setDiscountAmount(0);
             setDiscountId(null);
-            alert("Mã giảm giá không hợp lệ!");
+            dispatch(showNotification({
+                message: "Mã giảm giá không hợp lệ!",
+                severity: "error"
+            }));
         }
     };
 
@@ -90,6 +236,12 @@ const Cart = () => {
     );
 
     const total = Math.max(0, subtotal - discountAmount);
+
+    const hasInvalidItems = cartItems.some(item => {
+        const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
+        const isAvailable = isProductAvailable(item.product_id, item.product_size_id);
+        return !isAvailable || item.quantity > maxQty;
+    });
 
     return (
         <Box
@@ -156,132 +308,195 @@ const Cart = () => {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {cartItems.map((item) => (
-                                            <TableRow key={item.id} sx={{ '&:hover': { bgcolor: '#f9f9fa' } }}>
-                                                <TableCell sx={{ py: 3 }}>
-                                                    <Box display="flex" alignItems="center" gap={3}>
-                                                        <Box
-                                                            component="img"
-                                                            src={item.image}
-                                                            alt={item.name}
-                                                            sx={{
-                                                                width: 80,
-                                                                height: 80,
-                                                                objectFit: 'cover',
-                                                                borderRadius: 2,
-                                                                border: '1px solid #e0e0e0'
-                                                            }}
-                                                        />
-                                                        <Box>
-                                                            <Typography
-                                                                variant="body1"
+                                        {cartItems.map((item) => {
+                                            const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
+                                            const isAvailable = isProductAvailable(item.product_id, item.product_size_id);
+                                            const currentQty = currentQuantities[item.id] || item.quantity;
+                                            const isQuantityExceeded = currentQty > maxQty;
+                                            const canIncrease = currentQty < maxQty && isAvailable;
+                                            const isLoading = loadingItemId === item.id;
+
+                                            return (
+                                                <TableRow
+                                                    key={item.id}
+                                                    sx={{
+                                                        '&:hover': { bgcolor: '#f9f9fa' },
+                                                        opacity: !isAvailable ? 0.6 : 1
+                                                    }}
+                                                >
+                                                    <TableCell sx={{ py: 3 }}>
+                                                        <Box display="flex" alignItems="center" gap={3}>
+                                                            <Box
+                                                                component="img"
+                                                                src={item.image}
+                                                                alt={item.name}
                                                                 sx={{
-                                                                    maxWidth: 300,
-                                                                    fontWeight: 500
+                                                                    width: 80,
+                                                                    height: 80,
+                                                                    objectFit: 'cover',
+                                                                    borderRadius: 2,
+                                                                    border: '1px solid #e0e0e0'
                                                                 }}
-                                                            >
-                                                                {item.name}
-                                                            </Typography>
-                                                            {/* Hiển thị kích thước nếu có */}
-                                                            {/* {item.size && (
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    Kích thước: <b>{item.size}</b>
+                                                            />
+                                                            <Box>
+                                                                <Typography
+                                                                    variant="body1"
+                                                                    sx={{
+                                                                        maxWidth: 300,
+                                                                        fontWeight: 500
+                                                                    }}
+                                                                >
+                                                                    {item.name}
                                                                 </Typography>
-                                                            )} */}
-                                                            {/* Dropdown chọn size */}
-                                                            {item.sizes && item.sizes.length > 0 ? (
-                                                                <Box mt={1}>
-                                                                    <Typography variant="body2" color="text.secondary" mb={0.5}>
-                                                                        Kích thước:
+
+                                                                {/* Dropdown chọn size */}
+                                                                {item.sizes && item.sizes.length > 0 ? (
+                                                                    <Box mt={1}>
+                                                                        <Typography variant="body2" color="text.secondary" mb={0.5}>
+                                                                            Kích thước:
+                                                                        </Typography>
+                                                                        <Select
+                                                                            size="small"
+                                                                            value={item.product_size_id || ''}
+                                                                            onChange={(e) => handleChangeSize(item.id, e.target.value)}
+                                                                            sx={{
+                                                                                minWidth: 120,
+                                                                                fontSize: '0.875rem'
+                                                                            }}
+                                                                        >
+                                                                            {item.sizes.map(size => (
+                                                                                <MenuItem key={size.id} value={size.id}>
+                                                                                    {size.size} - {Number(size.price).toLocaleString()}đ
+                                                                                </MenuItem>
+                                                                            ))}
+                                                                        </Select>
+                                                                    </Box>
+                                                                ) : item.size ? (
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Kích thước: <b>{item.size}</b>
                                                                     </Typography>
-                                                                    <Select
+                                                                ) : null}
+
+                                                                {/* Hiển thị thông báo tồn kho */}
+                                                                {!isAvailable && (
+                                                                    <Chip
+                                                                        label="Hết hàng"
+                                                                        color="error"
                                                                         size="small"
-                                                                        value={item.product_size_id || ''}
-                                                                        onChange={(e) => handleChangeSize(item.id, e.target.value)}
-                                                                        sx={{
-                                                                            minWidth: 120,
-                                                                            fontSize: '0.875rem'
-                                                                        }}
-                                                                    >
-                                                                        {item.sizes.map(size => (
-                                                                            <MenuItem key={size.id} value={size.id}>
-                                                                                {size.size} - {Number(size.price).toLocaleString()}đ
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                </Box>
-                                                            ) : item.size ? (
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    Kích thước: <b>{item.size}</b>
-                                                                </Typography>
-                                                            ) : null}
+                                                                        sx={{ mt: 1 }}
+                                                                    />
+                                                                )}
+                                                                {isQuantityExceeded && (
+                                                                    <Chip
+                                                                        label={`Vượt quá số lượng (tối đa: ${maxQty})`}
+                                                                        color="warning"
+                                                                        size="small"
+                                                                        sx={{ mt: 1 }}
+                                                                    />
+                                                                )}
+                                                                {/* {limitingFlower && (
+                                                                    <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
+                                                                        Còn tối đa: {maxQty} (thiếu {limitingFlower.name})
+                                                                    </Typography>
+                                                                )} */}
+                                                            </Box>
                                                         </Box>
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="body1" fontWeight="500" color="primary">
-                                                        {item.price.toLocaleString()}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Box
-                                                        display="flex"
-                                                        alignItems="center"
-                                                        sx={{
-                                                            border: '1px solid #e0e0e0',
-                                                            borderRadius: 1,
-                                                            width: 'fit-content'
-                                                        }}
-                                                    >
-                                                        <IconButton
-                                                            onClick={() => handleQuantityChange(item.id, -1)}
-                                                            size="small"
-                                                            sx={{ p: 0.5 }}
-                                                        >
-                                                            <Minus size={16} />
-                                                        </IconButton>
-                                                        <Typography
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body1" fontWeight="500" color="primary">
+                                                            {item.price.toLocaleString()}đ
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Box
+                                                            display="flex"
+                                                            alignItems="center"
                                                             sx={{
-                                                                px: 2,
-                                                                py: 0.5,
-                                                                minWidth: 40,
-                                                                textAlign: 'center',
-                                                                fontWeight: 500
+                                                                border: '1px solid #e0e0e0',
+                                                                borderRadius: 1,
+                                                                width: 'fit-content'
                                                             }}
                                                         >
-                                                            {item.quantity}
+                                                            <IconButton
+                                                                onClick={() => handleQuantityChange(item.id, -1)}
+                                                                size="small"
+                                                                sx={{ p: 0.5 }}
+                                                                disabled={currentQty <= 1 || isLoading}
+                                                            >
+                                                                <Minus size={16} />
+                                                            </IconButton>
+
+                                                            {/*TextField */}
+                                                            <TextField
+                                                                value={currentQty}
+                                                                onChange={(e) => handleQuantityInputChange(item.id, e)}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === '' || isNaN(parseInt(e.target.value))) {
+                                                                        setCurrentQuantities(prev => ({
+                                                                            ...prev,
+                                                                            [item.id]: item.quantity
+                                                                        }));
+                                                                    }
+                                                                }}
+                                                                inputProps={{
+                                                                    min: 1,
+                                                                    max: maxQty,
+                                                                    style: {
+                                                                        textAlign: 'center',
+                                                                        width: '40px',
+                                                                        padding: '4px 0',
+                                                                        color: isQuantityExceeded ? '#d32f2f' : 'inherit'
+                                                                    }
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        '& fieldset': { border: 'none' }
+                                                                    },
+                                                                    '& .MuiOutlinedInput-input': {
+                                                                        p: 0
+                                                                    }
+                                                                }}
+                                                                disabled={isLoading}
+                                                            />
+
+                                                            <IconButton
+                                                                onClick={() => handleQuantityChange(item.id, 1)}
+                                                                size="small"
+                                                                sx={{ p: 0.5 }}
+                                                                disabled={!canIncrease || isLoading}
+                                                            >
+                                                                <Plus size={16} />
+                                                            </IconButton>
+                                                        </Box>
+
+                                                        {isQuantityExceeded && (
+                                                            <Typography variant="caption" color="error" display="block" mt={1}>
+                                                                Vượt quá số lượng tối đa ({maxQty})
+                                                            </Typography>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body1" fontWeight="600" color="error">
+                                                            {(item.price * currentQty).toLocaleString()}đ
                                                         </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <IconButton
-                                                            onClick={() => handleQuantityChange(item.id, 1)}
-                                                            size="small"
-                                                            sx={{ p: 0.5 }}
+                                                            onClick={() => handleRemoveItem(item.id)}
+                                                            color="error"
+                                                            sx={{
+                                                                '&:hover': {
+                                                                    bgcolor: 'error.light',
+                                                                    color: 'white'
+                                                                }
+                                                            }}
                                                         >
-                                                            <Plus size={16} />
+                                                            <Trash2 size={18} />
                                                         </IconButton>
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="body1" fontWeight="600" color="error">
-                                                        {((item.price) * item.quantity).toLocaleString()}đ
-                                                        {console.log(item.price * item.quantity)}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <IconButton
-                                                        onClick={() => handleRemoveItem(item.id)}
-                                                        color="error"
-                                                        sx={{
-                                                            '&:hover': {
-                                                                bgcolor: 'error.light',
-                                                                color: 'white'
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
                                     </TableBody>
                                 </Table>
                             </Box>
@@ -407,6 +622,7 @@ const Cart = () => {
                                         textTransform: 'none',
                                         fontSize: '1.1rem'
                                     }}
+                                    disabled={hasInvalidItems}
                                     onClick={() => navigate("/checkout", {
                                         state: {
                                             discountId,
@@ -415,7 +631,10 @@ const Cart = () => {
                                         }
                                     })}
                                 >
-                                    Tiến hành thanh toán
+                                    {hasInvalidItems
+                                        ? "Vui lòng kiểm tra lại giỏ hàng"
+                                        : "Tiến hành thanh toán"
+                                    }
                                 </Button>
                             </Box>
                         </Paper>

@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Grid, Card, CardContent, Avatar, LinearProgress,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, TextField, Button
 } from "@mui/material";
 import { Line, Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
 } from "chart.js";
-import { getOrders } from "../../services/orderService";
-import { getImportReceipts } from "../../services/importReceiptsService";
-import { ShoppingCart, DollarSign, Users, Package, TrendingUp, FileText } from "lucide-react";
+import { getDashboardStats } from "../../services/adminService";
+import { ShoppingCart, DollarSign, Users, Package, FileText } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
-const AdminDashbroad = () => {
+const AdminDashboard = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+
     const [loading, setLoading] = useState(true);
-    const [orders, setOrders] = useState([]);
-    const [receipts, setReceipts] = useState([]);
+    const [startDate, setStartDate] = useState(firstDay);
+    const [endDate, setEndDate] = useState(today);
     const [stats, setStats] = useState({
         totalOrders: 0,
         totalRevenue: 0,
         totalCustomers: 0,
-        totalProducts: 0,
         totalReceipts: 0,
         totalImport: 0,
         topCustomers: [],
@@ -35,139 +36,190 @@ const AdminDashbroad = () => {
     });
 
     useEffect(() => {
-        fetchData();
+        fetchData(firstDay, today);
+        // eslint-disable-next-line
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (start = "", end = "") => {
+        console.log(`Fetching data from ${start} to ${end}`); // Debug
         setLoading(true);
         try {
-            // Lấy tất cả đơn hàng (nhiều trang)
-            let allOrders = [];
-            let page = 1, lastPage = 1;
-            do {
-                const res = await getOrders(page);
-                allOrders = allOrders.concat(res.data.data || []);
-                lastPage = res.data.meta?.last_page || 1;
-                page++;
-            } while (page <= lastPage);
+            const res = await getDashboardStats(start, end);
+            console.log("API Response:", res.data); // Debug
+            console.log("API URL:", res.config?.url); // Debug URL
+            console.log("API Params:", res.config?.params); // Debug params
 
-            // Lấy tất cả phiếu nhập (nhiều trang)
-            let allReceipts = [];
-            page = 1; lastPage = 1;
-            do {
-                const res = await getImportReceipts(page);
-                allReceipts = allReceipts.concat(res.data.data || []);
-                lastPage = res.data.meta?.last_page || 1;
-                page++;
-            } while (page <= lastPage);
-
-            setOrders(allOrders);
-            setReceipts(allReceipts);
-
-            // Xử lý thống kê
-            processStats(allOrders, allReceipts);
+            if (res.data && res.data.success) {
+                setStats(res.data.stats);
+            }
         } catch (err) {
-            setOrders([]);
-            setReceipts([]);
+            console.error("Error fetching dashboard stats:", err);
+            setStats({
+                totalOrders: 0,
+                totalRevenue: 0,
+                totalCustomers: 0,
+                totalReceipts: 0,
+                totalImport: 0,
+                topCustomers: [],
+                topProducts: [],
+                recentOrders: [],
+                orderStatusStats: [],
+                revenueByDate: [],
+                orderCountByDate: [],
+                importByDate: [],
+                labels: []
+            });
         }
         setLoading(false);
     };
 
-    const processStats = (orders, receipts) => {
-        // Tổng đơn hàng, doanh thu, khách hàng
-        const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
-        const customers = {};
-        orders.forEach(o => {
-            const key = o.email || o.phone || o.name;
-            if (!customers[key]) customers[key] = { name: o.name, email: o.email, phone: o.phone, total: 0, spent: 0 };
-            customers[key].total += 1;
-            customers[key].spent += Number(o.total_price || 0);
+    // Thêm force refresh để tránh caching
+    const handleFilter = () => {
+        console.log("Manual filter:", startDate, "to", endDate);
+        setStats({
+            totalOrders: 0,
+            totalRevenue: 0,
+            totalCustomers: 0,
+            totalReceipts: 0,
+            totalImport: 0,
+            topCustomers: [],
+            topProducts: [],
+            recentOrders: [],
+            orderStatusStats: [],
+            revenueByDate: [],
+            orderCountByDate: [],
+            importByDate: [],
+            labels: []
         });
-        const totalCustomers = Object.keys(customers).length;
+        fetchData(startDate, endDate);
+    };
 
-        // Top khách hàng
-        const topCustomers = Object.values(customers)
-            .sort((a, b) => b.spent - a.spent)
-            .slice(0, 5);
+    const handleQuickFilter = (type) => {
+        let start, end;
+        const now = new Date();
 
-        // Thống kê trạng thái đơn hàng
-        const statusStats = {};
-        orders.forEach(o => {
-            statusStats[o.status] = (statusStats[o.status] || 0) + 1;
-        });
-        const orderStatusStats = Object.entries(statusStats).map(([status, count]) => ({
-            status, count
-        }));
+        switch (type) {
+            case 'today':
+                start = end = now.toISOString().split('T')[0];
+                break;
+            case 'week':
+                const weekStart = new Date(now);
+                weekStart.setDate(weekStart.getDate() - 6);
+                start = weekStart.toISOString().split('T')[0];
+                end = now.toISOString().split('T')[0];
+                break;
+            case 'month':
+                start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                end = now.toISOString().split('T')[0];
+                break;
+            case 'year':
+                start = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+                end = now.toISOString().split('T')[0];
+                break;
+            default:
+                return;
+        }
 
-        // Top sản phẩm bán chạy
-        const productStats = {};
-        orders.forEach(o => {
-            (o.order_details || []).forEach(d => {
-                const key = d.product?.id || d.product_id;
-                if (!productStats[key]) productStats[key] = {
-                    name: d.product?.name || "Sản phẩm",
-                    image: d.product?.image_url,
-                    sold: 0,
-                    revenue: 0
-                };
-                productStats[key].sold += d.quantity;
-                productStats[key].revenue += (Number(d.product_size?.price || d.price || 0) * d.quantity);
-            });
-        });
-        const topProducts = Object.values(productStats)
-            .sort((a, b) => b.sold - a.sold)
-            .slice(0, 5);
-
-        // Đơn hàng gần đây
-        const recentOrders = orders
-            .sort((a, b) => new Date(b.buy_at || b.created_at) - new Date(a.buy_at || a.created_at))
-            .slice(0, 10)
-            .map(o => ({
-                code: o.order_code,
-                name: o.name,
-                date: o.buy_at || o.created_at,
-                status: o.status,
-                total: Number(o.total_price || 0)
-            }));
-
-        // Tổng phiếu nhập, tổng tiền nhập
-        const totalReceipts = receipts.length;
-        const totalImport = receipts.reduce((sum, r) => sum + Number(r.total_price || 0), 0);
-
-        // Biểu đồ doanh thu và đơn hàng theo ngày
-        const allDates = [
-            ...orders.map(o => (o.buy_at || o.created_at)?.slice(0, 10)),
-            ...receipts.map(r => r.import_date?.slice(0, 10))
-        ].filter(Boolean);
-        const uniqueDates = Array.from(new Set(allDates)).sort();
-
-        const revenueByDate = uniqueDates.map(date =>
-            orders.filter(o => (o.buy_at || o.created_at)?.slice(0, 10) === date)
-                .reduce((sum, o) => sum + Number(o.total_price || 0), 0)
-        );
-        const orderCountByDate = uniqueDates.map(date =>
-            orders.filter(o => (o.buy_at || o.created_at)?.slice(0, 10) === date).length
-        );
-        const importByDate = uniqueDates.map(date =>
-            receipts.filter(r => r.import_date?.slice(0, 10) === date)
-                .reduce((sum, r) => sum + Number(r.total_price || 0), 0)
-        );
+        console.log(`Quick filter ${type}: ${start} to ${end}`); // Debug
+        setStartDate(start);
+        setEndDate(end);
 
         setStats({
-            totalOrders, totalRevenue, totalCustomers, totalReceipts, totalImport,
-            topCustomers, topProducts, recentOrders, orderStatusStats,
-            revenueByDate, orderCountByDate, importByDate, labels: uniqueDates
+            totalOrders: 0,
+            totalRevenue: 0,
+            totalCustomers: 0,
+            totalReceipts: 0,
+            totalImport: 0,
+            topCustomers: [],
+            topProducts: [],
+            recentOrders: [],
+            orderStatusStats: [],
+            revenueByDate: [],
+            orderCountByDate: [],
+            importByDate: [],
+            labels: []
         });
+
+        fetchData(start, end);
     };
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{
+            p: 3,
+            width: '100%',
+            maxWidth: 'none',  // Thay đổi từ '100%' thành 'none'
+            overflow: 'hidden'
+        }}>
             <Typography variant="h4" fontWeight="bold" mb={3}>
                 Dashboard Thống Kê
             </Typography>
+
+            {/* Bộ lọc ngày */}
+            <Card sx={{ mb: 3, width: '100%' }}>
+                <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                        Lọc theo thời gian
+                    </Typography>
+                    <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
+                        <TextField
+                            label="Từ ngày"
+                            type="date"
+                            size="small"
+                            value={startDate}
+                            onChange={e => setStartDate(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                            label="Đến ngày"
+                            type="date"
+                            size="small"
+                            value={endDate}
+                            onChange={e => setEndDate(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <Button
+                            variant="contained"
+                            onClick={handleFilter}
+                            disabled={loading}
+                        >
+                            Lọc
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => handleQuickFilter('today')}
+                            size="small"
+                        >
+                            Hôm nay
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => handleQuickFilter('week')}
+                            size="small"
+                        >
+                            7 ngày
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => handleQuickFilter('month')}
+                            size="small"
+                        >
+                            Tháng này
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => handleQuickFilter('year')}
+                            size="small"
+                        >
+                            Năm này
+                        </Button>
+                    </Box>
+                </CardContent>
+            </Card>
+
             {loading && <LinearProgress sx={{ mb: 2 }} />}
-            <Grid container spacing={3} mb={4}>
+
+            {/* Thống kê tổng quan */}
+            <Grid container spacing={4} mb={4}>
                 <Grid item xs={12} sm={6} md={2}>
                     <Card><CardContent>
                         <Box display="flex" alignItems="center" gap={2}>
@@ -225,84 +277,104 @@ const AdminDashbroad = () => {
                 </Grid>
             </Grid>
 
-            {/* Biểu đồ */}
-            <Grid container spacing={3} mb={4}>
-                <Grid item xs={12} md={8}>
-                    <Card>
-                        <CardContent>
+            {/* Biểu đồ doanh thu theo ngày */}
+            <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
                             <Typography variant="h6" gutterBottom>
                                 Doanh thu theo ngày
                             </Typography>
-                            <Line
-                                data={{
-                                    labels: stats.labels,
-                                    datasets: [
-                                        {
-                                            label: "Doanh thu",
-                                            data: stats.revenueByDate,
-                                            borderColor: "rgb(75, 192, 192)",
-                                            backgroundColor: "rgba(75, 192, 192, 0.2)",
-                                            tension: 0.1,
-                                            fill: true
-                                        }
-                                    ]
-                                }}
-                                options={{
-                                    responsive: true,
-                                    plugins: { legend: { display: false } },
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true,
-                                            ticks: {
-                                                callback: value => value.toLocaleString() + "đ"
+                            <Box sx={{
+                                height: 400,
+                                width: '100%',
+                                minWidth: '100%',
+                                position: 'relative'
+                            }}>
+                                <Line
+                                    data={{
+                                        labels: stats.labels,
+                                        datasets: [
+                                            {
+                                                label: "Doanh thu",
+                                                data: stats.revenueByDate,
+                                                borderColor: "rgb(75, 192, 192)",
+                                                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                                                tension: 0.1,
+                                                fill: true
+                                            }
+                                        ]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { display: false } },
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                ticks: {
+                                                    callback: value => value.toLocaleString() + "đ"
+                                                }
                                             }
                                         }
-                                    }
-                                }}
-                            />
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                Số đơn hàng & nhập kho theo ngày
-                            </Typography>
-                            <Bar
-                                data={{
-                                    labels: stats.labels,
-                                    datasets: [
-                                        {
-                                            label: "Đơn hàng",
-                                            data: stats.orderCountByDate,
-                                            backgroundColor: "rgba(54, 162, 235, 0.6)"
-                                        },
-                                        {
-                                            label: "Tiền nhập kho",
-                                            data: stats.importByDate,
-                                            backgroundColor: "rgba(255, 206, 86, 0.6)"
-                                        }
-                                    ]
-                                }}
-                                options={{
-                                    responsive: true,
-                                    plugins: { legend: { position: "bottom" } },
-                                    scales: {
-                                        y: { beginAtZero: true }
-                                    }
-                                }}
-                            />
+                                    }}
+                                />
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>
             </Grid>
 
-            {/* Top khách hàng và sản phẩm */}
-            <Grid container spacing={3} mb={4}>
-                <Grid item xs={12} md={6}>
-                    <Card>
-                        <CardContent>
+            {/* Biểu đồ số đơn hàng & nhập kho theo ngày */}
+            <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
+                            <Typography variant="h6" gutterBottom>
+                                Số đơn hàng & nhập kho theo ngày
+                            </Typography>
+                            <Box sx={{
+                                height: 400,
+                                width: '100%',
+                                minWidth: '100%',
+                                position: 'relative'
+                            }}>
+                                <Bar
+                                    data={{
+                                        labels: stats.labels,
+                                        datasets: [
+                                            {
+                                                label: "Đơn hàng",
+                                                data: stats.orderCountByDate,
+                                                backgroundColor: "rgba(54, 162, 235, 0.6)"
+                                            },
+                                            {
+                                                label: "Tiền nhập kho",
+                                                data: stats.importByDate,
+                                                backgroundColor: "rgba(255, 206, 86, 0.6)"
+                                            }
+                                        ]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { position: "bottom" } },
+                                        scales: {
+                                            y: { beginAtZero: true }
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+
+            {/* Top khách hàng */}
+            <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
                             <Typography variant="h6" gutterBottom>
                                 Top khách hàng
                             </Typography>
@@ -343,9 +415,13 @@ const AdminDashbroad = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                    <Card>
-                        <CardContent>
+            </Grid>
+
+            {/* Top sản phẩm bán chạy */}
+            <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
                             <Typography variant="h6" gutterBottom>
                                 Top sản phẩm bán chạy
                             </Typography>
@@ -380,10 +456,10 @@ const AdminDashbroad = () => {
             </Grid>
 
             {/* Thống kê trạng thái đơn hàng */}
-            <Grid container spacing={3} mb={4}>
-                <Grid item xs={12} md={6}>
-                    <Card>
-                        <CardContent>
+            <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
                             <Typography variant="h6" gutterBottom>
                                 Thống kê trạng thái đơn hàng
                             </Typography>
@@ -410,10 +486,13 @@ const AdminDashbroad = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                {/* Đơn hàng gần đây */}
-                <Grid item xs={12} md={6}>
-                    <Card>
-                        <CardContent>
+            </Grid>
+
+            {/* Đơn hàng gần đây */}
+            <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
                             <Typography variant="h6" gutterBottom>
                                 Đơn hàng gần đây
                             </Typography>
@@ -451,4 +530,4 @@ const AdminDashbroad = () => {
     );
 };
 
-export default AdminDashbroad;
+export default AdminDashboard;

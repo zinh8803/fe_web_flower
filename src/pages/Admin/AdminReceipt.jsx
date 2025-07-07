@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, IconButton,
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, Checkbox, TextField,
-    Pagination
+    Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Pagination,
+    Autocomplete, Stack, Chip, FormControl, InputLabel, Select, MenuItem,
+    Checkbox, InputAdornment, List, ListItem, ListItemText, ListItemIcon, Divider
 } from "@mui/material";
 import { getImportReceiptById, getImportReceipts, importReceipts, updateImportReceipt } from "../../services/importReceiptsService";
 import { getFlower } from "../../services/flowerService";
-import { Edit, KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
+import { Add, Delete, Edit, KeyboardArrowDown, KeyboardArrowUp, Search } from "@mui/icons-material";
 
 const AdminReceipt = () => {
     const [receipts, setReceipts] = useState([]);
-    // State tìm kiếm hoa cho popup
     const [flowerSearch, setFlowerSearch] = useState("");
     const [openRow, setOpenRow] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
@@ -21,17 +21,25 @@ const AdminReceipt = () => {
         details: []
     });
     const [editReceipt, setEditReceipt] = useState(null);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1);
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
+    const [selectedFlower, setSelectedFlower] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+    const [importPrice, setImportPrice] = useState(0);
+    // Thêm state để tìm kiếm phiếu nhập
+    const [searchQuery, setSearchQuery] = useState("");
+    // Thêm state để kiểm soát việc hiển thị dropdown
+    const [flowerDropdownOpen, setFlowerDropdownOpen] = useState(false);
+
     useEffect(() => {
         fetchReceipts(page);
     }, [page]);
 
     const fetchReceipts = async (pageNum = 1) => {
         try {
-            const res = await getImportReceipts(pageNum, fromDate, toDate);
+            const res = await getImportReceipts(pageNum, fromDate, toDate, searchQuery);
             setReceipts(res.data.data || []);
             setTotalPages(res.data.meta ? res.data.meta.last_page : 1);
         } catch {
@@ -39,7 +47,11 @@ const AdminReceipt = () => {
         }
     };
 
-    // Lấy danh sách hoa khi mở dialog
+    // Lọc danh sách hoa theo từ khóa tìm kiếm
+    const filteredFlowers = flowers.filter(flower =>
+        flower.name.toLowerCase().includes(flowerSearch.toLowerCase())
+    );
+
     const handleOpenDialog = async () => {
         try {
             const res = await getFlower();
@@ -50,7 +62,10 @@ const AdminReceipt = () => {
                 details: []
             });
             setEditReceipt(null);
-            setFlowerSearch(""); // reset tìm kiếm khi mở dialog
+            setFlowerSearch("");
+            setSelectedFlower(null);
+            setQuantity(1);
+            setImportPrice(0);
             setOpenDialog(true);
         } catch {
             alert("Lỗi khi tải danh sách hoa");
@@ -62,28 +77,28 @@ const AdminReceipt = () => {
     const handleCloseDialog = () => setOpenDialog(false);
 
     // Xử lý chọn hoa
-    const handleCheckFlower = (flower) => {
-        const exists = form.details.find(d => d.flower_id === flower.id);
-        if (exists) {
-            setForm({
-                ...form,
-                details: form.details.filter(d => d.flower_id !== flower.id)
-            });
-        } else {
-            setForm({
-                ...form,
-                details: [
-                    ...form.details,
-                    {
-                        flower_id: flower.id,
-                        quantity: 1,
-                        import_price: flower.price || 0,
-                        status: "hoa tươi"
-                    }
-                ]
-            });
-        }
-    };
+    // const handleCheckFlower = (flower) => {
+    //     const exists = form.details.find(d => d.flower_id === flower.id);
+    //     if (exists) {
+    //         setForm({
+    //             ...form,
+    //             details: form.details.filter(d => d.flower_id !== flower.id)
+    //         });
+    //     } else {
+    //         setForm({
+    //             ...form,
+    //             details: [
+    //                 ...form.details,
+    //                 {
+    //                     flower_id: flower.id,
+    //                     quantity: 1,
+    //                     import_price: flower.price || 0,
+    //                     status: "hoa tươi"
+    //                 }
+    //             ]
+    //         });
+    //     }
+    // };
 
     const handleDetailChange = (flower_id, field, value) => {
         setForm({
@@ -91,6 +106,53 @@ const AdminReceipt = () => {
             details: form.details.map(d =>
                 d.flower_id === flower_id ? { ...d, [field]: value } : d
             )
+        });
+    };
+
+    // Hàm mới để thêm hoa đã chọn vào danh sách
+    const handleAddFlowerToList = () => {
+        if (!selectedFlower) return;
+
+        // Kiểm tra xem hoa đã có trong danh sách chưa
+        const exists = form.details.find(d => d.flower_id === selectedFlower.id);
+        if (exists) {
+            // Cập nhật số lượng và giá nếu đã tồn tại
+            setForm({
+                ...form,
+                details: form.details.map(d =>
+                    d.flower_id === selectedFlower.id
+                        ? { ...d, quantity: parseInt(quantity), import_price: parseFloat(importPrice) }
+                        : d
+                )
+            });
+        } else {
+            // Thêm mới nếu chưa tồn tại
+            setForm({
+                ...form,
+                details: [
+                    ...form.details,
+                    {
+                        flower_id: selectedFlower.id,
+                        quantity: parseInt(quantity),
+                        import_price: parseFloat(importPrice),
+                        status: "hoa tươi",
+                        flower_name: selectedFlower.name // Thêm tên để hiển thị
+                    }
+                ]
+            });
+        }
+
+        // Reset các trường sau khi thêm
+        setSelectedFlower(null);
+        setQuantity(1);
+        setImportPrice(0);
+    };
+
+    // Hàm xóa hoa khỏi danh sách
+    const handleRemoveFlower = (flowerId) => {
+        setForm({
+            ...form,
+            details: form.details.filter(d => d.flower_id !== flowerId)
         });
     };
 
@@ -134,6 +196,11 @@ const AdminReceipt = () => {
         }
     };
 
+    // Thêm hàm để kiểm tra hoa đã được chọn chưa
+    const isFlowerSelected = (flowerId) => {
+        return form.details.some(d => d.flower_id === flowerId);
+    };
+
     return (
         <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
@@ -142,7 +209,24 @@ const AdminReceipt = () => {
             <Button variant="contained" color="success" sx={{ mb: 2 }} onClick={() => handleOpenDialog()}>
                 Thêm phiếu nhập
             </Button>
-            <Box display="flex" gap={2} mb={2}>
+
+            {/* Thêm ô tìm kiếm phiếu nhập */}
+            <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
+                {/* <TextField
+                    label="Tìm kiếm phiếu"
+                    size="small"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    sx={{ minWidth: 200 }}
+                    placeholder="Tìm theo mã, ghi chú..."
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <Search />
+                            </InputAdornment>
+                        )
+                    }}
+                /> */}
                 <TextField
                     label="Từ ngày"
                     type="date"
@@ -162,7 +246,19 @@ const AdminReceipt = () => {
                 <Button variant="contained" onClick={() => fetchReceipts(1)}>
                     Lọc
                 </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => {
+                        setSearchQuery("");
+                        setFromDate("");
+                        setToDate("");
+                        fetchReceipts(1);
+                    }}
+                >
+                    Xóa bộ lọc
+                </Button>
             </Box>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -258,7 +354,7 @@ const AdminReceipt = () => {
             </Box>
             {/* Dialog thêm phiếu nhập */}
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-                <DialogTitle>Thêm phiếu nhập</DialogTitle>
+                <DialogTitle>{editReceipt ? "Sửa phiếu nhập" : "Thêm phiếu nhập"}</DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Ngày nhập"
@@ -278,60 +374,187 @@ const AdminReceipt = () => {
                         fullWidth
                         margin="normal"
                     />
-                    <Typography variant="subtitle1" mt={2} mb={1}>Chọn hoa nhập kho</Typography>
-                    <TextField
-                        size="small"
-                        placeholder="Tìm kiếm hoa..."
-                        value={flowerSearch}
-                        onChange={e => setFlowerSearch(e.target.value)}
-                        sx={{ mb: 1, width: 300 }}
-                    />
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell />
-                                <TableCell>Tên hoa</TableCell>
-                                <TableCell>Số lượng</TableCell>
-                                <TableCell>Giá nhập</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {flowers.filter(f => f.name.toLowerCase().includes(flowerSearch.toLowerCase())).map(flower => {
-                                const detail = form.details.find(d => d.flower_id === flower.id);
-                                return (
-                                    <TableRow key={flower.id}>
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={!!detail}
-                                                onChange={() => handleCheckFlower(flower)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>{flower.name}</TableCell>
-                                        <TableCell>
-                                            <TextField
-                                                type="number"
-                                                size="small"
-                                                value={detail ? detail.quantity : ""}
-                                                onChange={e => handleDetailChange(flower.id, "quantity", e.target.value)}
-                                                disabled={!detail}
-                                                inputProps={{ min: 1 }}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <TextField
-                                                type="number"
-                                                size="small"
-                                                value={detail ? detail.import_price : ""}
-                                                onChange={e => handleDetailChange(flower.id, "import_price", e.target.value)}
-                                                disabled={!detail}
-                                                inputProps={{ min: 0 }}
-                                            />
-                                        </TableCell>
+
+                    {/* Phần tìm kiếm hoa */}
+                    <Box sx={{ mt: 3, position: 'relative' }}>
+                        <Typography variant="subtitle1" gutterBottom>
+                            Chọn hoa cho phiếu nhập
+                        </Typography>
+
+                        <TextField
+                            label="Tìm kiếm hoa"
+                            value={flowerSearch}
+                            onChange={(e) => setFlowerSearch(e.target.value)}
+                            onFocus={() => setFlowerDropdownOpen(true)}
+                            fullWidth
+                            margin="normal"
+                            size="small"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Search />
+                                    </InputAdornment>
+                                )
+                            }}
+                        />
+
+                        {/* Dropdown menu cho danh sách hoa */}
+                        {flowerDropdownOpen && (
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    position: 'absolute',
+                                    zIndex: 1000,
+                                    width: '100%',
+                                    maxHeight: 300,
+                                    overflow: 'auto',
+                                    mt: 0.5,
+                                    boxShadow: 3
+                                }}
+                            >
+                                <Box display="flex" justifyContent="flex-end" p={1}>
+                                    <Button
+                                        size="small"
+                                        onClick={() => setFlowerDropdownOpen(false)}
+                                    >
+                                        Đóng
+                                    </Button>
+                                </Box>
+                                <List dense>
+                                    {filteredFlowers.length === 0 ? (
+                                        <ListItem>
+                                            <ListItemText primary="Không tìm thấy hoa phù hợp" />
+                                        </ListItem>
+                                    ) : (
+                                        filteredFlowers.map((flower) => {
+                                            const isSelected = isFlowerSelected(flower.id);
+
+                                            return (
+                                                <React.Fragment key={flower.id}>
+                                                    <ListItem
+                                                        button
+                                                        onClick={() => {
+                                                            if (isSelected) {
+                                                                handleRemoveFlower(flower.id);
+                                                            } else {
+                                                                setSelectedFlower(flower);
+                                                                setImportPrice(flower.price || 0);
+                                                                handleAddFlowerToList();
+                                                            }
+                                                            // Không đóng dropdown sau khi chọn để người dùng có thể chọn nhiều hoa
+                                                        }}
+                                                    >
+                                                        <ListItemIcon>
+                                                            <Checkbox
+                                                                edge="start"
+                                                                checked={isSelected}
+                                                                tabIndex={-1}
+                                                                disableRipple
+                                                            />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={flower.name}
+                                                            secondary={`Giá: ${Number(flower.price).toLocaleString()} đ`}
+                                                        />
+                                                        {isSelected && (
+                                                            <Box display="flex" alignItems="center" gap={1}>
+                                                                <TextField
+                                                                    label="SL"
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={form.details.find(d => d.flower_id === flower.id)?.quantity || 1}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation(); // Ngăn event bubble lên ListItem
+                                                                        handleDetailChange(flower.id, "quantity", parseInt(e.target.value) || 1);
+                                                                    }}
+                                                                    onClick={(e) => e.stopPropagation()} // Ngăn event bubble lên ListItem
+                                                                    inputProps={{ min: 1, style: { width: '50px' } }}
+                                                                />
+                                                                <TextField
+                                                                    label="Giá"
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={form.details.find(d => d.flower_id === flower.id)?.import_price || 0}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation(); // Ngăn event bubble lên ListItem
+                                                                        handleDetailChange(flower.id, "import_price", parseFloat(e.target.value) || 0);
+                                                                    }}
+                                                                    onClick={(e) => e.stopPropagation()} // Ngăn event bubble lên ListItem
+                                                                    inputProps={{ min: 0, style: { width: '80px' } }}
+                                                                />
+                                                            </Box>
+                                                        )}
+                                                    </ListItem>
+                                                    <Divider />
+                                                </React.Fragment>
+                                            );
+                                        })
+                                    )}
+                                </List>
+                            </Paper>
+                        )}
+                    </Box>
+
+                    {/* Hiển thị danh sách hoa đã chọn */}
+                    {form.details.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Danh sách hoa đã chọn ({form.details.length})
+                            </Typography>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Tên hoa</TableCell>
+                                        <TableCell>Số lượng</TableCell>
+                                        <TableCell>Giá nhập</TableCell>
+                                        <TableCell>Thành tiền</TableCell>
+                                        <TableCell></TableCell>
                                     </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+                                </TableHead>
+                                <TableBody>
+                                    {form.details.map((detail) => {
+                                        const flower = flowers.find(f => f.id === detail.flower_id);
+                                        const flowerName = flower ? flower.name : detail.flower_name || "Không xác định";
+                                        return (
+                                            <TableRow key={detail.flower_id}>
+                                                <TableCell>{flowerName}</TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        size="small"
+                                                        value={detail.quantity}
+                                                        onChange={e => handleDetailChange(detail.flower_id, "quantity", parseInt(e.target.value) || 1)}
+                                                        inputProps={{ min: 1 }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        size="small"
+                                                        value={detail.import_price}
+                                                        onChange={e => handleDetailChange(detail.flower_id, "import_price", parseFloat(e.target.value) || 0)}
+                                                        inputProps={{ min: 0 }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {(detail.quantity * detail.import_price).toLocaleString()} đ
+                                                </TableCell>
+                                                <TableCell>
+                                                    <IconButton
+                                                        size="small"
+                                                        color="error"
+                                                        onClick={() => handleRemoveFlower(detail.flower_id)}
+                                                    >
+                                                        <Delete fontSize="small" />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </Box>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Hủy</Button>

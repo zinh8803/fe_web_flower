@@ -23,7 +23,7 @@ import AdminReceipt from "../pages/Admin/AdminReceipt";
 import AdminDiscount from "../pages/Admin/AdminDiscount";
 import AdminFlowerType from "../pages/Admin/AdminFlowerType";
 import AdminFlower from "../pages/Admin/AdminFlower";
-import AdminDashboard from "../pages/Admin/AdminDashbroad";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
 import VnpayReturn from "../pages/User/VnaypayReturn";
 import AdminRoute from "./AdminRoute";
 import StockProductAdmin from "../pages/Admin/StockProductAdmin";
