@@ -4,7 +4,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AdminMenu from "../component/admin/AdminMenu";
 import { Outlet } from "react-router-dom";
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 const AdminLayout = () => {
     const [open, setOpen] = useState(true);
@@ -71,6 +71,8 @@ const AdminLayout = () => {
                                 duration: theme.transitions.duration.enteringScreen,
                             }),
                         overflowX: 'hidden',
+                        overflowY: 'visible', // ← Thêm dòng này
+                        // hoặc chỉ cần: overflow: 'visible',
                         ...(open && {
                             width: drawerWidth,
                         }),

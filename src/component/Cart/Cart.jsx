@@ -206,6 +206,15 @@ const Cart = () => {
             const res = await checkCodeValidity(discountCode);
             const discount = res.data.data;
             if (discount && discount.id) {
+                if (subtotal < (discount.min_total || 0)) {
+                    setDiscountAmount(0);
+                    setDiscountId(null);
+                    dispatch(showNotification({
+                        message: `Đơn hàng cần tối thiểu ${Number(discount.min_total).toLocaleString()}đ mới được áp dụng mã giảm giá này!`,
+                        severity: "warning"
+                    }));
+                    return;
+                }
                 setDiscountId(discount.id);
                 let amount = 0;
                 if (discount.type === "percent") {

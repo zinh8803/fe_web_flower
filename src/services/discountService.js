@@ -6,5 +6,4 @@ export const updateDiscount = (id, discountData) => api.put(`/discounts/${id}`, 
 export const deleteDiscount = (id) => api.delete(`/discounts/${id}`);
 
 export const checkCodeValidity = (code) => api.post("/discounts/check-code", { name: code });
-// Nếu backend yêu cầu code thì:
 // export const checkCodeValidity = (code) => api.post("/discounts/check-code", { code });

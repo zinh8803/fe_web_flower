@@ -21,6 +21,7 @@ const AdminDiscount = () => {
         type: "fixed",
         start_date: "",
         end_date: "",
+        min_total: "",
         status: true,
     });
 
@@ -48,6 +49,7 @@ const AdminDiscount = () => {
             start_date: today,
             end_date: "",
             status: true,
+            min_total: "",
         });
         setOpenDialog(true);
     };
@@ -61,6 +63,7 @@ const AdminDiscount = () => {
             start_date: discount.start_date ? discount.start_date.slice(0, 10) : "",
             end_date: discount.end_date ? discount.end_date.slice(0, 10) : "",
             status: discount.status === 1 || discount.status === true,
+            min_total: discount.min_total || "",
         });
         setOpenDialog(true);
     };
@@ -123,6 +126,7 @@ const AdminDiscount = () => {
                             <TableCell>Tên mã</TableCell>
                             <TableCell>Loại</TableCell>
                             <TableCell>Giá trị</TableCell>
+                            <TableCell>Giá trị tối thiểu</TableCell>
                             <TableCell>Ngày bắt đầu</TableCell>
                             <TableCell>Ngày kết thúc</TableCell>
                             <TableCell>Trạng thái</TableCell>
@@ -139,6 +143,9 @@ const AdminDiscount = () => {
                                     {d.type === "fixed"
                                         ? Number(d.value).toLocaleString() + "đ"
                                         : d.value + "%"}
+                                </TableCell>
+                                <TableCell>
+                                    {d.min_total ? Number(d.min_total).toLocaleString() + "đ" : "Không yêu cầu"}
                                 </TableCell>
                                 <TableCell>{d.start_date ? d.start_date.slice(0, 10) : ""}</TableCell>
                                 <TableCell>{d.end_date ? d.end_date.slice(0, 10) : ""}</TableCell>
@@ -187,6 +194,15 @@ const AdminDiscount = () => {
                         label="Giá trị"
                         name="value"
                         value={form.value}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        type="number"
+                    />
+                    <TextField
+                        label="Giá trị tối thiểu"
+                        name="min_total"
+                        value={form.min_total}
                         onChange={handleChange}
                         fullWidth
                         margin="normal"

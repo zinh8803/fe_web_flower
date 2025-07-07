@@ -4,7 +4,13 @@ export const createOrder = (orderData) => api.post("/orders", orderData, {
     withCredentials: true,
 });
 
-export const getOrders = (page = 1) => api.get(`/orders?page=${page}`, {
+export const getOrders = (page = 1, filters = {}) => api.get("/orders", {
+    params: {
+        page,
+        from_date: filters.from_date,
+        to_date: filters.to_date,
+        status: filters.status
+    },
     withCredentials: true,
 });
 

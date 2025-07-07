@@ -123,14 +123,25 @@ const StockProductAdmin = () => {
                                     </TableCell>
                                     <TableCell>
                                         <Box display="flex" flexDirection="column" gap={0.5}>
-                                            {product.sizes.map((size, sizeIdx) => (
-                                                <Chip
-                                                    key={sizeIdx}
-                                                    label={size.warning ? "Gần hết" : "Ổn"}
-                                                    color={size.warning ? "error" : "success"}
-                                                    size="small"
-                                                />
-                                            ))}
+                                            {product.sizes.map((size, sizeIdx) => {
+                                                let label = "Ổn";
+                                                let color = "success";
+                                                if (size.max_quantity === 0) {
+                                                    label = "Hết";
+                                                    color = "error";
+                                                } else if (size.max_quantity < 3) {
+                                                    label = "Gần hết";
+                                                    color = "warning";
+                                                }
+                                                return (
+                                                    <Chip
+                                                        key={sizeIdx}
+                                                        label={label}
+                                                        color={color}
+                                                        size="small"
+                                                    />
+                                                );
+                                            })}
                                         </Box>
                                     </TableCell>
                                 </TableRow>

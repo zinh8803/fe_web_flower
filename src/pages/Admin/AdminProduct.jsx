@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox,
-    Pagination, CircularProgress
+    Pagination, CircularProgress, List, ListItem, ListItemIcon, ListItemText, Divider
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import { Edit, Delete, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../../services/productService";
 import { getCategory } from "../../services/categoryService";
 import { getFlower } from "../../services/flowerService";
@@ -25,7 +25,9 @@ const AdminProduct = () => {
     const [searchValue, setSearchValue] = useState("");
     const rowsPerPage = 10;
 
-    // Load dữ liệu
+    const [flowerDropdownOpen, setFlowerDropdownOpen] = useState({});
+    const [flowerSearches, setFlowerSearches] = useState(["", ""]);
+
     useEffect(() => {
         const loadInitialData = async () => {
             await Promise.all([
@@ -35,7 +37,6 @@ const AdminProduct = () => {
             fetchProducts(page, search);
         };
         loadInitialData();
-        // eslint-disable-next-line
     }, [page, search]);
 
     const fetchProducts = async (pageNumber, searchTerm = search) => {
@@ -67,6 +68,20 @@ const AdminProduct = () => {
             alert("Lỗi khi tải danh sách hoa");
         }
     };
+    useEffect(() => {
+        if (openDialog && editProduct && editProduct.sizes) {
+            setFlowerSearches(Array(editProduct.sizes.length).fill(""));
+            setFlowerDropdownOpen({});
+        }
+    }, [openDialog, editProduct]);
+
+    const handleToggleDropdown = (sizeIdx) => {
+        setFlowerDropdownOpen(prev => ({
+            ...prev,
+            [sizeIdx]: !prev[sizeIdx]
+        }));
+    };
+
     const handlePageChange = async (event, newPage) => {
         if (loadingPage) return;
 
@@ -82,7 +97,6 @@ const AdminProduct = () => {
             setLoadingPage(false);
         }
     };
-    // Mở popup thêm/sửa
     const handleOpenDialog = (product = null) => {
         if (product) {
             setEditProduct(JSON.parse(JSON.stringify(product)));
@@ -94,8 +108,8 @@ const AdminProduct = () => {
                 category_id: "",
                 status: 1,
                 sizes: [
-                    { size: "Nhỏ", price: "", receipt_details: [] }, // Thêm price
-                    { size: "Lớn", price: "", receipt_details: [] }  // Thêm price
+                    { size: "Nhỏ", price: "", receipt_details: [] },
+                    { size: "Lớn", price: "", receipt_details: [] }
                 ]
             });
             setImagePreview("");
@@ -104,7 +118,6 @@ const AdminProduct = () => {
     };
     const handleCloseDialog = () => setOpenDialog(false);
 
-    // Xử lý thay đổi trường
     const handleFieldChange = (e) => {
         setEditProduct({ ...editProduct, [e.target.name]: e.target.value });
     };
@@ -113,29 +126,6 @@ const AdminProduct = () => {
         sizes[idx][field] = value;
         setEditProduct({ ...editProduct, sizes });
     };
-    // Chọn hoa cho từng size
-    // const handleCheckFlower = (sizeIdx, flower) => {
-    //     const sizes = [...editProduct.sizes];
-    //     const details = sizes[sizeIdx].receipt_details || [];
-    //     const exists = details.find(d => d.flower_id === flower.id);
-    //     if (exists) {
-    //         sizes[sizeIdx].receipt_details = details.filter(d => d.flower_id !== flower.id);
-    //     } else {
-    //         sizes[sizeIdx].receipt_details = [
-    //             ...details,
-    //             {
-    //                 flower_id: flower.id,
-    //                 flower_name: flower.name,
-    //                 quantity: 1,
-    //                 //import_price: flower.price || 0,
-    //                 // import_date: new Date().toISOString().slice(0, 10),
-    //                 //status: "hoa tươi"
-    //             }
-    //         ];
-    //     }
-    //     setEditProduct({ ...editProduct, sizes });
-    // };
-    // Sửa chi tiết hoa
     const handleDetailChange = (sizeIdx, flower_id, field, value) => {
         const sizes = [...editProduct.sizes];
         sizes[sizeIdx].receipt_details = sizes[sizeIdx].receipt_details.map(d =>
@@ -144,7 +134,6 @@ const AdminProduct = () => {
         setEditProduct({ ...editProduct, sizes });
     };
 
-    // Lưu sản phẩm
     const handleSave = async () => {
         setLoading(true);
         try {
@@ -155,7 +144,7 @@ const AdminProduct = () => {
             formData.append("name", editProduct.name);
             formData.append("description", editProduct.description);
             formData.append("category_id", editProduct.category_id);
-            formData.append("status", editProduct.status);
+            formData.append("status", 1);
 
             if (editProduct.image instanceof File) {
                 formData.append("image", editProduct.image);
@@ -163,7 +152,7 @@ const AdminProduct = () => {
 
             editProduct.sizes.forEach((size, i) => {
                 formData.append(`sizes[${i}][size]`, size.size);
-                formData.append(`sizes[${i}][price]`, size.price); // Thêm dòng này
+                formData.append(`sizes[${i}][price]`, size.price);
                 size.receipt_details.forEach((r, j) => {
                     formData.append(`sizes[${i}][recipes][${j}][flower_id]`, r.flower_id);
                     formData.append(`sizes[${i}][recipes][${j}][quantity]`, r.quantity);
@@ -189,7 +178,6 @@ const AdminProduct = () => {
             setImagePreview(URL.createObjectURL(file));
         }
     };
-    // Xóa sản phẩm
     const handleDelete = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) return;
         try {
@@ -200,42 +188,33 @@ const AdminProduct = () => {
         }
     };
 
-    // Lấy tên danh mục
     const getCategoryName = (id) => {
         const cat = categories.find(c => c.id === id);
         return cat ? cat.name : "";
     };
 
-    // Thêm hàm handleSearch
     const handleSearch = (e) => {
         e.preventDefault();
         setPage(1);
         setSearch(searchValue);
     };
 
-    // State tìm kiếm hoa cho từng size
-    const [flowerSearches, setFlowerSearches] = useState(["", ""]);
+    const handleFlowerSearchChange = (idx, value) => {
+        const arr = [...flowerSearches];
+        arr[idx] = value;
+        setFlowerSearches(arr);
+    };
 
-    // Khi mở dialog thì reset tìm kiếm hoa
-    useEffect(() => {
-        if (openDialog && editProduct && editProduct.sizes) {
-            setFlowerSearches(Array(editProduct.sizes.length).fill(""));
-        }
-    }, [openDialog, editProduct]);
-
-    // Hàm chọn hoa đồng bộ giữa các size
     const handleCheckFlowerSync = (sizeIdx, flower) => {
         const sizes = [...editProduct.sizes];
-        // Kiểm tra trạng thái hiện tại của hoa ở size này
         const details = sizes[sizeIdx].receipt_details || [];
         const exists = details.find(d => d.flower_id === flower.id);
+
         if (exists) {
-            // Bỏ chọn ở tất cả các size
             sizes.forEach((sz, i) => {
                 sizes[i].receipt_details = (sz.receipt_details || []).filter(d => d.flower_id !== flower.id);
             });
         } else {
-            // Thêm vào tất cả các size (nếu chưa có)
             sizes.forEach((sz, i) => {
                 const szDetails = sz.receipt_details || [];
                 if (!szDetails.find(d => d.flower_id === flower.id)) {
@@ -253,19 +232,12 @@ const AdminProduct = () => {
         setEditProduct({ ...editProduct, sizes });
     };
 
-    // Tìm kiếm hoa cho từng size
-    const handleFlowerSearchChange = (idx, value) => {
-        const arr = [...flowerSearches];
-        arr[idx] = value;
-        setFlowerSearches(arr);
-    };
-
     return (
         <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý sản phẩm
             </Typography>
-            {/* Thêm form tìm kiếm */}
+
             <Box mb={2} component="form" onSubmit={handleSearch} display="flex" gap={2}>
                 <TextField
                     label="Tìm kiếm sản phẩm"
@@ -275,12 +247,13 @@ const AdminProduct = () => {
                 />
                 <Button type="submit" variant="contained">Tìm kiếm</Button>
             </Box>
+
             <Button
                 variant="contained"
                 color="success"
                 sx={{ mb: 2 }}
                 onClick={() => handleOpenDialog()}
-                disabled={loadingPage} // Disable khi đang loading
+                disabled={loadingPage}
             >
                 Thêm sản phẩm
             </Button>
@@ -393,7 +366,7 @@ const AdminProduct = () => {
                                     <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
                                 ))}
                             </TextField>
-                            <TextField
+                            {/* <TextField
                                 label="Trạng thái"
                                 name="status"
                                 select
@@ -404,7 +377,8 @@ const AdminProduct = () => {
                             >
                                 <MenuItem value={1}>Hiện</MenuItem>
                                 <MenuItem value={0}>Ẩn</MenuItem>
-                            </TextField>
+                            </TextField> */}
+
                             {/* Ảnh sản phẩm */}
                             <Box sx={{ mb: 2 }}>
                                 <Typography fontWeight={500}>Ảnh sản phẩm:</Typography>
@@ -429,18 +403,21 @@ const AdminProduct = () => {
                                     />
                                 </Button>
                             </Box>
-                            {/* Danh sách size */}
+
+                            {/* Danh sách size với dropdown */}
                             {editProduct.sizes && editProduct.sizes.map((size, idx) => {
                                 const flowerSearch = flowerSearches[idx] || "";
-                                const filteredFlowers = flowers.filter(f => f.name.toLowerCase().includes(flowerSearch.toLowerCase()));
+                                const filteredFlowers = flowers.filter(f =>
+                                    f.name.toLowerCase().includes(flowerSearch.toLowerCase())
+                                );
+
                                 return (
-                                    <Box key={idx} sx={{ mb: 2, p: 1, border: "1px solid #eee", borderRadius: 2 }}>
-                                        <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                                    <Box key={idx} sx={{ mb: 3, p: 2, border: "1px solid #eee", borderRadius: 2 }}>
+                                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                                             <TextField
                                                 label="Tên size"
                                                 disabled
                                                 value={size.size}
-                                                onChange={e => handleSizeChange(idx, "size", e.target.value)}
                                                 sx={{ flex: 1 }}
                                             />
                                             <TextField
@@ -455,49 +432,151 @@ const AdminProduct = () => {
                                                 inputProps={{ min: 0, step: 1000 }}
                                             />
                                         </Box>
-                                        <Typography fontWeight={500} mt={1} mb={1}>Chọn hoa cho size này:</Typography>
-                                        <TextField
-                                            size="small"
-                                            placeholder="Tìm kiếm hoa..."
-                                            value={flowerSearch}
-                                            onChange={e => handleFlowerSearchChange(idx, e.target.value)}
-                                            sx={{ mb: 1, width: 300 }}
-                                        />
-                                        <Table size="small">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell />
-                                                    <TableCell>Tên hoa</TableCell>
-                                                    <TableCell>Số lượng</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {filteredFlowers.map(flower => {
-                                                    const detail = (size.receipt_details || []).find(d => d.flower_id === flower.id);
-                                                    return (
-                                                        <TableRow key={flower.id}>
-                                                            <TableCell>
-                                                                <Checkbox
-                                                                    checked={!!detail}
-                                                                    onChange={() => handleCheckFlowerSync(idx, flower)}
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>{flower.name}</TableCell>
-                                                            <TableCell>
-                                                                <TextField
-                                                                    type="number"
-                                                                    size="small"
-                                                                    value={detail ? detail.quantity : ""}
-                                                                    onChange={e => handleDetailChange(idx, flower.id, "quantity", e.target.value)}
-                                                                    disabled={!detail}
-                                                                    inputProps={{ min: 1 }}
-                                                                />
-                                                            </TableCell>
+
+                                        {/* Phần dropdown chọn hoa */}
+                                        <Box sx={{ position: 'relative' }}>
+                                            <Typography variant="subtitle2" gutterBottom>
+                                                Chọn hoa cho {size.size}
+                                            </Typography>
+
+                                            <TextField
+                                                label="Tìm kiếm hoa"
+                                                value={flowerSearch}
+                                                onChange={(e) => handleFlowerSearchChange(idx, e.target.value)}
+                                                onFocus={() => handleToggleDropdown(idx)}
+                                                fullWidth
+                                                size="small"
+                                                sx={{ mb: 1 }}
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleToggleDropdown(idx)}
+                                                        >
+                                                            {flowerDropdownOpen[idx] ? <ExpandLess /> : <ExpandMore />}
+                                                        </IconButton>
+                                                    )
+                                                }}
+                                            />
+
+                                            {/* Dropdown menu */}
+                                            {flowerDropdownOpen[idx] && (
+                                                <Paper
+                                                    variant="outlined"
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        zIndex: 1000,
+                                                        width: '100%',
+                                                        maxHeight: 300,
+                                                        overflow: 'auto',
+                                                        mt: 0.5,
+                                                        boxShadow: 3
+                                                    }}
+                                                >
+                                                    <Box display="flex" justifyContent="flex-end" p={1}>
+                                                        <Button
+                                                            size="small"
+                                                            onClick={() => handleToggleDropdown(idx)}
+                                                        >
+                                                            Đóng
+                                                        </Button>
+                                                    </Box>
+                                                    <List dense>
+                                                        {filteredFlowers.length === 0 ? (
+                                                            <ListItem>
+                                                                <ListItemText primary="Không tìm thấy hoa phù hợp" />
+                                                            </ListItem>
+                                                        ) : (
+                                                            filteredFlowers.map((flower) => {
+                                                                const detail = (size.receipt_details || []).find(d => d.flower_id === flower.id);
+                                                                const isSelected = !!detail;
+
+                                                                return (
+                                                                    <React.Fragment key={flower.id}>
+                                                                        <ListItem
+                                                                            button
+                                                                            onClick={() => handleCheckFlowerSync(idx, flower)}
+                                                                        >
+                                                                            <ListItemIcon>
+                                                                                <Checkbox
+                                                                                    edge="start"
+                                                                                    checked={isSelected}
+                                                                                    tabIndex={-1}
+                                                                                    disableRipple
+                                                                                />
+                                                                            </ListItemIcon>
+                                                                            <ListItemText
+                                                                                primary={flower.name}
+                                                                            // secondary={`ID: ${flower.id}`}
+                                                                            />
+                                                                            {isSelected && (
+                                                                                <Box display="flex" alignItems="center">
+                                                                                    <TextField
+                                                                                        label="SL"
+                                                                                        type="number"
+                                                                                        size="small"
+                                                                                        value={detail?.quantity || 1}
+                                                                                        onChange={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleDetailChange(idx, flower.id, "quantity", parseInt(e.target.value) || 1);
+                                                                                        }}
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                        inputProps={{
+                                                                                            min: 1,
+                                                                                            style: { width: '60px' }
+                                                                                        }}
+                                                                                    />
+                                                                                </Box>
+                                                                            )}
+                                                                        </ListItem>
+                                                                        <Divider />
+                                                                    </React.Fragment>
+                                                                );
+                                                            })
+                                                        )}
+                                                    </List>
+                                                </Paper>
+                                            )}
+                                        </Box>
+
+                                        {/* Hiển thị hoa đã chọn */}
+                                        {size.receipt_details && size.receipt_details.length > 0 && (
+                                            <Box sx={{ mt: 2 }}>
+                                                <Typography variant="subtitle2" gutterBottom>
+                                                    Hoa đã chọn cho {size.size} ({size.receipt_details.length})
+                                                </Typography>
+                                                <Table size="small">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Tên hoa</TableCell>
+                                                            <TableCell>Số lượng</TableCell>
                                                         </TableRow>
-                                                    );
-                                                })}
-                                            </TableBody>
-                                        </Table>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {size.receipt_details.map((detail) => {
+                                                            const flower = flowers.find(f => f.id === detail.flower_id);
+                                                            const flowerName = flower ? flower.name : detail.flower_name || "Không xác định";
+
+                                                            return (
+                                                                <TableRow key={detail.flower_id}>
+                                                                    <TableCell>{flowerName}</TableCell>
+                                                                    <TableCell>
+                                                                        <TextField
+                                                                            type="number"
+                                                                            size="small"
+                                                                            value={detail.quantity}
+                                                                            onChange={e => handleDetailChange(idx, detail.flower_id, "quantity", parseInt(e.target.value) || 1)}
+                                                                            inputProps={{ min: 1 }}
+                                                                            sx={{ width: 80 }}
+                                                                        />
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </Box>
+                                        )}
                                     </Box>
                                 );
                             })}
