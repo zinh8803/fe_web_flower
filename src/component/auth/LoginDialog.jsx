@@ -10,6 +10,7 @@ import {
     Box,
     Link,
     IconButton,
+    CircularProgress
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { orange } from "@mui/material/colors";
@@ -18,11 +19,13 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../store/userSlice";
 import { login, getProfile } from "../../services/userService";
 import { useState } from "react";
+import { showNotification } from "../../store/notificationSlice";
 
 const LoginDialog = ({ open, onClose }) => {
     const [openRegister, setOpenRegister] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
     const handleOpenRegister = () => {
@@ -42,22 +45,29 @@ const LoginDialog = ({ open, onClose }) => {
     };
 
     const handleLogin = async () => {
+        setLoading(true);
         try {
             await login(email, password);
-            console.log("Login successful");
             const profileRes = await getProfile();
             const userData = profileRes.data.data;
 
-            dispatch(setUser({
-                user: userData,
-            }));
-
+            dispatch(setUser({ user: userData }));
             localStorage.setItem("user", JSON.stringify(userData));
+
+            dispatch(showNotification({
+                message: "Đăng nhập thành công!",
+                severity: "success"
+            }));
 
             onClose(false);
         } catch (error) {
+            dispatch(showNotification({
+                message: "Tài khoản mật hoặc khẩu không đúng!",
+                severity: "error"
+            }));
             console.error("Login failed:", error);
-            alert("Đăng nhập thất bại!");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -117,7 +127,7 @@ const LoginDialog = ({ open, onClose }) => {
 
                     <Box display="flex" justifyContent="center">
                         <Button
-                            width="100%"
+                            fullWidth
                             variant="contained"
                             sx={{
                                 backgroundColor: "orange",
@@ -125,8 +135,10 @@ const LoginDialog = ({ open, onClose }) => {
                                 maxWidth: "80%"
                             }}
                             onClick={handleLogin}
+                            disabled={loading}
+                            size="large"
                         >
-                            ĐĂNG NHẬP
+                            {loading ? <CircularProgress size={24} color="inherit" /> : "ĐĂNG NHẬP"}
                         </Button>
                     </Box>
 

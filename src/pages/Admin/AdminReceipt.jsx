@@ -5,9 +5,9 @@ import {
     Autocomplete, Stack, Chip, FormControl, InputLabel, Select, MenuItem,
     Checkbox, InputAdornment, List, ListItem, ListItemText, ListItemIcon, Divider
 } from "@mui/material";
-import { getImportReceiptById, getImportReceipts, importReceipts, updateImportReceipt } from "../../services/importReceiptsService";
+import { createAutoImportReceipt, getAutoImportReceipts, getImportReceiptById, getImportReceipts, importReceipts, updateImportReceipt } from "../../services/importReceiptsService";
 import { getFlower } from "../../services/flowerService";
-import { Add, Delete, Edit, KeyboardArrowDown, KeyboardArrowUp, Search } from "@mui/icons-material";
+import { Add, Delete, Edit, KeyboardArrowDown, KeyboardArrowUp, Search, AccessAlarm } from "@mui/icons-material"; // icon cho nút tự động
 
 const AdminReceipt = () => {
     const [receipts, setReceipts] = useState([]);
@@ -28,14 +28,52 @@ const AdminReceipt = () => {
     const [selectedFlower, setSelectedFlower] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [importPrice, setImportPrice] = useState(0);
-    // Thêm state để tìm kiếm phiếu nhập
     const [searchQuery, setSearchQuery] = useState("");
-    // Thêm state để kiểm soát việc hiển thị dropdown
     const [flowerDropdownOpen, setFlowerDropdownOpen] = useState(false);
+    const [openAutoDialog, setOpenAutoDialog] = useState(false);
+    const [autoConfig, setAutoConfig] = useState({
+        import_date: "",
+        run_time: "",
+        details: [],
+        enabled: true,
+    });
+    const [autoFlowerSearch, setAutoFlowerSearch] = useState("");
+    const [autoFlowerDropdownOpen, setAutoFlowerDropdownOpen] = useState(false);
 
     useEffect(() => {
         fetchReceipts(page);
     }, [page]);
+
+    // Thêm hàm fetchAutoConfig bên ngoài useEffect
+    const fetchAutoConfig = async () => {
+        try {
+            const res = await getAutoImportReceipts();
+            if (res.data && res.data.data) {
+                const data = res.data.data;
+                let import_date = data.import_date;
+                if (import_date) {
+                    import_date = import_date.split('T')[0];
+                    if (import_date.includes(' ')) import_date = import_date.split(' ')[0];
+                }
+                let run_time = data.run_time;
+                if (run_time && run_time.length > 5) {
+                    run_time = run_time.slice(0, 5);
+                }
+                setAutoConfig({
+                    ...data,
+                    import_date: import_date || "",
+                    run_time: run_time || "",
+                    enabled: !!data.enabled,
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching auto config:", error);
+        }
+    };
+    // useEffect sẽ gọi hàm này khi mount
+    useEffect(() => {
+        fetchAutoConfig();
+    }, []);
 
     const fetchReceipts = async (pageNum = 1) => {
         try {
@@ -47,7 +85,6 @@ const AdminReceipt = () => {
         }
     };
 
-    // Lọc danh sách hoa theo từ khóa tìm kiếm
     const filteredFlowers = flowers.filter(flower =>
         flower.name.toLowerCase().includes(flowerSearch.toLowerCase())
     );
@@ -76,30 +113,6 @@ const AdminReceipt = () => {
     };
     const handleCloseDialog = () => setOpenDialog(false);
 
-    // Xử lý chọn hoa
-    // const handleCheckFlower = (flower) => {
-    //     const exists = form.details.find(d => d.flower_id === flower.id);
-    //     if (exists) {
-    //         setForm({
-    //             ...form,
-    //             details: form.details.filter(d => d.flower_id !== flower.id)
-    //         });
-    //     } else {
-    //         setForm({
-    //             ...form,
-    //             details: [
-    //                 ...form.details,
-    //                 {
-    //                     flower_id: flower.id,
-    //                     quantity: 1,
-    //                     import_price: flower.price || 0,
-    //                     status: "hoa tươi"
-    //                 }
-    //             ]
-    //         });
-    //     }
-    // };
-
     const handleDetailChange = (flower_id, field, value) => {
         setForm({
             ...form,
@@ -109,14 +122,11 @@ const AdminReceipt = () => {
         });
     };
 
-    // Hàm mới để thêm hoa đã chọn vào danh sách
     const handleAddFlowerToList = () => {
         if (!selectedFlower) return;
 
-        // Kiểm tra xem hoa đã có trong danh sách chưa
         const exists = form.details.find(d => d.flower_id === selectedFlower.id);
         if (exists) {
-            // Cập nhật số lượng và giá nếu đã tồn tại
             setForm({
                 ...form,
                 details: form.details.map(d =>
@@ -126,7 +136,6 @@ const AdminReceipt = () => {
                 )
             });
         } else {
-            // Thêm mới nếu chưa tồn tại
             setForm({
                 ...form,
                 details: [
@@ -136,7 +145,7 @@ const AdminReceipt = () => {
                         quantity: parseInt(quantity),
                         import_price: parseFloat(importPrice),
                         status: "hoa tươi",
-                        flower_name: selectedFlower.name // Thêm tên để hiển thị
+                        flower_name: selectedFlower.name
                     }
                 ]
             });
@@ -201,6 +210,92 @@ const AdminReceipt = () => {
         return form.details.some(d => d.flower_id === flowerId);
     };
 
+    const handleOpenAutoDialog = async () => {
+        try {
+            // Tải danh sách hoa (nếu chưa có)
+            if (flowers.length === 0) {
+                const res = await getFlower();
+                setFlowers(res.data.data || []);
+            }
+
+            // Refresh cấu hình tự động mỗi khi mở dialog
+            await fetchAutoConfig();
+
+            // Không cần set lại autoConfig ở đây nữa vì đã được set trong fetchAutoConfig
+            setAutoFlowerSearch("");
+            setOpenAutoDialog(true);
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi khi tải danh sách hoa!");
+        }
+    };
+
+    // Thêm các hàm xử lý cho Auto Config:
+    const isAutoFlowerSelected = (flowerId) => {
+        return autoConfig.details.some(d => d.flower_id === flowerId);
+    };
+
+    const handleAutoDetailChange = (flower_id, field, value) => {
+        setAutoConfig({
+            ...autoConfig,
+            details: autoConfig.details.map(d =>
+                d.flower_id === flower_id ? { ...d, [field]: value } : d
+            )
+        });
+    };
+
+    const handleAddAutoFlower = (flower) => {
+        if (isAutoFlowerSelected(flower.id)) {
+            // Nếu đã có, xóa ra
+            setAutoConfig({
+                ...autoConfig,
+                details: autoConfig.details.filter(d => d.flower_id !== flower.id)
+            });
+        } else {
+            // Nếu chưa có, thêm vào
+            setAutoConfig({
+                ...autoConfig,
+                details: [
+                    ...autoConfig.details,
+                    {
+                        flower_id: flower.id,
+                        flower_name: flower.name,
+                        quantity: 10,
+                        import_price: flower.price || 0,
+                        status: "hoa tươi"
+                    }
+                ]
+            });
+        }
+    };
+
+    const handleRemoveAutoFlower = (flowerId) => {
+        setAutoConfig({
+            ...autoConfig,
+            details: autoConfig.details.filter(d => d.flower_id !== flowerId)
+        });
+    };
+
+    // Lọc hoa cho dialog tự động
+    const filteredAutoFlowers = flowers.filter(flower =>
+        flower.name.toLowerCase().includes(autoFlowerSearch.toLowerCase())
+    );
+
+    const handleSaveAutoConfig = async () => {
+        try {
+            await createAutoImportReceipt(autoConfig);
+            setOpenAutoDialog(false);
+
+            // Refresh dữ liệu sau khi lưu
+            await fetchAutoConfig();
+
+            alert("Đã lưu cấu hình tự động nhập!");
+        } catch (error) {
+            console.error("Error saving auto config:", error);
+            alert("Lỗi khi lưu cấu hình tự động!");
+        }
+    };
+
     return (
         <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
@@ -256,6 +351,14 @@ const AdminReceipt = () => {
                     }}
                 >
                     Xóa bộ lọc
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="info"
+                    startIcon={<AccessAlarm />}
+                    onClick={handleOpenAutoDialog}
+                >
+                    Tự động nhập
                 </Button>
             </Box>
 
@@ -561,6 +664,240 @@ const AdminReceipt = () => {
                     <Button onClick={handleSubmit} variant="contained" color="success">
                         Lưu
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog cấu hình tự động */}
+            <Dialog open={openAutoDialog} onClose={() => setOpenAutoDialog(false)} maxWidth="md" fullWidth>
+                <DialogTitle>Cấu hình tự động nhập phiếu</DialogTitle>
+                <DialogContent>
+                    {/* Thêm input cho import_date */}
+                    <TextField
+                        label="Ngày nhập"
+                        type="date"
+                        value={autoConfig.import_date}
+                        onChange={e => setAutoConfig({ ...autoConfig, import_date: e.target.value })}
+                        fullWidth
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                    />
+
+                    <TextField
+                        label="Giờ chạy (HH:mm)"
+                        type="time"
+                        value={autoConfig.run_time}
+                        onChange={e => setAutoConfig({ ...autoConfig, run_time: e.target.value })}
+                        fullWidth
+                        margin="normal"
+                        InputLabelProps={{ shrink: true }}
+                    />
+
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Trạng thái</InputLabel>
+                        <Select
+                            value={autoConfig.enabled ? 1 : 0}
+                            onChange={e => setAutoConfig({ ...autoConfig, enabled: !!e.target.value })}
+                            label="Trạng thái"
+                        >
+                            <MenuItem value={1}>Bật</MenuItem>
+                            <MenuItem value={0}>Tắt</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    {/* Phần chọn hoa cho cấu hình tự động */}
+                    <Box sx={{ mt: 3, position: 'relative' }}>
+                        <Typography variant="subtitle1" gutterBottom>
+                            Chọn hoa cho phiếu nhập tự động
+                        </Typography>
+
+                        <TextField
+                            label="Tìm kiếm hoa"
+                            value={autoFlowerSearch}
+                            onChange={(e) => setAutoFlowerSearch(e.target.value)}
+                            onFocus={() => setAutoFlowerDropdownOpen(true)}
+                            fullWidth
+                            margin="normal"
+                            size="small"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Search />
+                                    </InputAdornment>
+                                )
+                            }}
+                        />
+
+                        {/* Dropdown menu cho danh sách hoa */}
+                        {autoFlowerDropdownOpen && (
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    position: 'absolute',
+                                    zIndex: 1000,
+                                    width: '100%',
+                                    maxHeight: 300,
+                                    overflow: 'auto',
+                                    mt: 0.5,
+                                    boxShadow: 3
+                                }}
+                            >
+                                <Box display="flex" justifyContent="flex-end" p={1}>
+                                    <Button
+                                        size="small"
+                                        onClick={() => setAutoFlowerDropdownOpen(false)}
+                                    >
+                                        Đóng
+                                    </Button>
+                                </Box>
+                                <List dense>
+                                    {filteredAutoFlowers.length === 0 ? (
+                                        <ListItem>
+                                            <ListItemText primary="Không tìm thấy hoa phù hợp" />
+                                        </ListItem>
+                                    ) : (
+                                        filteredAutoFlowers.map((flower) => {
+                                            const isSelected = isAutoFlowerSelected(flower.id);
+
+                                            return (
+                                                <React.Fragment key={flower.id}>
+                                                    <ListItem
+                                                        button
+                                                        onClick={() => handleAddAutoFlower(flower)}
+                                                    >
+                                                        <ListItemIcon>
+                                                            <Checkbox
+                                                                edge="start"
+                                                                checked={isSelected}
+                                                                tabIndex={-1}
+                                                                disableRipple
+                                                            />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={flower.name}
+                                                            secondary={`Giá: ${Number(flower.price).toLocaleString()} đ`}
+                                                        />
+                                                        {isSelected && (
+                                                            <Box display="flex" alignItems="center" gap={1}>
+                                                                <TextField
+                                                                    label="SL"
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={autoConfig.details.find(d => d.flower_id === flower.id)?.quantity || 10}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleAutoDetailChange(flower.id, "quantity", parseInt(e.target.value) || 10);
+                                                                    }}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    inputProps={{ min: 1, style: { width: '50px' } }}
+                                                                />
+                                                                <TextField
+                                                                    label="Giá"
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={autoConfig.details.find(d => d.flower_id === flower.id)?.import_price || 0}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleAutoDetailChange(flower.id, "import_price", parseFloat(e.target.value) || 0);
+                                                                    }}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    inputProps={{ min: 0, style: { width: '80px' } }}
+                                                                />
+                                                            </Box>
+                                                        )}
+                                                    </ListItem>
+                                                    <Divider />
+                                                </React.Fragment>
+                                            );
+                                        })
+                                    )}
+                                </List>
+                            </Paper>
+                        )}
+                    </Box>
+
+                    {/* Hiển thị danh sách hoa đã chọn cho auto config */}
+                    {autoConfig.details.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Danh sách hoa sẽ tự động nhập ({autoConfig.details.length})
+                            </Typography>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Tên hoa</TableCell>
+                                        <TableCell>Số lượng</TableCell>
+                                        <TableCell>Giá nhập</TableCell>
+                                        <TableCell>Thành tiền</TableCell>
+                                        <TableCell></TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {autoConfig.details.map((detail) => {
+                                        const flower = flowers.find(f => f.id === detail.flower_id);
+                                        const flowerName = flower ? flower.name : detail.flower_name || "Không xác định";
+                                        return (
+                                            <TableRow key={detail.flower_id}>
+                                                <TableCell>{flowerName}</TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        size="small"
+                                                        value={detail.quantity}
+                                                        onChange={e => handleAutoDetailChange(detail.flower_id, "quantity", parseInt(e.target.value) || 10)}
+                                                        inputProps={{ min: 1 }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        size="small"
+                                                        value={detail.import_price}
+                                                        onChange={e => handleAutoDetailChange(detail.flower_id, "import_price", parseFloat(e.target.value) || 0)}
+                                                        inputProps={{ min: 0 }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {(detail.quantity * detail.import_price).toLocaleString()} đ
+                                                </TableCell>
+                                                <TableCell>
+                                                    <IconButton
+                                                        size="small"
+                                                        color="error"
+                                                        onClick={() => handleRemoveAutoFlower(detail.flower_id)}
+                                                    >
+                                                        <Delete fontSize="small" />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </Box>
+                    )}
+
+                    {/* Hiển thị thông tin cấu hình hiện tại nếu có */}
+                    <Box sx={{ mt: 3, mb: 2, p: 2, border: '1px solid #eee', borderRadius: 1 }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Cấu hình hiện tại:
+                        </Typography>
+                        <Typography>
+                            Ngày nhập: {autoConfig.import_date || 'Chưa cấu hình'}
+                        </Typography>
+                        <Typography>
+                            Giờ chạy: {autoConfig.run_time || 'Chưa cấu hình'}
+                        </Typography>
+                        <Typography>
+                            Trạng thái: {autoConfig.enabled ? 'Bật' : 'Tắt'}
+                        </Typography>
+                        <Typography>
+                            Số loại hoa: {autoConfig.details?.length || 0}
+                        </Typography>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenAutoDialog(false)}>Hủy</Button>
+                    <Button variant="contained" onClick={handleSaveAutoConfig}>Lưu</Button>
                 </DialogActions>
             </Dialog>
         </Box>

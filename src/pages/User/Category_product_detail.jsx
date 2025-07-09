@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { getProductsByCategory } from "../../services/productService";
 import { getCategoryId } from "../../services/categoryService";
 import CategoryProductGrid from "../../component/home/CategoryProductGrid";
+import { Container } from "@mui/material";
 
 const CategoryProductDetail = () => {
     const { id } = useParams();
@@ -21,14 +22,14 @@ const CategoryProductDetail = () => {
     }, [id]);
 
     return (
-        <div>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
 
             {products.length === 0 ? (
                 <p>Không có sản phẩm nào trong danh mục này.</p>
             ) : (
                 <CategoryProductGrid products={products} title={category?.name || "Sản phẩm"} />
             )}
-        </div>
+        </Container>
     );
 };
 

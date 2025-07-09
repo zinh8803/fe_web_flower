@@ -24,7 +24,17 @@ const NotificationSnackbar = () => {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             TransitionComponent={SlideTransition}
         >
-            <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
+            <Alert
+                onClose={handleClose}
+                severity={severity}
+                sx={{
+                    width: "100%",
+                    fontSize: "1rem",
+                    p: 1,
+                    minWidth: 350,
+                    fontWeight: 600
+                }}
+            >
                 {message}
             </Alert>
         </Snackbar>

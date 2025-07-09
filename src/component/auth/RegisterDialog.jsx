@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../store/userSlice";
 import { register, getProfile } from "../../services/userService";
 import { sendOtpMail } from "../../services/mailService";
+import { showNotification } from "../../store/notificationSlice";
 
 const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
     const [form, setForm] = useState({
@@ -20,9 +21,14 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
     });
     const [otpTimer, setOtpTimer] = useState(0);
     const [loadingOtp, setLoadingOtp] = useState(false);
+    const [loadingRegister, setLoadingRegister] = useState(false);
+    const [errors, setErrors] = useState({ phone: "", email: "" });
     const timerRef = useRef(null);
 
     const dispatch = useDispatch();
+
+    const phoneRegex = /^0\d{9}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,11 +36,32 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
             ...form,
             [name]: value,
         });
+
+        // Kiểm tra lỗi realtime
+        if (name === "phone") {
+            setErrors(errors => ({
+                ...errors,
+                phone: value && !phoneRegex.test(value)
+                    ? "Số điện thoại phải 10 số và bắt đầu bằng 0"
+                    : ""
+            }));
+        }
+        if (name === "email") {
+            setErrors(errors => ({
+                ...errors,
+                email: value && !emailRegex.test(value)
+                    ? "Email không đúng định dạng"
+                    : ""
+            }));
+        }
     };
 
     const handleSendOtp = async () => {
         if (!form.email) {
-            alert("Vui lòng nhập email trước!");
+            dispatch(showNotification({
+                message: "Vui lòng nhập email trước!",
+                severity: "warning"
+            }));
             return;
         }
         setLoadingOtp(true);
@@ -50,14 +77,44 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     return prev - 1;
                 });
             }, 1000);
+            dispatch(showNotification({
+                message: "Đã gửi mã OTP tới email!",
+                severity: "success"
+            }));
         } catch (err) {
             console.error(err);
-            alert("Gửi mã OTP thất bại!");
+            dispatch(showNotification({
+                message: "Email đã đăng ký!",
+                severity: "error"
+            }));
         }
         setLoadingOtp(false);
     };
 
     const handleRegister = async () => {
+        if (
+            !form.name.trim() ||
+            !form.phone.trim() ||
+            !form.email.trim() ||
+            !form.password ||
+            !form.password_confirmation ||
+            !form.otp.trim()
+        ) {
+            dispatch(showNotification({
+                message: "Vui lòng nhập đầy đủ thông tin!",
+                severity: "warning"
+            }));
+            return;
+        }
+        if (form.password !== form.password_confirmation) {
+            dispatch(showNotification({
+                message: "Mật khẩu xác nhận không khớp!",
+                severity: "warning"
+            }));
+            return;
+        }
+
+        setLoadingRegister(true);
         try {
             await register(form);
             const profileRes = await getProfile();
@@ -69,16 +126,45 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
 
             localStorage.setItem("user", JSON.stringify(userData));
 
+            dispatch(showNotification({
+                message: "Đăng ký thành công!",
+                severity: "success"
+            }));
+            handleResetForm();
             onClose();
         } catch (err) {
             console.error(err);
             if (err.response && err.response.data) {
                 const errorMessage = err.response.data.message || "Đăng ký thất bại";
-                alert(errorMessage);
+                dispatch(showNotification({
+                    message: errorMessage,
+                    severity: "error"
+                }));
+                setLoadingRegister(false);
                 return;
             }
-            alert("Đăng ký thất bại");
+            dispatch(showNotification({
+                message: "Đăng ký thất bại",
+                severity: "error"
+            }));
         }
+        setLoadingRegister(false);
+    };
+
+    const handleResetForm = () => {
+        setForm({
+            name: "",
+            phone: "",
+            email: "",
+            password: "",
+            password_confirmation: "",
+            otp: "",
+        });
+        setErrors({ phone: "", email: "" });
+        setOtpTimer(0);
+        clearInterval(timerRef.current);
+        setLoadingOtp(false);
+        setLoadingRegister(false);
     };
 
     // Clear timer khi đóng dialog
@@ -133,6 +219,8 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
+                    error={!!errors.phone}
+                    helperText={errors.phone}
                 />
 
                 <Typography variant="body1" fontWeight="bold">
@@ -147,6 +235,8 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                         name="email"
                         value={form.email}
                         onChange={handleChange}
+                        error={!!errors.email}
+                        helperText={errors.email}
                     />
                     <Button
                         variant="contained"
@@ -219,8 +309,9 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                             }
                         }}
                         onClick={handleRegister}
+                        disabled={loadingRegister}
                     >
-                        ĐĂNG KÝ
+                        {loadingRegister ? <CircularProgress size={24} color="inherit" /> : "ĐĂNG KÝ"}
                     </Button>
                 </Box>
 

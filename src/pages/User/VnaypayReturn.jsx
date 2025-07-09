@@ -4,6 +4,7 @@ import { clearCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createOrder } from "../../services/orderService";
+import { CircularProgress, Box, Typography } from "@mui/material";
 
 const VnpayReturn = () => {
     const dispatch = useDispatch();
@@ -41,7 +42,12 @@ const VnpayReturn = () => {
         }
     }, [dispatch, navigate, location.search]);
 
-    return <div>Đang xử lý thanh toán...</div>;
+    return (
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="60vh">
+            <CircularProgress size={48} sx={{ mb: 2 }} />
+            <Typography>Đang xử lý thanh toán...</Typography>
+        </Box>
+    );
 };
 
 export default VnpayReturn;

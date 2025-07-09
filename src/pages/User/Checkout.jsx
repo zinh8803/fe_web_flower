@@ -6,6 +6,8 @@ import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/mate
 import { clearCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { getPayments } from "../../services/paymentService";
+import codImg from "../../assets/img/cash.png";
+import vnpayImg from "../../assets/img/vnpay.png";
 
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
@@ -174,18 +176,41 @@ const Checkout = () => {
                 fullWidth
                 margin="normal"
             />
-            <TextField
-                select
-                label="Phương thức thanh toán"
-                name="payment_method"
-                value={form.payment_method}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-            >
-                <MenuItem value="cod">Thanh toán khi nhận hàng (COD)</MenuItem>
-                <MenuItem value="vnpay">Thanh toán VNPAY</MenuItem>
-            </TextField>
+            <Typography fontWeight={600} mb={1}>Phương thức thanh toán</Typography>
+            <Box display="flex" gap={3} mb={2}>
+                <Box
+                    onClick={() => setForm({ ...form, payment_method: "cod" })}
+                    sx={{
+                        border: form.payment_method === "cod" ? "2px solid #1976d2" : "1px solid #ccc",
+                        borderRadius: 2,
+                        p: 2,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        boxShadow: form.payment_method === "cod" ? 2 : 0,
+                        bgcolor: form.payment_method === "cod" ? "#f5faff" : "#fff"
+                    }}
+                >
+                    <img src={codImg} alt="COD" width={48} style={{ marginRight: 12 }} />
+                    <Typography fontWeight={500}>Thanh toán khi nhận hàng</Typography>
+                </Box>
+                <Box
+                    onClick={() => setForm({ ...form, payment_method: "vnpay" })}
+                    sx={{
+                        border: form.payment_method === "vnpay" ? "2px solid #1976d2" : "1px solid #ccc",
+                        borderRadius: 2,
+                        p: 2,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        boxShadow: form.payment_method === "vnpay" ? 2 : 0,
+                        bgcolor: form.payment_method === "vnpay" ? "#f5faff" : "#fff"
+                    }}
+                >
+                    <img src={vnpayImg} alt="VNPAY" width={48} style={{ marginRight: 12 }} />
+                    <Typography fontWeight={500}>Thanh toán VNPAY</Typography>
+                </Box>
+            </Box>
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1" fontWeight={600} mb={2}>Đơn hàng của bạn</Typography>

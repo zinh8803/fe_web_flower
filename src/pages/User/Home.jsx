@@ -1,7 +1,6 @@
 import React from "react";
-import { Box, Button, Container } from "@mui/material";
+import { Container } from "@mui/material";
 import ProductGrid from "../../component/home/ProductGrid";
-import LoginDialog from "../../component/auth/LoginDialog";
 
 const Home = () => {
     document.title = 'Trang sản phẩm';
