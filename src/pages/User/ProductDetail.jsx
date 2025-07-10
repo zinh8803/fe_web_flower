@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, ButtonGroup } from "@mui/material";
+import { Box, Typography, Button, ButtonGroup, Container } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { getProductById, getProductsByCategory } from "../../services/productService";
 import { useDispatch, useSelector } from "react-redux";
@@ -125,7 +125,7 @@ const ProductDetail = () => {
     if (!product) return <Typography>Không tìm thấy sản phẩm.</Typography>;
 
     return (
-        <Box sx={{ p: 4, maxWidth: "1200px", mx: "auto" }}>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
             <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
                 <Box sx={{ flex: 1 }}>
                     <img
@@ -182,7 +182,7 @@ const ProductDetail = () => {
             </Box>
             <ProductDescription description={product.description} />
             <RelatedProducts related={related} />
-        </Box>
+        </Container>
     );
 };
 

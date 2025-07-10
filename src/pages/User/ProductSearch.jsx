@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProductsBySearch } from "../../services/productService";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Container, Typography, CircularProgress } from "@mui/material";
 import ProductSearchGrid from "../../component/home/ProductSearchGrid";
 
 const ProductSearch = () => {
@@ -24,7 +24,7 @@ const ProductSearch = () => {
     }, [keyword]);
 
     return (
-        <Box maxWidth="1200px" mx="auto" mt={4}>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Kết quả tìm kiếm: "{keyword}"
             </Typography>
@@ -35,7 +35,7 @@ const ProductSearch = () => {
             ) : (
                 <ProductSearchGrid products={products} title={`Kết quả cho "${keyword}"`} />
             )}
-        </Box>
+        </Container>
     );
 };
 

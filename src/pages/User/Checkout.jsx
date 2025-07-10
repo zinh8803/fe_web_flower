@@ -8,7 +8,8 @@ import { showNotification } from "../../store/notificationSlice";
 import { getPayments } from "../../services/paymentService";
 import codImg from "../../assets/img/cash.png";
 import vnpayImg from "../../assets/img/vnpay.png";
-
+import Cookies from "js-cookie";
+import { LogIn } from "lucide-react";
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
     const user = useSelector(state => state.user.user);
@@ -28,7 +29,10 @@ const Checkout = () => {
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
     const [discountId, setDiscountId] = useState(null);
-
+    const [errors, setErrors] = useState({ phone: "", email: "" });
+    //const isLoggedIn = !!user;
+    const phoneRegex = /^0\d{9}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     useEffect(() => {
         document.title = 'Thanh toán đơn hàng';
         if (location.state) {
@@ -54,8 +58,33 @@ const Checkout = () => {
         }
     }, [user]);
 
+    // useEffect(() => {
+    //     if (!isLoggedIn) {
+    //         setForm(prev => ({ ...prev, payment_method: "vnpay" }));
+    //     }
+    // }, [isLoggedIn]);
+
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+
+        // Kiểm tra lỗi realtime
+        if (name === "phone") {
+            setErrors(errors => ({
+                ...errors,
+                phone: value && !phoneRegex.test(value)
+                    ? "Số điện thoại phải 10 số và bắt đầu bằng 0"
+                    : ""
+            }));
+        }
+        if (name === "email") {
+            setErrors(errors => ({
+                ...errors,
+                email: value && !emailRegex.test(value)
+                    ? "Email không đúng định dạng"
+                    : ""
+            }));
+        }
     };
 
     const subtotal = cartItems.reduce(
@@ -90,7 +119,6 @@ const Checkout = () => {
             } catch (err) {
                 if (err.response && err.response.data) {
                     console.log("Lỗi đặt hàng:", err.response.data);
-                    //alert(JSON.stringify(err.response.data.message));
                 }
                 dispatch(showNotification({ message: err.response.data.message, severity: "error" }));
             } finally {
@@ -128,7 +156,6 @@ const Checkout = () => {
 
     console.log("user in checkout:", user);
 
-    // Đảm bảo total không nhỏ hơn 0
     const displayTotal = total < 0 ? 0 : total;
 
     return (
@@ -151,6 +178,8 @@ const Checkout = () => {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
+                error={!!errors.email}
+                helperText={errors.email}
             />
             <TextField
                 label="Số điện thoại"
@@ -159,6 +188,8 @@ const Checkout = () => {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
+                error={!!errors.phone}
+                helperText={errors.phone}
             />
             <TextField
                 label="Địa chỉ"
@@ -178,22 +209,24 @@ const Checkout = () => {
             />
             <Typography fontWeight={600} mb={1}>Phương thức thanh toán</Typography>
             <Box display="flex" gap={3} mb={2}>
-                <Box
-                    onClick={() => setForm({ ...form, payment_method: "cod" })}
-                    sx={{
-                        border: form.payment_method === "cod" ? "2px solid #1976d2" : "1px solid #ccc",
-                        borderRadius: 2,
-                        p: 2,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        boxShadow: form.payment_method === "cod" ? 2 : 0,
-                        bgcolor: form.payment_method === "cod" ? "#f5faff" : "#fff"
-                    }}
-                >
-                    <img src={codImg} alt="COD" width={48} style={{ marginRight: 12 }} />
-                    <Typography fontWeight={500}>Thanh toán khi nhận hàng</Typography>
-                </Box>
+                {user && (
+                    <Box
+                        onClick={() => setForm({ ...form, payment_method: "cod" })}
+                        sx={{
+                            border: form.payment_method === "cod" ? "2px solid #1976d2" : "1px solid #ccc",
+                            borderRadius: 2,
+                            p: 2,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            boxShadow: form.payment_method === "cod" ? 2 : 0,
+                            bgcolor: form.payment_method === "cod" ? "#f5faff" : "#fff"
+                        }}
+                    >
+                        <img src={codImg} alt="COD" width={48} style={{ marginRight: 12 }} />
+                        <Typography fontWeight={500}>Thanh toán khi nhận hàng</Typography>
+                    </Box>
+                )}
                 <Box
                     onClick={() => setForm({ ...form, payment_method: "vnpay" })}
                     sx={{

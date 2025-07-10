@@ -683,7 +683,7 @@ const AdminReceipt = () => {
                     />
 
                     <TextField
-                        label="Giờ chạy (HH:mm)"
+                        label="Giờ nhập (HH:mm)"
                         type="time"
                         value={autoConfig.run_time}
                         onChange={e => setAutoConfig({ ...autoConfig, run_time: e.target.value })}
@@ -885,7 +885,7 @@ const AdminReceipt = () => {
                             Ngày nhập: {autoConfig.import_date || 'Chưa cấu hình'}
                         </Typography>
                         <Typography>
-                            Giờ chạy: {autoConfig.run_time || 'Chưa cấu hình'}
+                            Giờ nhập: {autoConfig.run_time || 'Chưa cấu hình'}
                         </Typography>
                         <Typography>
                             Trạng thái: {autoConfig.enabled ? 'Bật' : 'Tắt'}

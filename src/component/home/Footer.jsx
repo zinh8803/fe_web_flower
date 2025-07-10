@@ -27,7 +27,6 @@ export default function Footer() {
               justifyContent: { md: "space-between" }
             }}
           >
-            {/* Company Info - dịch qua phải một chút */}
             <Grid
               item
               xs={12}
@@ -35,9 +34,7 @@ export default function Footer() {
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: { xs: 'center', md: 'flex-start' },
-                pl: { md: 6, lg: 18 }, // Dịch qua phải nhiều hơn
-                pr: { md: 0 }
+                alignItems: { xs: 'center', md: 'flex-start' }
               }}
             >
               <img
@@ -282,8 +279,7 @@ export default function Footer() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: { xs: 'center', md: 'flex-start' },
-                justifyContent: 'center',
-                pr: { md: 6, lg: 18 }
+                justifyContent: 'center'
               }}
             >
               <Typography

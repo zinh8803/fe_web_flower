@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {
-    Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper, Avatar, Drawer, List, ListItem, ListItemText, Divider
+    Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper, Avatar, Drawer, List, ListItem, ListItemText, Divider, Container
 } from "@mui/material";
 import { ShoppingCart, Menu as MenuIcon, Search, Close } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
@@ -78,14 +78,15 @@ const Header = () => {
 
     return (
         <Box component="header" width="100%" borderTop={1} borderColor="divider" boxShadow={1} position="sticky" top={0} zIndex={1000} bgcolor="#fff">
-            <Box
-                maxWidth="lg"
-                mx="auto"
-                px={{ xs: 1, sm: 2, md: 4 }}
-                py={1.5}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
+            <Container
+                maxWidth="xl"
+                sx={{
+                    px: { xs: 1, sm: 2, md: 4 },
+                    py: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between"
+                }}
             >
                 {/* Logo */}
                 <Box display="flex" alignItems="center" gap={2}>
@@ -196,7 +197,7 @@ const Header = () => {
                         </IconButton>
                     </Box>
                 </Box>
-            </Box>
+            </Container>
 
             {/* Search riêng cho mobile */}
             <Box display={{ xs: "block", sm: "none" }} px={2} pb={1}>

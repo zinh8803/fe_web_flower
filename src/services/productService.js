@@ -26,4 +26,9 @@ export const getStockWarning = (page = 1) =>
     api.get(`/products/stock-warning?page=${page}`);
 export const searchStockWarning = (q = "", page = 1) =>
     api.get(`/products/stock-warning/search?q=${encodeURIComponent(q)}&page=${page}`);
+export const filterProducts = (params) =>
+    api.get("/products/filter", {
+        params: params,
+        withCredentials: true
+    });
 
