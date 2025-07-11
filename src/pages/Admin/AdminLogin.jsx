@@ -25,7 +25,7 @@ const AdminLogin = () => {
             const token = res.data.token;
             const profileRes = await getProfile(token);
             const user = profileRes.data.data;
-            if (user.role !== "admin") {
+            if (user.role !== "admin" && user.role !== "employee") {
                 setError("Bạn không có quyền truy cập trang admin.");
                 setLoading(false);
                 return;

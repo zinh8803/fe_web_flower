@@ -9,7 +9,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { logoutAndClearCart } from "../../store/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Warehouse } from "lucide-react";
 
 const AdminMenu = () => {
@@ -17,6 +17,7 @@ const AdminMenu = () => {
     const [openProduct, setOpenProduct] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const user = useSelector(state => state.user.user);
 
     const handleLogout = () => {
         dispatch(logoutAndClearCart());
@@ -55,7 +56,7 @@ const AdminMenu = () => {
             {/* Menu cuộn riêng nếu quá dài */}
             <Box sx={{ flex: 1 }}>
                 <List component="nav" >
-                    {/* Dashboard */}
+                    {/* Luôn hiện Dashboard */}
                     <ListItem
                         button
                         component={Link}
@@ -73,138 +74,143 @@ const AdminMenu = () => {
                         <ListItemText primary="Dashboard" sx={{ color: "black" }} />
                     </ListItem>
 
-                    {/* Quản lý loại hoa */}
-                    <ListItem
-                        button
-                        component={Link}
-                        to="/admin/flower-types"
-                        selected={location.pathname.startsWith("/admin/flower-types")}
-                        sx={{
-                            "&.Mui-selected, &.Mui-selected:hover": {
-                                bgcolor: "#e0f2f1",
-                                color: "black"
-                            },
-                            color: "black"
-                        }}
-                    >
-                        <ListItemIcon sx={{ color: "green" }}><Spa /></ListItemIcon>
-                        <ListItemText primary="Quản lý loại hoa" sx={{ color: "black" }} />
-                    </ListItem>
-
-                    {/* Quản lý hoa */}
-                    <ListItem
-                        button
-                        component={Link}
-                        to="/admin/flowers"
-                        selected={location.pathname.startsWith("/admin/flowers")}
-                        sx={{
-                            "&.Mui-selected, &.Mui-selected:hover": {
-                                bgcolor: "#e0f2f1",
-                                color: "black"
-                            },
-                            color: "black"
-                        }}
-                    >
-                        <ListItemIcon sx={{ color: "green" }}><LocalFlorist /></ListItemIcon>
-                        <ListItemText primary="Quản lý hoa" sx={{ color: "black" }} />
-                    </ListItem>
-                    {/* Các menu khác */}
-                    <ListItem
-                        button
-                        component={Link}
-                        to="/admin/categories"
-                        selected={location.pathname.startsWith("/admin/categories")}
-                        sx={{
-                            "&.Mui-selected, &.Mui-selected:hover": {
-                                bgcolor: "#e0f2f1",
-                                color: "black"
-                            },
-                            color: "black"
-                        }}
-                    >
-                        <ListItemIcon sx={{ color: "green" }}><Category /></ListItemIcon>
-                        <ListItemText primary="Quản lý danh mục" />
-                    </ListItem>
-                    {/* Quản lý sản phẩm xổ xuống */}
-                    <ListItem
-                        button
-                        selected={location.pathname.startsWith("/admin/products")}
-                        onClick={() => navigate("/admin/products")}
-                    >
-                        <ListItemIcon sx={{ color: "green" }}><Inventory /></ListItemIcon>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <ListItemText primary="Quản lý sản phẩm" />
-                            <IconButton
-                                size="small"
-                                sx={{ ml: 1 }}
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    setOpenProduct(!openProduct);
-                                }}
-                            >
-                                {openProduct ? <ExpandLess /> : <ExpandMore />}
-                            </IconButton>
-                        </Box>
-                    </ListItem>
-                    <Collapse in={openProduct} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
+                    {/* Nếu là admin thì hiện đầy đủ menu */}
+                    {user?.role === "admin" && (
+                        <>
+                            {/* Quản lý loại hoa */}
                             <ListItem
                                 button
                                 component={Link}
-                                to="/admin/products/stock"
-                                sx={{ pl: 4 }}
-                                selected={location.pathname === "/admin/products/stock"}
-                            >
-                                <ListItemIcon sx={{ color: "green" }}><Warehouse /></ListItemIcon>
-                                <ListItemText primary="Tồn kho" sx={{
+                                to="/admin/flower-types"
+                                selected={location.pathname.startsWith("/admin/flower-types")}
+                                sx={{
                                     "&.Mui-selected, &.Mui-selected:hover": {
                                         bgcolor: "#e0f2f1",
                                         color: "black"
                                     },
                                     color: "black"
-                                }} />
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><Spa /></ListItemIcon>
+                                <ListItemText primary="Quản lý loại hoa" sx={{ color: "black" }} />
                             </ListItem>
 
-                        </List>
-                    </Collapse>
+                            {/* Quản lý hoa */}
+                            <ListItem
+                                button
+                                component={Link}
+                                to="/admin/flowers"
+                                selected={location.pathname.startsWith("/admin/flowers")}
+                                sx={{
+                                    "&.Mui-selected, &.Mui-selected:hover": {
+                                        bgcolor: "#e0f2f1",
+                                        color: "black"
+                                    },
+                                    color: "black"
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><LocalFlorist /></ListItemIcon>
+                                <ListItemText primary="Quản lý hoa" sx={{ color: "black" }} />
+                            </ListItem>
+                            {/* Các menu khác */}
+                            <ListItem
+                                button
+                                component={Link}
+                                to="/admin/categories"
+                                selected={location.pathname.startsWith("/admin/categories")}
+                                sx={{
+                                    "&.Mui-selected, &.Mui-selected:hover": {
+                                        bgcolor: "#e0f2f1",
+                                        color: "black"
+                                    },
+                                    color: "black"
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><Category /></ListItemIcon>
+                                <ListItemText primary="Quản lý danh mục" />
+                            </ListItem>
+                            {/* Quản lý sản phẩm xổ xuống */}
+                            <ListItem
+                                button
+                                selected={location.pathname.startsWith("/admin/products")}
+                                onClick={() => navigate("/admin/products")}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><Inventory /></ListItemIcon>
+                                <Box sx={{ display: "flex", alignItems: "center" }}>
+                                    <ListItemText primary="Quản lý sản phẩm" />
+                                    <IconButton
+                                        size="small"
+                                        sx={{ ml: 1 }}
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            setOpenProduct(!openProduct);
+                                        }}
+                                    >
+                                        {openProduct ? <ExpandLess /> : <ExpandMore />}
+                                    </IconButton>
+                                </Box>
+                            </ListItem>
+                            <Collapse in={openProduct} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding>
+                                    <ListItem
+                                        button
+                                        component={Link}
+                                        to="/admin/products/stock"
+                                        sx={{ pl: 4 }}
+                                        selected={location.pathname === "/admin/products/stock"}
+                                    >
+                                        <ListItemIcon sx={{ color: "green" }}><Warehouse /></ListItemIcon>
+                                        <ListItemText primary="Tồn kho" sx={{
+                                            "&.Mui-selected, &.Mui-selected:hover": {
+                                                bgcolor: "#e0f2f1",
+                                                color: "black"
+                                            },
+                                            color: "black"
+                                        }} />
+                                    </ListItem>
 
-                    {/* Quản lý phiếu nhập */}
-                    <ListItem
-                        button
-                        component={Link}
-                        to="/admin/receipts"
-                        selected={location.pathname.startsWith("/admin/receipts")}
-                        sx={{
-                            "&.Mui-selected, &.Mui-selected:hover": {
-                                bgcolor: "#e0f2f1",
-                                color: "black"
-                            },
-                            color: "black"
-                        }}
-                    >
-                        <ListItemIcon sx={{ color: "green" }}><ReceiptLong /></ListItemIcon>
-                        <ListItemText primary="Quản lý phiếu nhập" />
-                    </ListItem>
+                                </List>
+                            </Collapse>
 
-                    {/* Quản lý mã giảm giá */}
-                    <ListItem
-                        button
-                        component={Link}
-                        to="/admin/discounts"
-                        selected={location.pathname.startsWith("/admin/discounts")}
-                        sx={{
-                            "&.Mui-selected, &.Mui-selected:hover": {
-                                bgcolor: "#e0f2f1",
-                                color: "black"
-                            },
-                            color: "black"
-                        }}
-                    >
-                        <ListItemIcon sx={{ color: "green" }}><LocalOffer /></ListItemIcon>
-                        <ListItemText primary="Quản lý mã giảm giá" />
-                    </ListItem>
+                            {/* Quản lý mã giảm giá */}
+                            <ListItem
+                                button
+                                component={Link}
+                                to="/admin/discounts"
+                                selected={location.pathname.startsWith("/admin/discounts")}
+                                sx={{
+                                    "&.Mui-selected, &.Mui-selected:hover": {
+                                        bgcolor: "#e0f2f1",
+                                        color: "black"
+                                    },
+                                    color: "black"
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><LocalOffer /></ListItemIcon>
+                                <ListItemText primary="Quản lý mã giảm giá" />
+                            </ListItem>
 
+                            {/* Quản lý người dùng */}
+                            <ListItem
+                                button
+                                component={Link}
+                                to="/admin/users"
+                                selected={location.pathname.startsWith("/admin/users")}
+                                sx={{
+                                    "&.Mui-selected, &.Mui-selected:hover": {
+                                        bgcolor: "#e0f2f1",
+                                        color: "black"
+                                    },
+                                    color: "black"
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><People /></ListItemIcon>
+                                <ListItemText primary="Quản lý người dùng" />
+                            </ListItem>
+                        </>
+                    )}
 
+                    {/* Đơn hàng và phiếu nhập: cả admin và employee đều có */}
                     <ListItem
                         button
                         component={Link}
@@ -224,8 +230,8 @@ const AdminMenu = () => {
                     <ListItem
                         button
                         component={Link}
-                        to="/admin/users"
-                        selected={location.pathname.startsWith("/admin/users")}
+                        to="/admin/receipts"
+                        selected={location.pathname.startsWith("/admin/receipts")}
                         sx={{
                             "&.Mui-selected, &.Mui-selected:hover": {
                                 bgcolor: "#e0f2f1",
@@ -234,9 +240,11 @@ const AdminMenu = () => {
                             color: "black"
                         }}
                     >
-                        <ListItemIcon sx={{ color: "green" }}><People /></ListItemIcon>
-                        <ListItemText primary="Quản lý người dùng" />
+                        <ListItemIcon sx={{ color: "green" }}><ReceiptLong /></ListItemIcon>
+                        <ListItemText primary="Quản lý phiếu nhập" />
                     </ListItem>
+
+                    {/* Logout */}
                     <ListItem
                         button
                         onClick={handleLogout}

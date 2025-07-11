@@ -8,8 +8,6 @@ import { showNotification } from "../../store/notificationSlice";
 import { getPayments } from "../../services/paymentService";
 import codImg from "../../assets/img/cash.png";
 import vnpayImg from "../../assets/img/vnpay.png";
-import Cookies from "js-cookie";
-import { LogIn } from "lucide-react";
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
     const user = useSelector(state => state.user.user);

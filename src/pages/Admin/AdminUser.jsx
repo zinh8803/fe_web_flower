@@ -3,11 +3,22 @@ import { getAllUsers } from "../../services/userService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip
 } from "@mui/material";
+import { createEmployee } from "../../services/Employee";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
+import Button from "@mui/material/Button";
 
 const AdminUser = () => {
     const [users, setUsers] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [open, setOpen] = useState(false);
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        password: "",
+        role: "employee",
+        status: 1
+    });
 
     useEffect(() => {
         fetchUsers(page);
@@ -28,11 +39,73 @@ const AdminUser = () => {
         setPage(value);
     };
 
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async () => {
+        try {
+            await createEmployee(form);
+            setOpen(false);
+            setForm({
+                name: "",
+                email: "",
+                password: "",
+                role: "employee",
+                status: 1
+            });
+            fetchUsers(page);
+        } catch (err) {
+            console.error(err);
+            alert(err);
+        }
+    };
+
     return (
         <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý người dùng
             </Typography>
+            <Button variant="contained" color="success" sx={{ mb: 2 }} onClick={handleOpen}>
+                Thêm nhân viên
+            </Button>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Thêm nhân viên</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        margin="dense"
+                        label="Tên"
+                        name="name"
+                        fullWidth
+                        value={form.name}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Email"
+                        name="email"
+                        fullWidth
+                        value={form.email}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Mật khẩu"
+                        name="password"
+                        type="password"
+                        fullWidth
+                        value={form.password}
+                        onChange={handleChange}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Huỷ</Button>
+                    <Button onClick={handleSubmit} variant="contained">Thêm</Button>
+                </DialogActions>
+            </Dialog>
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
