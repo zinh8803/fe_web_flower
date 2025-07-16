@@ -3,29 +3,33 @@ import { useParams } from "react-router-dom";
 import { getProductsByCategory } from "../../services/productService";
 import { getCategoryId } from "../../services/categoryService";
 import CategoryProductGrid from "../../component/home/CategoryProductGrid";
-import { Container } from "@mui/material";
+import { Box, CircularProgress, Container } from "@mui/material";
 
 const CategoryProductDetail = () => {
     const { id } = useParams();
     const [products, setProducts] = useState([]);
     const [category, setCategory] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         document.title = 'Danh mục sản phẩm';
-        getCategoryId(id)
-            .then(res => setCategory(res.data.data))
-            .catch(() => setCategory(null));
-
-        getProductsByCategory(id)
-            .then(res => setProducts(res.data.data || []))
-            .catch(() => setProducts([]));
+        setLoading(true);
+        Promise.all([
+            getCategoryId(id).then(res => setCategory(res.data.data)).catch(() => setCategory(null)),
+            getProductsByCategory(id).then(res => setProducts(res.data.data || [])).catch(() => setProducts([]))
+        ]).finally(() => setLoading(false));
     }, [id]);
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
-
-            {products.length === 0 ? (
-                <p>Không có sản phẩm nào trong danh mục này.</p>
+            {loading ? (
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+                    <CircularProgress />
+                </Box>
+            ) : products.length === 0 ? (
+                <Box textAlign="center" py={4}>
+                    <p>Không có sản phẩm nào trong danh mục này.</p>
+                </Box>
             ) : (
                 <CategoryProductGrid products={products} title={category?.name || "Sản phẩm"} />
             )}

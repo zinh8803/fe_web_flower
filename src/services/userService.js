@@ -57,3 +57,19 @@ export const getAllUsers = (page = 1) =>
             withCredentials: true,
         }
     );
+
+export const changePassword = (old_password, new_password, new_password_confirmation) =>
+    api.put("/change-password",
+        {
+            old_password,
+            new_password,
+            new_password_confirmation
+        },
+        {
+            withCredentials: true,
+        }
+    );
+
+export const resetPassword = (email, otp, new_password, new_password_confirmation) =>
+    api.put("/reset-password", { email, otp, new_password, new_password_confirmation }, {
+    });

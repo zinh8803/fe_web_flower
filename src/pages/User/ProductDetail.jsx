@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, ButtonGroup, Container } from "@mui/material";
+import { Box, Typography, Button, ButtonGroup, Container, CircularProgress } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { getProductById, getProductsByCategory } from "../../services/productService";
 import { useDispatch, useSelector } from "react-redux";
@@ -110,7 +110,7 @@ const ProductDetail = () => {
             image: product.image_url,
             quantity: quantity,
             size: selectedSize.size,
-            sizes: product.sizes, // Thêm mảng sizes để có thể đổi size
+            sizes: product.sizes,
         }));
         dispatch(showNotification({ message: "Thêm vào giỏ hàng thành công!", severity: "success" }));
 
@@ -121,7 +121,10 @@ const ProductDetail = () => {
         dispatch(fetchStockAvailability(updatedCartItems));
     };
 
-    if (loading) return <Typography>Đang tải sản phẩm...</Typography>;
+    if (loading)
+        return (<Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+            <CircularProgress />
+        </Box>);
     if (!product) return <Typography>Không tìm thấy sản phẩm.</Typography>;
 
     return (

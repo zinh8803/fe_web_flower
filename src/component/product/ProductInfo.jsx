@@ -38,13 +38,11 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart, disable
             {product.receipt_details && product.receipt_details.length > 0 && (
                 <Box mb={2}>
                     <Typography fontWeight={600}>Chi tiết hoa:</Typography>
-                    <ul>
-                        {product.receipt_details.map((f, idx) => (
-                            <li key={idx}>
-                                {f.flower_name} - SL: {f.quantity} ({Number(f.import_price).toLocaleString()}đ)
-                            </li>
-                        ))}
-                    </ul>
+                    {product.receipt_details.map((f, idx) => (
+                        <Typography key={idx} sx={{ marginBottom: 1 }}>
+                            {f.flower_name} - {f.quantity} bông
+                        </Typography>
+                    ))}
                 </Box>
             )}
             <Button

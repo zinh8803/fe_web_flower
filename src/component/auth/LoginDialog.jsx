@@ -126,7 +126,7 @@ const LoginDialog = ({ open, onClose }) => {
 
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                         <FormControlLabel control={<Checkbox />} label="Ghi nhớ mật khẩu" />
-                        <Link href="#" fontSize={14} fontWeight="bold" sx={{ color: orange[500], textDecoration: 'none' }}>
+                        <Link href="/reset-password" fontSize={14} fontWeight="bold" sx={{ color: orange[500], textDecoration: 'none' }}>
                             Quên mật khẩu ?
                         </Link>
                     </Box>

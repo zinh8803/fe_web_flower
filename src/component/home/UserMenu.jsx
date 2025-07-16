@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { Menu, MenuItem, IconButton, Avatar } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-//import { getProfile } from "../../api/profileApi"; // Import your API function
 import { logoutAndClearCart } from "../../store/userSlice";
 const UserMenu = ({ user }) => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -27,6 +26,11 @@ const UserMenu = ({ user }) => {
     const handleProfile = () => {
         handleClose();
         navigate("/profile");
+    }
+
+    const handleChanePassword = () => {
+        handleClose();
+        navigate("/change-password");
     }
 
     const handleOrderHistory = () => {
@@ -66,6 +70,7 @@ const UserMenu = ({ user }) => {
                 <MenuItem >{user.name}</MenuItem>
                 <MenuItem onClick={handleProfile}>Thông tin tài khoản</MenuItem>
                 <MenuItem onClick={handleOrderHistory}>Đơn hàng</MenuItem>
+                <MenuItem onClick={handleChanePassword}>Đổi mật khẩu</MenuItem>
                 <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>
         </div>

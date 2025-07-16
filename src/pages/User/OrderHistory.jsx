@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getOrderHistory } from "../../services/userService";
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination } from "@mui/material";
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const OrderHistory = () => {
@@ -25,7 +25,13 @@ const OrderHistory = () => {
         setPage(value);
     };
 
-    if (loading) return <Typography>Đang tải...</Typography>;
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
         <Box maxWidth="1500px" mx="auto" mt={4}>

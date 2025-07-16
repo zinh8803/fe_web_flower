@@ -27,6 +27,8 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import VnpayReturn from "../pages/User/VnaypayReturn";
 import AdminRoute from "./AdminRoute";
 import StockProductAdmin from "../pages/Admin/StockProductAdmin";
+import ChangePassWordPage from "../pages/User/ChangePassWordPage";
+import ResetPassWordPage from "../pages/User/ResetPassWordPage";
 
 const AppRoutes = () => (
     <Router>
@@ -41,6 +43,8 @@ const AppRoutes = () => (
                 <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/search" element={<ProductSearch />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/change-password" element={<ChangePassWordPage />} />
+                <Route path="/reset-password" element={<ResetPassWordPage />} />
                 <Route path="/vnpay_return" element={<VnpayReturn />} />
                 <Route element={<PrivateRoute />}>
                     <Route path="/orders/history" element={<OrderHistory />} />

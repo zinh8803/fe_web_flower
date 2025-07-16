@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProductsBySearch } from "../../services/productService";
-import { Container, Typography, CircularProgress } from "@mui/material";
+import { Container, Typography, CircularProgress, Box } from "@mui/material";
 import ProductSearchGrid from "../../component/home/ProductSearchGrid";
 
 const ProductSearch = () => {
@@ -29,7 +29,9 @@ const ProductSearch = () => {
                 Kết quả tìm kiếm: "{keyword}"
             </Typography>
             {loading ? (
-                <CircularProgress />
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+                    <CircularProgress />
+                </Box>
             ) : products.length === 0 ? (
                 <Typography>Không tìm thấy sản phẩm nào.</Typography>
             ) : (
