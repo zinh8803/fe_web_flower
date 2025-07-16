@@ -70,9 +70,10 @@ const AdminLayout = () => {
                                 easing: theme.transitions.easing.sharp,
                                 duration: theme.transitions.duration.enteringScreen,
                             }),
-                        overflowX: 'hidden',
-                        overflowY: 'visible', // ← Thêm dòng này
-                        // hoặc chỉ cần: overflow: 'visible',
+                        // overflowX: 'hidden',
+                        // overflowY: 'visible',
+                        //  overflow: 'visible',
+                        overflow: "hidden",
                         ...(open && {
                             width: drawerWidth,
                         }),

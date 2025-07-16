@@ -25,8 +25,10 @@ const ProductGrid = ({ filterParams = {} }) => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false); // Loading cho tải trang đầu
+    const [loadingMore, setLoadingMore] = useState(false); // Loading cho "Xem thêm"
     const [filtering, setFiltering] = useState(false);
+    const [isFiltering, setIsFiltering] = useState(false); // Thêm state
 
     const stockState = useSelector(state => state.stock);
     const cartItems = useSelector(state => state.cart.items);
@@ -48,7 +50,12 @@ const ProductGrid = ({ filterParams = {} }) => {
 
     const fetchProducts = async (page) => {
         try {
-            setLoading(true);
+            if (page === 1) {
+                setLoading(true); // Loading toàn bộ
+            } else {
+                setLoadingMore(true); // Loading "Xem thêm"
+            }
+
             const res = await getProducts(page);
 
             if (page === 1) {
@@ -67,20 +74,22 @@ const ProductGrid = ({ filterParams = {} }) => {
             }));
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
 
     const handleFilter = async (filterParams) => {
         try {
             setFiltering(true);
-            // Chỉ gọi API khi có tham số lọc
+            setIsFiltering(true);
+
             if (filterParams.color || filterParams.flower_type_id) {
                 const res = await filterProducts(filterParams);
                 setProducts(res.data.data);
                 setCurrentPage(res.data.meta.current_page);
                 setLastPage(res.data.meta.last_page);
             } else {
-                // Nếu không có tham số lọc, lấy tất cả sản phẩm
+                setIsFiltering(false);
                 fetchProducts(1);
             }
         } catch (error) {
@@ -94,9 +103,25 @@ const ProductGrid = ({ filterParams = {} }) => {
         }
     };
 
-    const handleLoadMore = () => {
-        if (currentPage < lastPage && !loading) {
-            fetchProducts(currentPage + 1);
+    const handleLoadMore = async () => {
+        console.log('Load more clicked!');
+        if (currentPage < lastPage && !loadingMore) {
+            try {
+                setLoadingMore(true);
+
+                if (isFiltering) {
+                    const res = await filterProducts({ ...filterParams, page: currentPage + 1 });
+                    setProducts(prev => [...prev, ...res.data.data]);
+                    setCurrentPage(res.data.meta.current_page);
+                    setLastPage(res.data.meta.last_page);
+                } else {
+                    fetchProducts(currentPage + 1);
+                }
+            } catch (error) {
+                console.error("Error loading more:", error);
+            } finally {
+                setLoadingMore(false);
+            }
         }
     };
 
@@ -347,20 +372,35 @@ const ProductGrid = ({ filterParams = {} }) => {
                     )}
                 </Box>
 
-                {currentPage < lastPage && (
+                {currentPage < lastPage && !filtering && (
                     <Box textAlign="center" mt={4}>
                         <Button
                             variant="contained"
                             sx={{
                                 backgroundColor: "orange",
                                 borderRadius: 10,
-                                minWidth: 120
+                                minWidth: 120,
+                                position: "relative"
                             }}
                             onClick={handleLoadMore}
-                            disabled={loading}
+                            disabled={loadingMore}
+                            type="button"
                         >
-                            {loading ? (
-                                <CircularProgress size={24} color="inherit" />
+                            {loadingMore ? (
+                                <>
+                                    <span style={{ opacity: 0.5 }}>Xem thêm</span>
+                                    <CircularProgress
+                                        size={24}
+                                        color="primary"
+                                        sx={{
+                                            position: "absolute",
+                                            top: "50%",
+                                            left: "50%",
+                                            marginTop: "-12px",
+                                            marginLeft: "-12px"
+                                        }}
+                                    />
+                                </>
                             ) : (
                                 "Xem thêm"
                             )}
@@ -368,12 +408,12 @@ const ProductGrid = ({ filterParams = {} }) => {
                     </Box>
                 )}
 
-                <Box textAlign="center" mt={2}>
+                {/* <Box textAlign="center" mt={2}>
                     <Typography variant="body2" color="text.secondary">
                         Đang hiển thị {products.length} sản phẩm
                         {currentPage < lastPage && ` (Trang ${currentPage}/${lastPage})`}
                     </Typography>
-                </Box>
+                </Box> */}
             </Box>
         </Box>
     );

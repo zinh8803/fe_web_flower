@@ -103,6 +103,9 @@ const LoginDialog = ({ open, onClose }) => {
                         margin="normal"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
+                        error={!email && email !== ""}
+                        helperText={!email && email !== "" ? "Vui lòng nhập email" : ""}
                     />
 
                     <Typography variant="body1" fontWeight="bold">
@@ -116,6 +119,9 @@ const LoginDialog = ({ open, onClose }) => {
                         margin="normal"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        required
+                        error={!password && password !== ""}
+                        helperText={!password && password !== "" ? "Vui lòng nhập mật khẩu" : ""}
                     />
 
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -125,7 +131,7 @@ const LoginDialog = ({ open, onClose }) => {
                         </Link>
                     </Box>
 
-                    <Box display="flex" justifyContent="center">
+                    <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center">
                         <Button
                             fullWidth
                             variant="contained"
@@ -134,8 +140,16 @@ const LoginDialog = ({ open, onClose }) => {
                                 borderRadius: 5,
                                 maxWidth: "80%"
                             }}
-                            onClick={handleLogin}
-                            disabled={loading}
+                            onClick={() => {
+                                if (!email || !password) {
+                                    dispatch(showNotification({
+                                        message: "Vui lòng nhập đầy đủ email và mật khẩu!",
+                                        severity: "warning"
+                                    }));
+                                    return;
+                                }
+                                handleLogin();
+                            }}
                             size="large"
                         >
                             {loading ? <CircularProgress size={24} color="inherit" /> : "ĐĂNG NHẬP"}

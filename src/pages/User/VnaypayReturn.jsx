@@ -28,7 +28,7 @@ const VnpayReturn = () => {
                         setTimeout(() => navigate("/"), 2000);
                     })
                     .catch(() => {
-                        dispatch(showNotification({ message: "Lỗi khi lưu đơn hàng!", severity: "error" }));
+                        dispatch(showNotification({ message: "Không đủ tồn kho cho sản phẩm này!", severity: "error" }));
                         localStorage.removeItem("pendingOrderSent");
                         setTimeout(() => navigate("/checkout"), 2000);
                     });

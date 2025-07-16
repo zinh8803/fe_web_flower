@@ -53,10 +53,8 @@ const AdminMenu = () => {
                     Admin Dashboard
                 </Typography>
             </Box>
-            {/* Menu cuộn riêng nếu quá dài */}
             <Box sx={{ flex: 1 }}>
                 <List component="nav" >
-                    {/* Luôn hiện Dashboard */}
                     <ListItem
                         button
                         component={Link}
@@ -74,7 +72,6 @@ const AdminMenu = () => {
                         <ListItemText primary="Dashboard" sx={{ color: "black" }} />
                     </ListItem>
 
-                    {/* Nếu là admin thì hiện đầy đủ menu */}
                     {user?.role === "admin" && (
                         <>
                             {/* Quản lý loại hoa */}
