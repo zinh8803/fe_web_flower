@@ -1,17 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Drawer, Toolbar, AppBar, Typography, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AdminMenu from "../component/admin/AdminMenu";
 import { Outlet } from "react-router-dom";
+import { getNotifications } from "../services/notifycationService";
+import NotificationSnackbar from "../component/NotificationSnackbar";
+import { initWebsocket } from "../services/websocketService";
+import Notifycation from "../component/admin/notifycation";
 
 const drawerWidth = 260;
 
 const AdminLayout = () => {
     const [open, setOpen] = useState(true);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unread, setUnread] = useState(0);
 
     const handleDrawerToggle = () => {
         setOpen(!open);
     };
+
+
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    useEffect(() => {
+        getNotifications().then(res => {
+            setNotifications(res.data.notifications);
+            setUnread(res.data.unread_count);
+        });
+
+        initWebsocket((data) => {
+            getNotifications().then(res => {
+                setNotifications(res.data.notifications);
+                setUnread(res.data.unread_count);
+            });
+        });
+    }, []);
 
     return (
         <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -46,6 +73,20 @@ const AdminLayout = () => {
                     <Typography variant="h6" fontWeight={700} color="green" noWrap>
                         ADMIN PANEL
                     </Typography>
+                    <Box sx={{ flexGrow: 1 }} />
+                    {/* Thay thế phần thông báo cũ bằng Notifycation */}
+                    <Notifycation
+                        notifications={notifications}
+                        unread={unread}
+                        anchorEl={anchorEl}
+                        onBellClick={event => setAnchorEl(event.currentTarget)}
+                        onClose={handleClose}
+                        setNotifications={setNotifications}
+                        setUnread={setUnread}
+                    />
+                    <Typography variant="body1" color="textSecondary" sx={{ ml: 2 }}>
+                        Welcome, Admin
+                    </Typography>
                 </Toolbar>
             </AppBar>
 
@@ -70,9 +111,6 @@ const AdminLayout = () => {
                                 easing: theme.transitions.easing.sharp,
                                 duration: theme.transitions.duration.enteringScreen,
                             }),
-                        // overflowX: 'hidden',
-                        // overflowY: 'visible',
-                        //  overflow: 'visible',
                         overflow: "hidden",
                         ...(open && {
                             width: drawerWidth,
@@ -106,6 +144,7 @@ const AdminLayout = () => {
                 <Toolbar />
                 <Outlet />
             </Box>
+            <NotificationSnackbar />
         </Box>
     );
 };
