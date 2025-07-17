@@ -131,7 +131,7 @@ const HomeBanner = () => {
                                             color: '#000',
                                         }}
                                         component={Link}
-                                        to={`/category/${item.id}`}
+                                        to={`/category/${item.slug}`}
                                     >
                                         <ListItemText
                                             primary={item.name}

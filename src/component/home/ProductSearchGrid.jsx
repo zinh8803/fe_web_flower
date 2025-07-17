@@ -31,7 +31,7 @@ const ProductSearchGrid = ({ products, title }) => {
 
     const isProductAvailable = (productId, sizeId) => {
         const product = stockState.availableProducts.find(p => p.id === productId);
-        if (!product) return true; // Nếu chưa có thông tin, mặc định là có sẵn
+        if (!product) return true;
 
         const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
         return sizeInfo && sizeInfo.in_stock && sizeInfo.max_quantity > 0;
@@ -101,7 +101,7 @@ const ProductSearchGrid = ({ products, title }) => {
                                 }}
                             >
                                 <Link
-                                    to={`/detail/${item.id}`}
+                                    to={`/detail/${item.slug}`}
                                     style={{
                                         textDecoration: "none",
                                         color: "inherit",

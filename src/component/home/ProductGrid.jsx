@@ -25,10 +25,10 @@ const ProductGrid = ({ filterParams = {} }) => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
-    const [loading, setLoading] = useState(false); // Loading cho tải trang đầu
-    const [loadingMore, setLoadingMore] = useState(false); // Loading cho "Xem thêm"
+    const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [filtering, setFiltering] = useState(false);
-    const [isFiltering, setIsFiltering] = useState(false); // Thêm state
+    const [isFiltering, setIsFiltering] = useState(false);
 
     const stockState = useSelector(state => state.stock);
     const cartItems = useSelector(state => state.cart.items);
@@ -51,9 +51,9 @@ const ProductGrid = ({ filterParams = {} }) => {
     const fetchProducts = async (page) => {
         try {
             if (page === 1) {
-                setLoading(true); // Loading toàn bộ
+                setLoading(true); 
             } else {
-                setLoadingMore(true); // Loading "Xem thêm"
+                setLoadingMore(true); 
             }
 
             const res = await getProducts(page);
@@ -198,9 +198,8 @@ const ProductGrid = ({ filterParams = {} }) => {
                                         }
                                     }}
                                 >
-                                    {/* Product card content - giữ nguyên phần này */}
                                     <Link
-                                        to={`/detail/${item.id}`}
+                                        to={`/detail/${item.slug}`}
                                         style={{
                                             textDecoration: "none",
                                             color: "inherit",

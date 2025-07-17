@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProductsByCategory } from "../../services/productService";
+import { getProductsByCategorySlug } from "../../services/productService";
 import { getCategoryId } from "../../services/categoryService";
 import CategoryProductGrid from "../../component/home/CategoryProductGrid";
 import { Box, CircularProgress, Container } from "@mui/material";
@@ -16,7 +16,7 @@ const CategoryProductDetail = () => {
         setLoading(true);
         Promise.all([
             getCategoryId(id).then(res => setCategory(res.data.data)).catch(() => setCategory(null)),
-            getProductsByCategory(id).then(res => setProducts(res.data.data || [])).catch(() => setProducts([]))
+            getProductsByCategorySlug(id).then(res => setProducts(res.data.data || [])).catch(() => setProducts([]))
         ]).finally(() => setLoading(false));
     }, [id]);
 
