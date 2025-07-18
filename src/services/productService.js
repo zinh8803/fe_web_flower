@@ -22,7 +22,7 @@ export const checkAllStock = () => api.get("/products/stock");
 
 export const checkStockById = (id) => api.get(`/products/${id}/stock`);
 
-export const checkStockAvailable = (data) => api.post(`/products/check-available-products`, { params: data });
+export const checkStockAvailable = (data) => api.get(`/products/check-available-products`, { params: data });
 
 export const getStockWarning = (page = 1) =>
     api.get(`/products/stock-warning?page=${page}`);
