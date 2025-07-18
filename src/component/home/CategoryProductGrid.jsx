@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { fetchStockAvailability } from "../../store/stockSlice";
+import Breadcrumb from "../breadcrumb/Breadcrumb";
 
 const CategoryProductGrid = ({ products, title }) => {
     const dispatch = useDispatch();
@@ -62,6 +63,13 @@ const CategoryProductGrid = ({ products, title }) => {
 
     return (
         <Box sx={{ width: "100%" }}>
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Danh mục" },
+                ]}
+            />
             <Box sx={{ p: 3, borderRadius: 2, bgcolor: "#fff" }}>
                 <Typography variant="h6" fontWeight={700} color="green" mb={4}>
                     {title}
@@ -102,7 +110,7 @@ const CategoryProductGrid = ({ products, title }) => {
                             >
                                 <Link
                                     to={`/detail/${item.slug}`}
-                                    state={{ id: item.id }}
+                                    state={{ id: item.id, fromCategory: true }}
                                     style={{
                                         textDecoration: "none",
                                         color: "inherit",

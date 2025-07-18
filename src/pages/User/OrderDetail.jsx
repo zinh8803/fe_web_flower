@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderUserdetail } from "../../services/userService";
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from "@mui/material";
+import { Box, CircularProgress, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from "@mui/material";
+import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 
 const OrderDetail = () => {
     const { id } = useParams();
@@ -16,11 +17,21 @@ const OrderDetail = () => {
             .finally(() => setLoading(false));
     }, [id]);
 
-    if (loading) return <Typography>Đang tải...</Typography>;
+    if (loading) return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+            <CircularProgress />
+        </Box>)
     if (!order) return <Typography>Không tìm thấy đơn hàng.</Typography>;
 
     return (
-        <Box maxWidth="1500px" mx="auto" mt={4}>
+        <Box maxWidth="1450px" mx="auto" mt={4}>
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Lịch sử đơn hàng", href: "/orders/history" },
+                    { label: "Chi tiết đơn hàng" }
+                ]}
+            />
             <Typography variant="h5" fontWeight={700} mb={2}>
                 Chi tiết đơn hàng #{order.order_code}
             </Typography>

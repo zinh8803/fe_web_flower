@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { getProductsBySearch } from "../../services/productService";
 import { Container, Typography, CircularProgress, Box } from "@mui/material";
 import ProductSearchGrid from "../../component/home/ProductSearchGrid";
+import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 
 const ProductSearch = () => {
     const [searchParams] = useSearchParams();
@@ -26,6 +27,12 @@ const ProductSearch = () => {
     console.log("Products:", products);
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Tìm kiếm" }
+                ]}
+            />
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Kết quả tìm kiếm: "{keyword}"
             </Typography>
@@ -36,7 +43,7 @@ const ProductSearch = () => {
             ) : products.length === 0 ? (
                 <Typography>Không tìm thấy sản phẩm nào.</Typography>
             ) : (
-                <ProductSearchGrid products={products} title={`Kết quả cho "${keyword}"`} />
+                <ProductSearchGrid products={products} />
             )}
         </Container>
     );

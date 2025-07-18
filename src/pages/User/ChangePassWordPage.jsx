@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { showNotification } from '../../store/notificationSlice';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Breadcrumb from '../../component/breadcrumb/Breadcrumb';
 
 const ChangePassWordPage = () => {
     document.title = 'Đổi mật khẩu';
@@ -42,7 +43,13 @@ const ChangePassWordPage = () => {
     };
 
     return (
-        <Box maxWidth="1500px" mx="auto" mt={4}>
+        <Box maxWidth="1450px" mx="auto" mt={4}>
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Đổi mật khẩu" }
+                ]}
+            />
             <Card>
                 <CardContent>
                     <Typography variant="h5" fontWeight={700} mb={3}>

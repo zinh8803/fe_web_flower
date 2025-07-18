@@ -9,11 +9,13 @@ import { fetchStockAvailability } from "../../store/stockSlice";
 import ProductInfo from "../../component/product/ProductInfo";
 import ProductDescription from "../../component/product/ProductDescription";
 import RelatedProducts from "../../component/product/RelatedProducts";
+import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 
 const ProductDetail = () => {
     // const { id } = useParams();
     const location = useLocation();
     const id = location.state?.id;
+    const fromCategory = location.state?.fromCategory;
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -134,6 +136,20 @@ const ProductDetail = () => {
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
+            <Breadcrumb
+                items={
+                    fromCategory
+                        ? [
+                            { label: "Trang chủ", href: "/" },
+                            { label: "Danh mục", href: "/category" },
+                            { label: "Sản phẩm" }
+                        ]
+                        : [
+                            { label: "Trang chủ", href: "/" },
+                            { label: "Sản phẩm" }
+                        ]
+                }
+            />
             <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
                 <Box sx={{ flex: 1 }}>
                     <img

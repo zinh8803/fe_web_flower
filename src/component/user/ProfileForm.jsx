@@ -1,8 +1,15 @@
 import React from "react";
 import { Box, Typography, TextField, Button, Avatar, Stack, CircularProgress, Card, CardContent } from "@mui/material";
+import Breadcrumb from "../breadcrumb/Breadcrumb";
 
 const ProfileForm = ({ form, onChange, onImageChange, onSubmit, loading }) => (
-    <Box maxWidth="1500px" mx="auto" mt={4}>
+    <Box maxWidth="1450px" mx="auto" mt={4}>
+        <Breadcrumb
+            items={[
+                { label: "Trang chủ", href: "/" },
+                { label: "Thông tin tài khoản" }
+            ]}
+        />
         <Card>
             <CardContent >
                 <Typography variant="h5" fontWeight={700} mb={3}>

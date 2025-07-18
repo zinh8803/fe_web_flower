@@ -15,11 +15,12 @@ import { getFlowerTypes } from "../../services/flowerTypeService";
 import { getFlower } from "../../services/flowerService";
 import { COLORS } from "../../utils/color";
 
+
 const Filter = ({ onFilter }) => {
   const [loading, setLoading] = useState(true);
   const [colors, setColors] = useState([]);
   const [flowerTypes, setFlowerTypes] = useState([]);
-  const [priceRange, setPriceRange] = useState(["", ""]); // Cho phép rỗng
+  const [priceRange, setPriceRange] = useState(["", ""]); 
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [ManualFilter, setManualFilter] = useState(false);
@@ -70,15 +71,10 @@ const Filter = ({ onFilter }) => {
     });
   };
 
-  // const handlePriceChange = (newRange) => {
 
-
-
-  // };
   const handleApplyFilter = () => {
     setManualFilter(true);
 
-    // Kiểm tra khi nhấn nút, nếu rỗng thì gán giá trị mặc định
     let minPrice = priceRange[0] === "" ? 0 : Number(priceRange[0]);
     let maxPrice = priceRange[1] === "" ? 1000000 : Number(priceRange[1]);
     if (minPrice > maxPrice) minPrice = maxPrice;
@@ -88,11 +84,8 @@ const Filter = ({ onFilter }) => {
       flower_type_id: selectedTypes.length > 0 ? selectedTypes : null,
       price: [minPrice, maxPrice],
     });
-    console.log("Áp dụng bộ lọc:", {
-      color: selectedColors,
-      flower_type_id: selectedTypes,
-      price: [minPrice, maxPrice],
-    });
+
+    window.scrollTo(0, 0);
   };
 
 

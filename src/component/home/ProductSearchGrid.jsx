@@ -16,7 +16,7 @@ import { addToCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { fetchStockAvailability } from "../../store/stockSlice";
 
-const ProductSearchGrid = ({ products, title }) => {
+const ProductSearchGrid = ({ products }) => {
     const dispatch = useDispatch();
 
     const stockState = useSelector(state => state.stock);
@@ -63,9 +63,6 @@ const ProductSearchGrid = ({ products, title }) => {
     return (
         <Box sx={{ width: "100%" }}>
             <Box sx={{ p: 3, borderRadius: 2, bgcolor: "#fff" }}>
-                <Typography variant="h6" fontWeight={700} color="green" mb={4}>
-                    {title}
-                </Typography>
                 <Box
                     sx={{
                         display: "flex",

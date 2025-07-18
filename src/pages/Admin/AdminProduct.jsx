@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Checkbox,
-    Pagination, CircularProgress, List, ListItem, ListItemIcon, ListItemText, Divider
+    Pagination, CircularProgress, List, ListItem, ListItemIcon, ListItemText, Divider,
+    InputAdornment
 } from "@mui/material";
 import { Edit, Delete, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../../services/productService";
@@ -12,6 +13,7 @@ import { forwardRef } from "react";
 import { showNotification } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
+import { SearchIcon } from "lucide-react";
 
 const RichTextEditor = forwardRef(({ value, onChange, placeholder }, ref) => {
     return (
@@ -282,6 +284,13 @@ const AdminProduct = () => {
                     value={searchValue}
                     onChange={e => setSearchValue(e.target.value)}
                     size="small"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
                 />
                 <Button type="submit" variant="contained">Tìm kiếm</Button>
             </Box>

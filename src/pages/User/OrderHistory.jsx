@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getOrderHistory } from "../../services/userService";
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Pagination, CircularProgress } from "@mui/material";
 import { Link } from "react-router-dom";
+import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 
 const OrderHistory = () => {
     const [orders, setOrders] = useState([]);
@@ -34,7 +35,13 @@ const OrderHistory = () => {
     }
 
     return (
-        <Box maxWidth="1500px" mx="auto" mt={4}>
+        <Box maxWidth="1450px" mx="auto" mt={4}>
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Lịch sử đơn hàng" }
+                ]}
+            />
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Lịch sử đơn hàng
             </Typography>

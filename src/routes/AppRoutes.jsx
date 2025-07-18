@@ -29,9 +29,11 @@ import AdminRoute from "./AdminRoute";
 import StockProductAdmin from "../pages/Admin/StockProductAdmin";
 import ChangePassWordPage from "../pages/User/ChangePassWordPage";
 import ResetPassWordPage from "../pages/User/ResetPassWordPage";
+import ScrollToTop from "../component/ScrollToTop";
 
 const AppRoutes = () => (
     <Router>
+    <ScrollToTop />
         <Routes>
             {/* Main layout cho user */}
             <Route element={<MainLayout />}>
@@ -72,6 +74,7 @@ const AppRoutes = () => (
                 </Route>
             </Route>
         </Routes>
+        <ScrollToTop />
     </Router>
 );
 

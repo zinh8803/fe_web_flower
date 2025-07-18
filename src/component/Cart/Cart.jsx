@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { checkCodeValidity } from "../../services/discountService";
 import { fetchStockAvailability } from "../../store/stockSlice";
 import { showNotification } from "../../store/notificationSlice";
-
+import Breadcrumb from "../breadcrumb/Breadcrumb";
 const Cart = () => {
     document.title = 'Giỏ hàng';
     const cartItems = useSelector(state => state.cart.items);
@@ -263,20 +263,12 @@ const Cart = () => {
             }}
         >
             {/* Breadcrumb */}
-            <Box sx={{ mb: 3 }}>
-                <Typography variant="body2" color="text.secondary">
-                    <Link sx={{
-                        fontWeight: 'bold',
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        '&:hover': {
-                            textDecoration: 'underline'
-                        }
-                    }}
-                        href="/"
-                    >Trang chủ</Link> / <span style={{ color: '#333' }}>Giỏ hàng</span>
-                </Typography>
-            </Box>
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Giỏ hàng" }
+                ]}
+            />
 
             {cartItems.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
