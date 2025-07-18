@@ -32,7 +32,7 @@ const AdminLayout = () => {
             setUnread(res.data.unread_count);
         });
 
-        initWebsocket((data) => {
+        initWebsocket(() => {
             getNotifications().then(res => {
                 setNotifications(res.data.notifications);
                 setUnread(res.data.unread_count);
@@ -74,7 +74,6 @@ const AdminLayout = () => {
                         ADMIN PANEL
                     </Typography>
                     <Box sx={{ flexGrow: 1 }} />
-                    {/* Thay thế phần thông báo cũ bằng Notifycation */}
                     <Notifycation
                         notifications={notifications}
                         unread={unread}

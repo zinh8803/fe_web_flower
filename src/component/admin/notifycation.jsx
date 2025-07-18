@@ -20,24 +20,20 @@ const Notifycation = ({
         setUnread((prev) => Math.max(0, prev - 1));
     };
 
-    // Xóa tất cả thông báo
     const handleDeleteAll = async () => {
         await deleteAllNotifications();
         setNotifications([]);
         setUnread(0);
     };
 
-    // Đánh dấu tất cả là đã đọc khi mở menu chuông
     const handleMenuOpen = async (event) => {
         onBellClick(event);
 
-        // Đánh dấu tất cả thông báo chưa đọc
         const unreadNotifications = notifications.filter(n => !n.read_at);
         if (unreadNotifications.length > 0) {
             await Promise.all(unreadNotifications.map(n => markNotificationAsRead(n.id)));
         }
 
-        // Gọi lại API để đồng bộ
         try {
             const res = await getNotifications();
             setNotifications(res.data.notifications);
@@ -72,7 +68,7 @@ const Notifycation = ({
                     notifications.map((noti) => (
                         <MenuItem key={noti.id} onClick={onClose} selected={!noti.read_at}>
                             <ListItemText
-                                primary={`Đơn hàng mới: ${noti.data.order_id} - ${noti.data.customer_name || "Khách lẻ"}`}
+                                primary={`Đơn hàng mới: ${noti.data.order_code} - ${noti.data.customer_name || "Khách lẻ"}`}
                                 secondary={`Tổng tiền: ${Number(noti.data.total_price).toLocaleString()}đ`}
                             />
                             <IconButton

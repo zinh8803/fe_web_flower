@@ -8,7 +8,26 @@ import { Edit, Delete, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../../services/productService";
 import { getCategory } from "../../services/categoryService";
 import { getFlower } from "../../services/flowerService";
-
+import { forwardRef } from "react";
+const RichTextEditor = forwardRef(({ value, onChange, placeholder }, ref) => {
+    return (
+        <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+                Mô tả sản phẩm
+            </Typography>
+            <TextField
+                multiline
+                fullWidth
+                rows={6}
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                inputRef={ref}
+                sx={{ '& .MuiOutlinedInput-root': { fontFamily: 'inherit' } }}
+            />
+        </Box>
+    );
+});
 const AdminProduct = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -81,7 +100,9 @@ const AdminProduct = () => {
             [sizeIdx]: !prev[sizeIdx]
         }));
     };
-
+    const handleDescriptionChange = (value) => {
+        setEditProduct(prev => ({ ...prev, description: value }));
+    };
     const handlePageChange = async (event, newPage) => {
         if (loadingPage) return;
 
@@ -273,14 +294,12 @@ const AdminProduct = () => {
                     </TableHead>
                     <TableBody>
                         {loadingPage ? (
-                            // Hiển thị skeleton loading hoặc hàng rỗng khi đang loading
                             <TableRow>
                                 <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
                                     <CircularProgress />
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            // Hiển thị dữ liệu khi đã load xong
                             products.map((p, index) => (
                                 <TableRow key={p.id}>
                                     <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
@@ -343,15 +362,10 @@ const AdminProduct = () => {
                                 fullWidth
                                 sx={{ mb: 2 }}
                             />
-                            <TextField
-                                label="Mô tả"
-                                name="description"
-                                value={editProduct.description}
-                                onChange={handleFieldChange}
-                                fullWidth
-                                multiline
-                                rows={2}
-                                sx={{ mb: 2 }}
+                            <RichTextEditor
+                                value={editProduct.description || ''}
+                                onChange={handleDescriptionChange}
+                                placeholder="Nhập mô tả sản phẩm..."
                             />
                             <TextField
                                 label="Danh mục"

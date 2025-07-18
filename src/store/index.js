@@ -9,7 +9,7 @@ const store = configureStore({
         user: userReducer,
         cart: cartReducer,
         notification: notificationReducer,
-        stock: stockReducer, // Thêm reducer stock
+        stock: stockReducer,
     },
 });
 
