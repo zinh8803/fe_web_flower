@@ -23,6 +23,7 @@ const ProductSearch = () => {
             .finally(() => setLoading(false));
     }, [keyword]);
 
+    console.log("Products:", products);
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
             <Typography variant="h5" fontWeight={700} mb={3}>

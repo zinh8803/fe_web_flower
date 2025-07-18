@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, ButtonGroup, Container, CircularProgress } from "@mui/material";
-import { useParams } from "react-router-dom";
-import { getProductById, getProductsByCategory } from "../../services/productService";
+import { useLocation } from "react-router-dom";
+import { getProductsByCategory, getProductDetailById } from "../../services/productService";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
@@ -11,7 +11,9 @@ import ProductDescription from "../../component/product/ProductDescription";
 import RelatedProducts from "../../component/product/RelatedProducts";
 
 const ProductDetail = () => {
-    const { id } = useParams();
+    // const { id } = useParams();
+    const location = useLocation();
+    const id = location.state?.id;
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -22,6 +24,8 @@ const ProductDetail = () => {
     const stockState = useSelector(state => state.stock);
     const cartItems = useSelector(state => state.cart.items);
 
+    console.log("id:", id);
+    // console.log("productId:", productId);
     useEffect(() => {
         dispatch(fetchStockAvailability(cartItems.map(item => ({
             product_size_id: item.product_size_id,
@@ -32,7 +36,7 @@ const ProductDetail = () => {
     useEffect(() => {
         document.title = 'Chi tiết sản phẩm';
         setLoading(true);
-        getProductById(id)
+        getProductDetailById(id)
             .then(res => {
                 setProduct(res.data.data);
                 setQuantity(1);
@@ -119,6 +123,7 @@ const ProductDetail = () => {
             quantity: quantity
         }];
         dispatch(fetchStockAvailability(updatedCartItems));
+        setQuantity(1);
     };
 
     if (loading)

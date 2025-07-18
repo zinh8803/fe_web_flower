@@ -9,6 +9,10 @@ import { getProducts, createProduct, updateProduct, deleteProduct } from "../../
 import { getCategory } from "../../services/categoryService";
 import { getFlower } from "../../services/flowerService";
 import { forwardRef } from "react";
+import { showNotification } from "../../store/notificationSlice";
+import { useDispatch } from "react-redux";
+import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
+
 const RichTextEditor = forwardRef(({ value, onChange, placeholder }, ref) => {
     return (
         <Box sx={{ mb: 2 }}>
@@ -43,9 +47,10 @@ const AdminProduct = () => {
     const [search, setSearch] = useState("");
     const [searchValue, setSearchValue] = useState("");
     const rowsPerPage = 10;
-
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [flowerDropdownOpen, setFlowerDropdownOpen] = useState({});
     const [flowerSearches, setFlowerSearches] = useState(["", ""]);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -65,7 +70,7 @@ const AdminProduct = () => {
             setProducts(res.data.data || []);
             setTotalPages(res.data.meta?.last_page || 1);
         } catch {
-            alert("Lỗi khi tải danh sách sản phẩm");
+            dispatch(showNotification({ message: "Lỗi khi tải danh sách sản phẩm", severity: "error" }));
         } finally {
             setLoadingPage(false);
         }
@@ -76,7 +81,7 @@ const AdminProduct = () => {
             const res = await getCategory();
             setCategories(res.data.data || []);
         } catch {
-            alert("Lỗi khi tải danh mục");
+            dispatch(showNotification({ message: "Lỗi khi tải danh mục", severity: "error" }));
         }
     };
     const fetchFlowers = async () => {
@@ -84,7 +89,7 @@ const AdminProduct = () => {
             const res = await getFlower();
             setFlowers(res.data.data || []);
         } catch {
-            alert("Lỗi khi tải danh sách hoa");
+            dispatch(showNotification({ message: "Lỗi khi tải danh sách hoa", severity: "error" }));
         }
     };
     useEffect(() => {
@@ -113,7 +118,7 @@ const AdminProduct = () => {
             setTotalPages(res.data.meta.last_page || 1);
             setPage(newPage);
         } catch {
-            alert("Lỗi khi tải danh sách sản phẩm");
+            dispatch(showNotification({ message: "Lỗi khi tải danh sách sản phẩm", severity: "error" }));
         } finally {
             setLoadingPage(false);
         }
@@ -182,13 +187,16 @@ const AdminProduct = () => {
 
             if (editProduct.id) {
                 await updateProduct(editProduct.id, formData, { headers: { "Content-Type": "multipart/form-data" } });
+                dispatch(showNotification({ message: "Cập nhật sản phẩm thành công!", severity: "success" }));
             } else {
                 await createProduct(formData, { headers: { "Content-Type": "multipart/form-data" } });
+                dispatch(showNotification({ message: "Thêm sản phẩm thành công!", severity: "success" }));
             }
             setOpenDialog(false);
             fetchProducts();
-        } catch {
-            alert("Lỗi khi lưu sản phẩm");
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || "Lỗi khi lưu sản phẩm";
+            dispatch(showNotification({ message: errorMessage, severity: "error" }));
         }
         setLoading(false);
     };
@@ -199,16 +207,25 @@ const AdminProduct = () => {
             setImagePreview(URL.createObjectURL(file));
         }
     };
-    const handleDelete = async (id) => {
-        if (!window.confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) return;
-        try {
-            await deleteProduct(id);
-            fetchProducts();
-        } catch {
-            alert("Lỗi khi xóa sản phẩm");
-        }
-    };
 
+    const handleDelete = (id) => {
+        setConfirmDeleteId(id);
+    };
+    const handleConfirmDelete = async () => {
+        try {
+            await deleteProduct(confirmDeleteId);
+            fetchProducts();
+            dispatch(showNotification({
+                message: "Xóa thành công!",
+                severity: "success"
+            }));
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || "Lỗi khi xóa sản phẩm";
+            dispatch(showNotification({ message: errorMessage, severity: "error" }));
+        }
+        setConfirmDeleteId(null);
+    };
+    const handleCancelDelete = () => setConfirmDeleteId(null);
     const getCategoryName = (id) => {
         const cat = categories.find(c => c.id === id);
         return cat ? cat.name : "";
@@ -341,12 +358,19 @@ const AdminProduct = () => {
                     page={page}
                     onChange={handlePageChange}
                     color="primary"
-                    disabled={loadingPage} // Disable khi đang loading
+                    disabled={loadingPage}
                 />
                 {loadingPage && (
                     <CircularProgress size={24} sx={{ ml: 2 }} />
                 )}
             </Box>
+
+            <ConfirmDeleteDialog
+                open={!!confirmDeleteId}
+                onClose={handleCancelDelete}
+                onConfirm={handleConfirmDelete}
+                content="Bạn chắc chắn muốn xóa hoa này?" // hoặc loại hoa, sản phẩm...
+            />
 
             {/* Popup thêm/sửa sản phẩm */}
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>

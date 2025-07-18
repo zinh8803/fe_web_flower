@@ -18,7 +18,6 @@ import { addToCart } from "../../store/cartSlice";
 import { getProducts, filterProducts } from "../../services/productService";
 import { showNotification } from "../../store/notificationSlice";
 import { fetchStockAvailability } from "../../store/stockSlice";
-import Filter from "./filter";
 
 const ProductGrid = ({ filterParams = {} }) => {
     const dispatch = useDispatch();
@@ -51,9 +50,9 @@ const ProductGrid = ({ filterParams = {} }) => {
     const fetchProducts = async (page) => {
         try {
             if (page === 1) {
-                setLoading(true); 
+                setLoading(true);
             } else {
-                setLoadingMore(true); 
+                setLoadingMore(true);
             }
 
             const res = await getProducts(page);
@@ -83,7 +82,7 @@ const ProductGrid = ({ filterParams = {} }) => {
             setFiltering(true);
             setIsFiltering(true);
 
-            if (filterParams.color || filterParams.flower_type_id) {
+            if (filterParams.color || filterParams.flower_type_id || filterParams.price) {
                 const res = await filterProducts(filterParams);
                 setProducts(res.data.data);
                 setCurrentPage(res.data.meta.current_page);
@@ -200,6 +199,7 @@ const ProductGrid = ({ filterParams = {} }) => {
                                 >
                                     <Link
                                         to={`/detail/${item.slug}`}
+                                        state={{ id: item.id }}
                                         style={{
                                             textDecoration: "none",
                                             color: "inherit",

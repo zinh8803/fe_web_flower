@@ -10,12 +10,16 @@ import {
     updateFlowerType,
     deleteFlowerType
 } from "../../services/flowerTypeService";
-
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/notificationSlice";
+import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
 const AdminFlowerType = () => {
     const [types, setTypes] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editType, setEditType] = useState(null);
     const [form, setForm] = useState({ name: "" });
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const dispatch = useDispatch();
 
     const fetchTypes = async () => {
         try {
@@ -50,25 +54,49 @@ const AdminFlowerType = () => {
         try {
             if (editType) {
                 await updateFlowerType(editType.id, form);
+                dispatch(showNotification({
+                    message: "Cập nhật loại hoa thành công!",
+                    severity: "success"
+                }));
             } else {
                 await createFlowerType(form);
+                dispatch(showNotification({
+                    message: "Thêm loại hoa thành công!",
+                    severity: "success"
+                }));
             }
             setOpenDialog(false);
             fetchTypes();
         } catch {
-            alert("Lỗi khi lưu loại hoa");
+            dispatch(showNotification({
+                message: "Lỗi khi lưu loại hoa",
+                severity: "error"
+            }));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Bạn chắc chắn muốn xóa?")) return;
-        try {
-            await deleteFlowerType(id);
-            fetchTypes();
-        } catch {
-            alert("Lỗi khi xóa loại hoa");
-        }
+        setConfirmDeleteId(id);
     };
+
+    const handleConfirmDelete = async () => {
+        try {
+            await deleteFlowerType(confirmDeleteId);
+            fetchTypes();
+            dispatch(showNotification({
+                message: "Xóa loại hoa thành công!",
+                severity: "success"
+            }));
+        } catch {
+            dispatch(showNotification({
+                message: "Loại hoa đã có sản phẩm, không thể xóa",
+                severity: "error"
+            }));
+        }
+        setConfirmDeleteId(null);
+    };
+
+    const handleCancelDelete = () => setConfirmDeleteId(null);
 
     return (
         <Box >
@@ -125,6 +153,11 @@ const AdminFlowerType = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ConfirmDeleteDialog
+                open={!!confirmDeleteId}
+                onClose={handleCancelDelete}
+                onConfirm={handleConfirmDelete}
+            />
         </Box>
     );
 };

@@ -102,6 +102,7 @@ const CategoryProductGrid = ({ products, title }) => {
                             >
                                 <Link
                                     to={`/detail/${item.slug}`}
+                                    state={{ id: item.id }}
                                     style={{
                                         textDecoration: "none",
                                         color: "inherit",

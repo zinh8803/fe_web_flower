@@ -7,6 +7,9 @@ export const getProducts = (page = 1, search = "") =>
     });
 
 export const getProductById = (id) => api.get(`/products/${id}`);
+
+export const getProductDetailById = (id) => api.get(`/products/detailId/${id}`);
+
 export const getProductBySlug = (slug) => api.get(`/products/${slug}`);
 export const getProductsByCategory = (category) => api.get(`/products/category/id=${category}`);
 export const getProductsByCategorySlug = (slug) => api.get(`/products/category/${slug}`);

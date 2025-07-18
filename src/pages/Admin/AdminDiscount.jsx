@@ -10,7 +10,9 @@ import {
     updateDiscount,
     deleteDiscount
 } from "../../services/discountService";
-
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/notificationSlice";
+import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
 const AdminDiscount = () => {
     const [discounts, setDiscounts] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
@@ -24,14 +26,18 @@ const AdminDiscount = () => {
         min_total: "",
         status: true,
     });
-
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const dispatch = useDispatch();
     const fetchDiscounts = async () => {
         try {
             const res = await getDiscounts();
             setDiscounts(res.data.data || []);
         } catch (e) {
             console.error(e);
-            alert("Lỗi khi tải danh sách mã giảm giá");
+            dispatch(showNotification({
+                message: "Lỗi khi tải mã giảm giá",
+                severity: "error"
+            }));
         }
     };
 
@@ -40,7 +46,7 @@ const AdminDiscount = () => {
     }, []);
 
     const handleOpenAdd = () => {
-        const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+        const today = new Date().toISOString().slice(0, 10);
         setEditDiscount(null);
         setForm({
             name: "",
@@ -88,28 +94,51 @@ const AdminDiscount = () => {
             };
             if (editDiscount) {
                 await updateDiscount(editDiscount.id, data);
+                dispatch(showNotification({
+                    message: "Cập nhật mã giảm giá thành công",
+                    severity: "success"
+                }));
             } else {
                 await createDiscount(data);
+                dispatch(showNotification({
+                    message: "Thêm mã giảm giá thành công",
+                    severity: "success"
+                }));
             }
             setOpenDialog(false);
             fetchDiscounts();
         } catch (e) {
             console.error(e);
-            alert("Lỗi khi lưu mã giảm giá");
+            const errorMessage = e.response?.data?.message || "Lỗi khi lưu mã giảm giá";
+            dispatch(showNotification({
+                message: errorMessage,
+                severity: "error"
+            }));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Bạn chắc chắn muốn xóa?")) return;
+        setConfirmDeleteId(id);
+    };
+    const handleConfirmDelete = async () => {
         try {
-            await deleteDiscount(id);
+            await deleteDiscount(confirmDeleteId);
             fetchDiscounts();
+            dispatch(showNotification({
+                message: "Xóa mã giảm giá thành công",
+                severity: "success"
+            }));
         } catch (e) {
             console.error(e);
-            alert("Lỗi khi xóa mã giảm giá");
+            dispatch(showNotification({
+                message: "Lỗi khi xóa mã giảm giá",
+                severity: "error"
+            }));
         }
+        setConfirmDeleteId(null);
     };
 
+    const handleCancelDelete = () => setConfirmDeleteId(null);
     return (
         <Box>
             <Typography variant="h5" fontWeight={700} mb={3}>
@@ -250,6 +279,12 @@ const AdminDiscount = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ConfirmDeleteDialog
+                open={!!confirmDeleteId}
+                onClose={handleCancelDelete}
+                onConfirm={handleConfirmDelete}
+                content="Bạn chắc chắn muốn xóa mã giảm giá này?"
+            />
         </Box>
     );
 };

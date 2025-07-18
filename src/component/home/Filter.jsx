@@ -19,9 +19,10 @@ const Filter = ({ onFilter }) => {
   const [loading, setLoading] = useState(true);
   const [colors, setColors] = useState([]);
   const [flowerTypes, setFlowerTypes] = useState([]);
+  const [priceRange, setPriceRange] = useState(["", ""]); // Cho phép rỗng
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [manualFilter, setManualFilter] = useState(false);
+  const [ManualFilter, setManualFilter] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,7 +57,7 @@ const Filter = ({ onFilter }) => {
       if (prev.includes(color)) {
         return prev.filter((c) => c !== color);
       }
-      return [color];
+      return [...prev, color];
     });
   };
 
@@ -65,21 +66,40 @@ const Filter = ({ onFilter }) => {
       if (prev.includes(typeId)) {
         return prev.filter((id) => id !== typeId);
       }
-      return [typeId];
+      return [...prev, typeId];
     });
   };
 
+  // const handlePriceChange = (newRange) => {
+
+
+
+  // };
   const handleApplyFilter = () => {
     setManualFilter(true);
+
+    // Kiểm tra khi nhấn nút, nếu rỗng thì gán giá trị mặc định
+    let minPrice = priceRange[0] === "" ? 0 : Number(priceRange[0]);
+    let maxPrice = priceRange[1] === "" ? 1000000 : Number(priceRange[1]);
+    if (minPrice > maxPrice) minPrice = maxPrice;
+
     onFilter({
-      color: selectedColors.length > 0 ? selectedColors[0] : null,
-      flower_type_id: selectedTypes.length > 0 ? selectedTypes[0] : null,
+      color: selectedColors.length > 0 ? selectedColors : null,
+      flower_type_id: selectedTypes.length > 0 ? selectedTypes : null,
+      price: [minPrice, maxPrice],
+    });
+    console.log("Áp dụng bộ lọc:", {
+      color: selectedColors,
+      flower_type_id: selectedTypes,
+      price: [minPrice, maxPrice],
     });
   };
+
 
   const handleResetFilters = () => {
     setSelectedColors([]);
     setSelectedTypes([]);
+    setPriceRange([0, 1000000]);
     setManualFilter(true);
     onFilter({});
   };
@@ -119,22 +139,22 @@ const Filter = ({ onFilter }) => {
                           color === "Đỏ"
                             ? "#f44336"
                             : color === "Xanh dương"
-                            ? "#2196f3"
-                            : color === "Vàng"
-                            ? "#ffeb3b"
-                            : color === "Hồng"
-                            ? "#e91e63"
-                            : color === "Tím"
-                            ? "#9c27b0"
-                            : color === "Xanh lá"
-                            ? "#4caf50"
-                            : color === "Cam"
-                            ? "#ff9800"
-                            : color === "Nâu"
-                            ? "#795548"
-                            : color === "Đen"
-                            ? "#000000"
-                            : "gray",
+                              ? "#2196f3"
+                              : color === "Vàng"
+                                ? "#ffeb3b"
+                                : color === "Hồng"
+                                  ? "#e91e63"
+                                  : color === "Tím"
+                                    ? "#9c27b0"
+                                    : color === "Xanh lá"
+                                      ? "#4caf50"
+                                      : color === "Cam"
+                                        ? "#ff9800"
+                                        : color === "Nâu"
+                                          ? "#795548"
+                                          : color === "Đen"
+                                            ? "#000000"
+                                            : "gray",
                       }}
                     />
                   }
@@ -163,7 +183,45 @@ const Filter = ({ onFilter }) => {
               ))}
             </FormGroup>
 
-            {/* Thêm nút Áp dụng ở cuối */}
+            <Typography variant="subtitle1" fontWeight={600} mb={1}>
+              Khoảng giá
+            </Typography>
+            <Box display="flex" gap={2} alignItems="center" mb={2}>
+              <input
+                type="number"
+                min={0}
+                value={priceRange[0]}
+                onChange={e => {
+                  const val = e.target.value === "" ? "" : Math.max(0, Number(e.target.value));
+                  setPriceRange([val, priceRange[1]]);
+                }}
+                style={{
+                  width: 100,
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc"
+                }}
+                placeholder="Từ"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                min={0}
+                value={priceRange[1]}
+                onChange={e => {
+                  const val = e.target.value === "" ? "" : Math.max(0, Number(e.target.value));
+                  setPriceRange([priceRange[0], val]);
+                }}
+                style={{
+                  width: 100,
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc"
+                }}
+                placeholder="Đến"
+              />
+            </Box>
+
             <Box mt={3} display="flex" justifyContent="space-between">
               <Button
                 variant="contained"
@@ -174,7 +232,7 @@ const Filter = ({ onFilter }) => {
                 Áp dụng
               </Button>
 
-              {(selectedColors.length > 0 || selectedTypes.length > 0) && (
+              {(selectedColors.length > 0 || selectedTypes.length > 0 || priceRange[0] !== "" || priceRange[1] !== "") && (
                 <Button
                   variant="outlined"
                   color="error"

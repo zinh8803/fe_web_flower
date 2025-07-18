@@ -13,7 +13,6 @@ const Notifycation = ({
     setNotifications,
     setUnread,
 }) => {
-    // Xóa một thông báo
     const handleDelete = async (id) => {
         await deleteNotification(id);
         setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -68,7 +67,8 @@ const Notifycation = ({
                     notifications.map((noti) => (
                         <MenuItem key={noti.id} onClick={onClose} selected={!noti.read_at}>
                             <ListItemText
-                                primary={`Đơn hàng mới: ${noti.data.order_code} - ${noti.data.customer_name || "Khách lẻ"}`}
+                                // primary={`Đơn hàng mới: :${noti.data.order_code} - ${noti.data.customer_name || "Khách lẻ"}`}
+                                primary={`Đơn hàng mới: ${noti.data.order_code}`}
                                 secondary={`Tổng tiền: ${Number(noti.data.total_price).toLocaleString()}đ`}
                             />
                             <IconButton
