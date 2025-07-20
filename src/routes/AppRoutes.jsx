@@ -30,10 +30,13 @@ import StockProductAdmin from "../pages/Admin/StockProductAdmin";
 import ChangePassWordPage from "../pages/User/ChangePassWordPage";
 import ResetPassWordPage from "../pages/User/ResetPassWordPage";
 import ScrollToTop from "../component/ScrollToTop";
+import AdminEmployee from "../pages/Admin/AdminEmployee";
+import ProfileAdmin from "../pages/Admin/ProfileAdmin";
+import ChangePasswordAdminPage from "../pages/Admin/ChangePasswordAdminPage";
 
 const AppRoutes = () => (
     <Router>
-    <ScrollToTop />
+        <ScrollToTop />
         <Routes>
             {/* Main layout cho user */}
             <Route element={<MainLayout />}>
@@ -66,10 +69,15 @@ const AppRoutes = () => (
                     <Route path="categories" element={<AdminCategory />} />
                     <Route path="orders" element={<AdminOrder />} />
                     <Route path="users" element={<AdminUser />} />
+                    <Route path="employees" element={<AdminEmployee />} />
                     <Route path="flowers" element={<AdminFlower />} />
                     <Route path="flower-types" element={<AdminFlowerType />} />
                     <Route path="discounts" element={<AdminDiscount />} />
                     <Route path="receipts" element={<AdminReceipt />} />
+
+                    <Route path="profileAdmin" element={<ProfileAdmin />} />
+                    <Route path="change-password" element={<ChangePasswordAdminPage />} />
+
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Route>

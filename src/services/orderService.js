@@ -19,3 +19,6 @@ export const getOrderDetailAdmin = (id) =>
 
 export const updateOrder = (id, data) =>
     api.put(`/orders/${id}`, data, { withCredentials: true });
+
+export const cancelOrder = (id) =>
+    api.put(`/orders/cancel/${id}`, {}, { withCredentials: true });

@@ -61,10 +61,19 @@ const LoginDialog = ({ open, onClose }) => {
 
             onClose(false);
         } catch (error) {
-            dispatch(showNotification({
-                message: "Tài khoản mật hoặc khẩu không đúng!",
-                severity: "error"
-            }));
+
+            if (error.response && error.response.status === 403) {
+                dispatch(showNotification({
+                    message: "Tài khoản của bạn đã bị khóa.",
+                    severity: "error"
+                }));
+            }
+            else {
+                dispatch(showNotification({
+                    message: "Tài khoản hoặc mật khẩu không đúng!",
+                    severity: "error"
+                }));
+            }
             console.error("Login failed:", error);
         } finally {
             setLoading(false);

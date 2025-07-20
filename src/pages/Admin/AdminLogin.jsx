@@ -33,8 +33,13 @@ const AdminLogin = () => {
             dispatch(setUser({ user, token, refresh_token: res.data.refresh_token }));
             navigate("/admin");
         } catch (err) {
-            console.error(err);
-            setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+            if (err.response && err.response.status === 403) {
+                setError("Tài khoản của bạn đã bị khóa.");
+            } else {
+                setError("Tài khoản hoặc mật khẩu không đúng!");
+            }
+            // console.error(err);
+            // setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
         }
         setLoading(false);
     };

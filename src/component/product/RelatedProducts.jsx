@@ -13,6 +13,7 @@ const RelatedProducts = ({ related }) => {
                 {related.map(item => (
                     <Link
                         key={item.id}
+                        state={{ id: item.id }}
                         to={`/detail/${item.slug}`}
                         style={{ textDecoration: "none", color: "inherit" }}
                     >

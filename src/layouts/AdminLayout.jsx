@@ -7,10 +7,13 @@ import { getNotifications } from "../services/notifycationService";
 import NotificationSnackbar from "../component/NotificationSnackbar";
 import { initWebsocket } from "../services/websocketService";
 import Notifycation from "../component/admin/notifycation";
+import AdminMenuUser from "../component/admin/AdminHeader";
+import { useSelector } from "react-redux";
 
 const drawerWidth = 260;
 
 const AdminLayout = () => {
+    const admin = useSelector(state => state.user.user);
     const [open, setOpen] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [notifications, setNotifications] = useState([]);
@@ -83,9 +86,7 @@ const AdminLayout = () => {
                         setNotifications={setNotifications}
                         setUnread={setUnread}
                     />
-                    <Typography variant="body1" color="textSecondary" sx={{ ml: 2 }}>
-                        Welcome, Admin
-                    </Typography>
+                    <AdminMenuUser admin={admin} />
                 </Toolbar>
             </AppBar>
 

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutAndClearCart } from "../../store/userSlice";
 import { showNotification } from "../../store/notificationSlice";
-const UserMenu = ({ user }) => {
+const AdminMenuUser = ({ admin }) => {
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const dispatch = useDispatch();
@@ -19,44 +20,28 @@ const UserMenu = ({ user }) => {
     };
 
     const handleLogout = () => {
-
         dispatch(logoutAndClearCart());
-        navigate("/");
+        navigate("/admin/login");
         dispatch(showNotification({
             message: "Đăng xuất thành công!",
             severity: "success"
         }));
-
     };
 
     const handleProfile = () => {
         handleClose();
-        navigate("/profile");
-    }
-
-    const handleChanePassword = () => {
-        handleClose();
-        navigate("/change-password");
-    }
-
-    const handleOrderHistory = () => {
-        handleClose();
-        navigate("/orders/history");
+        navigate("/admin/profileAdmin");
     };
 
-    // This function can be called after a successful login
-    // const handleLoginSuccess = (token) => {
-    //     localStorage.setItem("token", token);
-    //     // Call API to get profile
-    //     getProfile(token).then(profileRes => {
-    //         dispatch(setUser({ user: profileRes.data.data, token }));
-    //     });
-    // };
+    const handleChangePassword = () => {
+        handleClose();
+        navigate("/admin/change-password");
+    };
 
     return (
         <div>
             <IconButton onClick={handleClick} size="small" sx={{ ml: 2 }}>
-                <Avatar alt={user.name} src={user.image_url} />
+                <Avatar alt={admin.name} src={admin.image_url} />
             </IconButton>
             <Menu
                 anchorEl={anchorEl}
@@ -73,14 +58,13 @@ const UserMenu = ({ user }) => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
-                <MenuItem >{user.name}</MenuItem>
-                <MenuItem onClick={handleProfile}>Thông tin tài khoản</MenuItem>
-                <MenuItem onClick={handleOrderHistory}>Đơn hàng</MenuItem>
-                <MenuItem onClick={handleChanePassword}>Đổi mật khẩu</MenuItem>
+                <MenuItem>{admin.name}</MenuItem>
+                <MenuItem onClick={handleProfile}>Đổi thông tin</MenuItem>
+                <MenuItem onClick={handleChangePassword}>Đổi mật khẩu</MenuItem>
                 <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </Menu>
         </div>
     );
 };
 
-export default UserMenu;
+export default AdminMenuUser;

@@ -112,18 +112,18 @@ const AdminProduct = () => {
     };
     const handlePageChange = async (event, newPage) => {
         if (loadingPage) return;
-
-        try {
-            setLoadingPage(true);
-            const res = await getProducts(newPage);
-            setProducts(res.data.data || []);
-            setTotalPages(res.data.meta.last_page || 1);
-            setPage(newPage);
-        } catch {
-            dispatch(showNotification({ message: "Lỗi khi tải danh sách sản phẩm", severity: "error" }));
-        } finally {
-            setLoadingPage(false);
-        }
+        setPage(newPage);
+        // try {
+        //     setLoadingPage(true);
+        //     const res = await getProducts(newPage);
+        //     setProducts(res.data.data || []);
+        //     setTotalPages(res.data.meta.last_page || 1);
+        //     setPage(newPage);
+        // } catch {
+        //     dispatch(showNotification({ message: "Lỗi khi tải danh sách sản phẩm", severity: "error" }));
+        // } finally {
+        //     setLoadingPage(false);
+        // }
     };
     const handleOpenDialog = (product = null) => {
         if (product) {
@@ -195,12 +195,12 @@ const AdminProduct = () => {
                 dispatch(showNotification({ message: "Thêm sản phẩm thành công!", severity: "success" }));
             }
             setOpenDialog(false);
-            fetchProducts();
         } catch (e) {
             const errorMessage = e.response?.data?.message || "Lỗi khi lưu sản phẩm";
             dispatch(showNotification({ message: errorMessage, severity: "error" }));
         }
         setLoading(false);
+        fetchProducts(page);
     };
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -221,11 +221,13 @@ const AdminProduct = () => {
                 message: "Xóa thành công!",
                 severity: "success"
             }));
+
         } catch (e) {
             const errorMessage = e.response?.data?.message || "Lỗi khi xóa sản phẩm";
             dispatch(showNotification({ message: errorMessage, severity: "error" }));
         }
         setConfirmDeleteId(null);
+        fetchProducts(page);
     };
     const handleCancelDelete = () => setConfirmDeleteId(null);
     const getCategoryName = (id) => {

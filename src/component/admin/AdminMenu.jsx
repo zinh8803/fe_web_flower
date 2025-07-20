@@ -4,25 +4,25 @@ import {
 } from "@mui/material";
 import {
     Dashboard, LocalOffer, Inventory, Category, ShoppingCart, People,
-    ExpandLess, ExpandMore, Add, Edit, Delete, LocalFlorist, ReceiptLong, Spa
+    ExpandLess, ExpandMore, Add, Edit, Delete, LocalFlorist, ReceiptLong, Spa,
+    SupervisorAccount
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { logoutAndClearCart } from "../../store/userSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Warehouse } from "lucide-react";
 
 const AdminMenu = () => {
     const location = useLocation();
     const [openProduct, setOpenProduct] = useState(false);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    //   const dispatch = useDispatch();
     const user = useSelector(state => state.user.user);
 
-    const handleLogout = () => {
-        dispatch(logoutAndClearCart());
-        window.location.href = "/admin/login";
-    };
+    // const handleLogout = () => {
+    //     dispatch(logoutAndClearCart());
+    //     window.location.href = "/admin/login";
+    // };
 
     return (
         <Box
@@ -204,6 +204,22 @@ const AdminMenu = () => {
                                 <ListItemIcon sx={{ color: "green" }}><People /></ListItemIcon>
                                 <ListItemText primary="Quản lý người dùng" />
                             </ListItem>
+                            <ListItem
+                                button
+                                component={Link}
+                                to="/admin/employees"
+                                selected={location.pathname.startsWith("/admin/employees")}
+                                sx={{
+                                    "&.Mui-selected, &.Mui-selected:hover": {
+                                        bgcolor: "#e0f2f1",
+                                        color: "black"
+                                    },
+                                    color: "black"
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "green" }}><SupervisorAccount /></ListItemIcon>
+                                <ListItemText primary="Quản lý nhân viên" />
+                            </ListItem>
                         </>
                     )}
 
@@ -242,7 +258,7 @@ const AdminMenu = () => {
                     </ListItem>
 
                     {/* Logout */}
-                    <ListItem
+                    {/* <ListItem
                         button
                         onClick={handleLogout}
                         sx={{
@@ -257,7 +273,7 @@ const AdminMenu = () => {
                     >
                         <ListItemIcon sx={{ color: "red" }}><LogoutIcon /></ListItemIcon>
                         <ListItemText primary="Đăng xuất" />
-                    </ListItem>
+                    </ListItem> */}
                 </List>
             </Box>
         </Box>

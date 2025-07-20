@@ -8,8 +8,11 @@ import {
 import { createAutoImportReceipt, getAutoImportReceipts, getImportReceiptById, getImportReceipts, importReceipts, updateImportReceipt } from "../../services/importReceiptsService";
 import { getFlower } from "../../services/flowerService";
 import { Add, Delete, Edit, KeyboardArrowDown, KeyboardArrowUp, Search, AccessAlarm } from "@mui/icons-material"; // icon cho nút tự động
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/notificationSlice";
 
 const AdminReceipt = () => {
+    const dispatch = useDispatch();
     const [receipts, setReceipts] = useState([]);
     const [flowerSearch, setFlowerSearch] = useState("");
     const [openRow, setOpenRow] = useState(null);
@@ -39,7 +42,6 @@ const AdminReceipt = () => {
     });
     const [autoFlowerSearch, setAutoFlowerSearch] = useState("");
     const [autoFlowerDropdownOpen, setAutoFlowerDropdownOpen] = useState(false);
-
     useEffect(() => {
         fetchReceipts(page);
     }, [page]);
@@ -81,7 +83,7 @@ const AdminReceipt = () => {
             setReceipts(res.data.data || []);
             setTotalPages(res.data.meta ? res.data.meta.last_page : 1);
         } catch {
-            alert("Lỗi khi tải phiếu nhập");
+            dispatch(showNotification({ message: "Lỗi khi tải phiếu nhập", type: "error" }));
         }
     };
 
@@ -105,7 +107,7 @@ const AdminReceipt = () => {
             setImportPrice(0);
             setOpenDialog(true);
         } catch {
-            alert("Lỗi khi tải danh sách hoa");
+            dispatch(showNotification({ message: "Lỗi khi tải danh sách hoa", type: "error" }));
         }
     };
     const handlePageChange = (event, value) => {
@@ -151,13 +153,11 @@ const AdminReceipt = () => {
             });
         }
 
-        // Reset các trường sau khi thêm
         setSelectedFlower(null);
         setQuantity(1);
         setImportPrice(0);
     };
 
-    // Hàm xóa hoa khỏi danh sách
     const handleRemoveFlower = (flowerId) => {
         setForm({
             ...form,
@@ -165,7 +165,6 @@ const AdminReceipt = () => {
         });
     };
 
-    // Xử lý submit
     const handleSubmit = async () => {
         try {
             if (editReceipt) {
@@ -176,11 +175,10 @@ const AdminReceipt = () => {
             setOpenDialog(false);
             fetchReceipts();
         } catch {
-            alert("Lỗi khi lưu phiếu nhập");
+            dispatch(showNotification({ message: "Lỗi khi lưu phiếu nhập", type: "error" }));
         }
     };
 
-    // Xử lý mở form sửa
     const handleOpenEdit = async (receipt) => {
         try {
             const res = await getImportReceiptById(receipt.id);
@@ -196,41 +194,35 @@ const AdminReceipt = () => {
                     status: d.status
                 }))
             });
-            // Lấy lại danh sách hoa (nếu cần)
             const flowerRes = await getFlower();
             setFlowers(flowerRes.data.data || []);
             setOpenDialog(true);
         } catch {
-            alert("Lỗi khi tải chi tiết phiếu nhập");
+            dispatch(showNotification({ message: "Lỗi khi tải chi tiết phiếu nhập", type: "error" }));
         }
     };
 
-    // Thêm hàm để kiểm tra hoa đã được chọn chưa
     const isFlowerSelected = (flowerId) => {
         return form.details.some(d => d.flower_id === flowerId);
     };
 
     const handleOpenAutoDialog = async () => {
         try {
-            // Tải danh sách hoa (nếu chưa có)
             if (flowers.length === 0) {
                 const res = await getFlower();
                 setFlowers(res.data.data || []);
             }
 
-            // Refresh cấu hình tự động mỗi khi mở dialog
             await fetchAutoConfig();
 
-            // Không cần set lại autoConfig ở đây nữa vì đã được set trong fetchAutoConfig
             setAutoFlowerSearch("");
             setOpenAutoDialog(true);
         } catch (error) {
             console.error(error);
-            alert("Lỗi khi tải danh sách hoa!");
+            dispatch(showNotification({ message: "Lỗi khi tải danh sách hoa", type: "error" }));
         }
     };
 
-    // Thêm các hàm xử lý cho Auto Config:
     const isAutoFlowerSelected = (flowerId) => {
         return autoConfig.details.some(d => d.flower_id === flowerId);
     };
@@ -246,13 +238,11 @@ const AdminReceipt = () => {
 
     const handleAddAutoFlower = (flower) => {
         if (isAutoFlowerSelected(flower.id)) {
-            // Nếu đã có, xóa ra
             setAutoConfig({
                 ...autoConfig,
                 details: autoConfig.details.filter(d => d.flower_id !== flower.id)
             });
         } else {
-            // Nếu chưa có, thêm vào
             setAutoConfig({
                 ...autoConfig,
                 details: [
@@ -276,7 +266,6 @@ const AdminReceipt = () => {
         });
     };
 
-    // Lọc hoa cho dialog tự động
     const filteredAutoFlowers = flowers.filter(flower =>
         flower.name.toLowerCase().includes(autoFlowerSearch.toLowerCase())
     );
@@ -286,13 +275,12 @@ const AdminReceipt = () => {
             await createAutoImportReceipt(autoConfig);
             setOpenAutoDialog(false);
 
-            // Refresh dữ liệu sau khi lưu
             await fetchAutoConfig();
 
-            alert("Đã lưu cấu hình tự động nhập!");
+            dispatch(showNotification({ message: "Đã lưu cấu hình tự động nhập!", type: "success" }));
         } catch (error) {
             console.error("Error saving auto config:", error);
-            alert("Lỗi khi lưu cấu hình tự động!");
+            dispatch(showNotification({ message: "Lỗi khi lưu cấu hình tự động!", type: "error" }));
         }
     };
 

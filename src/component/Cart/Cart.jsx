@@ -574,19 +574,43 @@ const Cart = () => {
                                                     borderRadius: 2
                                                 }
                                             }}
+                                            disabled={!!discountId} // Không cho nhập khi đã áp dụng
                                         />
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={handleApplyDiscount}
-                                            sx={{
-                                                borderRadius: 2,
-                                                minWidth: 80
-                                            }}
-                                        >
-                                            Áp dụng
-                                        </Button>
+                                        {!discountId ? (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleApplyDiscount}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    minWidth: 80
+                                                }}
+                                            >
+                                                Áp dụng
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="outlined"
+                                                color="warning"
+                                                onClick={() => {
+                                                    setDiscountId(null);
+                                                    setDiscountAmount(0);
+                                                    setDiscountCode("");
+                                                }}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    minWidth: 80
+                                                }}
+                                            >
+                                                Gỡ mã
+                                            </Button>
+                                        )}
                                     </Box>
+                                    {discountId && (
+                                        <Typography variant="body2" color="success.main" mt={1}>
+                                            Đã áp dụng mã giảm giá!
+                                        </Typography>
+                                    )}
                                 </Box>
 
                                 <Divider sx={{ my: 3 }} />

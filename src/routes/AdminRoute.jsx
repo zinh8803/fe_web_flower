@@ -4,7 +4,9 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 const allowedEmployeePaths = [
     "/admin/dashboard",
     "/admin/orders",
-    "/admin/receipts"
+    "/admin/receipts",
+    "/admin/profileAdmin",
+    "/admin/change-password",
 ];
 
 const AdminRoute = () => {

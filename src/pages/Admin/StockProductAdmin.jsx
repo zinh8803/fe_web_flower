@@ -184,7 +184,7 @@ const StockProductAdmin = () => {
                             ) : (
                                 data[activeTab].map((product, idx) => (
                                     <TableRow key={product.product_id}>
-                                        <TableCell>{(page - 1) * 10 + idx + 1}</TableCell>
+                                        <TableCell>{(page - 1) * data[activeTab].length + idx + 1}</TableCell>
                                         <TableCell>
                                             <img src={product.product_image} alt={product.product_name} width={50} />
                                         </TableCell>

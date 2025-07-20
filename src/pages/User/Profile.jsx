@@ -57,7 +57,7 @@ const Profile = () => {
             });
         } catch (error) {
             console.error("Cập nhật thông tin thất bại:", error);
-            alert("Cập nhật thất bại!");
+            dispatch(showNotification({ message: error.response?.data?.message || "Cập nhật thông tin thất bại!", severity: "error" }));
             setLoading(false);
         }
     };

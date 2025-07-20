@@ -202,6 +202,7 @@ const AdminOrder = () => {
                                             size="small"
                                             onClick={() => handleOpenUpdate(order.id)}
                                             sx={{ cursor: "pointer" }}
+                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy"}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -237,12 +238,12 @@ const AdminOrder = () => {
                                                             <TableRow key={idx}>
                                                                 <TableCell>
                                                                     <img
-                                                                        src={item.product?.image_url}
-                                                                        alt={item.product?.name}
+                                                                        src={item.product_size.product?.image_url}
+                                                                        alt={item.product_size.product?.name}
                                                                         style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 4 }}
                                                                     />
                                                                 </TableCell>
-                                                                <TableCell>{item.product?.name}</TableCell>
+                                                                <TableCell>{item.product_size.product?.name}</TableCell>
                                                                 <TableCell>{item.product_size?.size}</TableCell>
                                                                 <TableCell>{Number(item.product_size?.price || item.price || 0).toLocaleString()}đ</TableCell>
                                                                 <TableCell>{item.quantity}</TableCell>

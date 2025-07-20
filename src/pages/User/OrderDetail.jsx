@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderUserdetail } from "../../services/userService";
-import { Box, CircularProgress, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from "@mui/material";
+import { cancelOrder } from "../../services/orderService";
+import { Box, CircularProgress, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider, Button } from "@mui/material";
 import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
+import { showNotification } from "../../store/notificationSlice";
+import { useDispatch } from "react-redux";
 
 const OrderDetail = () => {
     const { id } = useParams();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const dispatch = useDispatch();
+    const [canceling, setCanceling] = useState(false);
+    console.log("id", id);
     useEffect(() => {
         document.title = 'Chi tiết đơn hàng';
         const token = localStorage.getItem("token");
@@ -16,6 +21,24 @@ const OrderDetail = () => {
             .then(res => setOrder(res.data.data))
             .finally(() => setLoading(false));
     }, [id]);
+
+    const handleCancelOrder = async () => {
+        setCanceling(true);
+        try {
+            await cancelOrder(id);
+            dispatch(showNotification({
+                message: "Hủy đơn hàng thành công!",
+                severity: "success"
+            }));
+            setOrder(prev => ({ ...prev, status: "đã hủy" }));
+        } catch (e) {
+            dispatch(showNotification({
+                message: e.response?.data?.message || "Hủy đơn hàng thất bại!",
+                severity: "error"
+            }));
+        }
+        setCanceling(false);
+    };
 
     if (loading) return (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
@@ -35,6 +58,19 @@ const OrderDetail = () => {
             <Typography variant="h5" fontWeight={700} mb={2}>
                 Chi tiết đơn hàng #{order.order_code}
             </Typography>
+            {/* Nút hủy đơn hàng */}
+            {order.status === "đang xử lý" && (
+                <Box mb={2}>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleCancelOrder}
+                        disabled={canceling}
+                    >
+                        {canceling ? "Đang hủy..." : "Hủy đơn hàng"}
+                    </Button>
+                </Box>
+            )}
             <Box mb={2} display="flex" flexWrap="wrap" gap={4}>
                 <Box flex={1} minWidth={280}>
                     <Typography><b>Khách hàng:</b> {order.name}</Typography>
@@ -88,17 +124,17 @@ const OrderDetail = () => {
                         {order.order_details.map(detail => (
                             <TableRow key={detail.id}>
                                 <TableCell>
-                                    {detail.product?.image_url ? (
+                                    {detail.product_size.product?.image_url ? (
                                         <img
-                                            src={detail.product.image_url}
-                                            alt={detail.product.name}
+                                            src={detail.product_size.product.image_url}
+                                            alt={detail.product_size.product.name}
                                             style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }}
                                         />
                                     ) : (
                                         <span style={{ color: "#ccc" }}>Không có ảnh</span>
                                     )}
                                 </TableCell>
-                                <TableCell>{detail.product?.name}</TableCell>
+                                <TableCell>{detail.product_size.product?.name}</TableCell>
                                 <TableCell>
                                     {detail.product_size?.size ? detail.product_size.size : ""}
                                 </TableCell>
