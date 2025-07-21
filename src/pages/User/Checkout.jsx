@@ -162,7 +162,7 @@ const Checkout = () => {
                 Thanh toán đơn hàng
             </Typography>
             <TextField
-                label="Tên"
+                label="Họ Tên"
                 name="name"
                 value={form.name}
                 onChange={handleChange}
@@ -180,7 +180,7 @@ const Checkout = () => {
                 helperText={errors.email}
             />
             <TextField
-                label="Số điện thoại"
+                label="Số điện thoại nhận hàng"
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
@@ -190,7 +190,7 @@ const Checkout = () => {
                 helperText={errors.phone}
             />
             <TextField
-                label="Địa chỉ"
+                label="Địa chỉ nhận hàng"
                 name="address"
                 value={form.address}
                 onChange={handleChange}

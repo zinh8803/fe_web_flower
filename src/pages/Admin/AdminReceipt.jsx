@@ -46,7 +46,6 @@ const AdminReceipt = () => {
         fetchReceipts(page);
     }, [page]);
 
-    // Thêm hàm fetchAutoConfig bên ngoài useEffect
     const fetchAutoConfig = async () => {
         try {
             const res = await getAutoImportReceipts();

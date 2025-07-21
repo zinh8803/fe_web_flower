@@ -19,6 +19,12 @@ export function initWebsocket(onOrderCreated) {
                     onOrderCreated(data);
                 }
             });
+        echoInstance.channel("admin-auto-imports")
+            .listen("AutoImport", (data) => {
+                if (typeof onOrderCreated === "function") {
+                    onOrderCreated(data);
+                }
+            });
     }
     return echoInstance;
 }

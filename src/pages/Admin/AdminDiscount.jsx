@@ -223,19 +223,27 @@ const AdminDiscount = () => {
                         label="Giá trị"
                         name="value"
                         value={form.value}
-                        onChange={handleChange}
+                        onChange={e => {
+                            const val = Number(e.target.value);
+                            setForm({ ...form, value: val < 0 ? 0 : val });
+                        }}
                         fullWidth
                         margin="normal"
                         type="number"
+                        inputProps={{ min: 0 }}
                     />
                     <TextField
                         label="Giá trị tối thiểu"
                         name="min_total"
                         value={form.min_total}
-                        onChange={handleChange}
+                        onChange={e => {
+                            const val = Number(e.target.value);
+                            setForm({ ...form, min_total: val < 0 ? 0 : val });
+                        }}
                         fullWidth
                         margin="normal"
                         type="number"
+                        inputProps={{ min: 0 }}
                     />
                     <TextField
                         label="Ngày bắt đầu"

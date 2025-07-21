@@ -50,6 +50,7 @@ const ProfileForm = ({ form, onChange, onImageChange, onSubmit, loading }) => (
                         onChange={onChange}
                         fullWidth
                         margin="normal"
+                        disabled
                     />
                     <TextField
                         label="Địa chỉ"

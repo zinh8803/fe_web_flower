@@ -67,9 +67,20 @@ const Notifycation = ({
                     notifications.map((noti) => (
                         <MenuItem key={noti.id} onClick={onClose} selected={!noti.read_at}>
                             <ListItemText
-                                // primary={`Đơn hàng mới: :${noti.data.order_code} - ${noti.data.customer_name || "Khách lẻ"}`}
-                                primary={`Đơn hàng mới: ${noti.data.order_code}`}
-                                secondary={`Tổng tiền: ${Number(noti.data.total_price).toLocaleString()}đ`}
+                                primary={
+                                    noti.data.order_code
+                                        ? `Đơn hàng mới: ${noti.data.order_code}`
+                                        : noti.data.import_date
+                                            ? `Phiếu nhập tự động: ${noti.data.import_date}`
+                                            : "Thông báo mới"
+                                }
+                                secondary={
+                                    noti.data.total_price
+                                        ? `Tổng tiền: ${Number(noti.data.total_price).toLocaleString()}đ`
+                                        : noti.data.import_date
+                                            ? `Ngày nhập: ${noti.data.import_date}`
+                                            : ""
+                                }
                             />
                             <IconButton
                                 edge="end"
