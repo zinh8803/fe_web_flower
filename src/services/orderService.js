@@ -22,3 +22,12 @@ export const updateOrder = (id, data) =>
 
 export const cancelOrder = (id) =>
     api.put(`/orders/cancel/${id}`, {}, { withCredentials: true });
+
+export const reportProduct = (data) =>
+    api.post("/orders/product-reports", data, { withCredentials: true });
+
+export const updateReport = (id, data) =>
+    api.put(`/orders/product-reports/${id}`, data, { withCredentials: true });
+
+export const deleteReport = (id) =>
+    api.delete(`/orders/product-reports/${id}`, { withCredentials: true });
