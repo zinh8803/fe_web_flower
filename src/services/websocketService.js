@@ -3,7 +3,7 @@ import Pusher from "pusher-js";
 
 let echoInstance = null;
 
-export function initWebsocket(onOrderCreated) {
+export function initWebsocket(onOrderCreated, onAutoImport) {
     if (!echoInstance) {
         window.Pusher = Pusher;
         echoInstance = new Echo({
@@ -21,10 +21,12 @@ export function initWebsocket(onOrderCreated) {
             });
         echoInstance.channel("admin-auto-imports")
             .listen("AutoImport", (data) => {
-                if (typeof onOrderCreated === "function") {
-                    onOrderCreated(data);
+                console.log("AutoImport event received:", data);
+                if (typeof onAutoImport === "function") {
+                    onAutoImport(data);
                 }
             });
     }
     return echoInstance;
 }
+

@@ -29,18 +29,20 @@ const AdminLayout = () => {
         setAnchorEl(null);
     };
 
+    const handleNewNotification = () => {
+        getNotifications().then(res => {
+            setNotifications(res.data.notifications);
+            setUnread(res.data.unread_count);
+        });
+    };
+
     useEffect(() => {
         getNotifications().then(res => {
             setNotifications(res.data.notifications);
             setUnread(res.data.unread_count);
         });
 
-        initWebsocket(() => {
-            getNotifications().then(res => {
-                setNotifications(res.data.notifications);
-                setUnread(res.data.unread_count);
-            });
-        });
+        initWebsocket(handleNewNotification, handleNewNotification);
     }, []);
 
     return (

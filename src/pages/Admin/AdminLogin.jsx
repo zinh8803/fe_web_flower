@@ -31,7 +31,7 @@ const AdminLogin = () => {
                 return;
             }
             dispatch(setUser({ user, token, refresh_token: res.data.refresh_token }));
-            navigate("/admin");
+            navigate("/admin/dashboard");
         } catch (err) {
             if (err.response && err.response.status === 403) {
                 setError("Tài khoản của bạn đã bị khóa.");
