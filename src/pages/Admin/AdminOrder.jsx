@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getOrders, getOrderDetailAdmin, updateOrder } from "../../services/orderService";
+import { getOrders, getOrderDetailAdmin, updateOrder, updateReport } from "../../services/orderService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Chip,
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Collapse, IconButton
@@ -23,6 +23,12 @@ const AdminOrder = () => {
     const [currentReports, setCurrentReports] = useState([]);
     const [openImageDialog, setOpenImageDialog] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
+    const [handleReportDialog, setHandleReportDialog] = useState(false);
+    const [selectedReport, setSelectedReport] = useState(null);
+    const [adminNote, setAdminNote] = useState("");
+    const [reportStatus, setReportStatus] = useState("");
+    const [orderStatus, setOrderStatus] = useState("");
+
     useEffect(() => {
         fetchOrders(page);
     }, [page]);
@@ -145,13 +151,16 @@ const AdminOrder = () => {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow>
+                        <TableRow
+
+                        >
                             <TableCell />
                             <TableCell>Mã đơn</TableCell>
                             <TableCell>Khách hàng</TableCell>
                             <TableCell>Điện thoại</TableCell>
                             <TableCell>Ngày mua</TableCell>
-                            <TableCell>Giảm giá</TableCell>
+                            <TableCell>Ngày giao</TableCell>
+                            {/* <TableCell>Giảm giá</TableCell> */}
                             <TableCell>Tổng tiền</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
@@ -160,7 +169,9 @@ const AdminOrder = () => {
                     <TableBody>
                         {orders.map(order => (
                             <React.Fragment key={order.id}>
-                                <TableRow>
+                                <TableRow
+                                    sx={order.is_express ? { backgroundColor: "#EEEEEE" } : {}}
+                                >
                                     <TableCell>
                                         <IconButton
                                             size="small"
@@ -173,7 +184,8 @@ const AdminOrder = () => {
                                     <TableCell>{order.name}</TableCell>
                                     <TableCell>{order.phone}</TableCell>
                                     <TableCell>{order.buy_at}</TableCell>
-                                    <TableCell>
+                                    <TableCell>{order.delivery_date} {order.delivery_time}</TableCell>
+                                    {/* <TableCell>
                                         {order.discount ? (
                                             <Chip
                                                 label={`${order.discount.name} (${order.discount.type === "percent" ? `${order.discount.value}%` : `${parseInt(order.discount.value).toLocaleString()}đ`}) `}
@@ -181,7 +193,7 @@ const AdminOrder = () => {
                                                 size="small"
                                             />
                                         ) : "-"}
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell>
                                         {Number(order.total_price).toLocaleString()}đ
                                     </TableCell>
@@ -201,14 +213,14 @@ const AdminOrder = () => {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <Chip
-                                            label="Cập nhật trạng thái"
-                                            color="secondary"
+                                        <Button
+                                            variant="outlined"
                                             size="small"
+                                            color="primary"
                                             onClick={() => handleOpenUpdate(order.id)}
-                                            sx={{ cursor: "pointer" }}
-                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy"}
-                                        />
+                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy" || order.status === "đang xử lý báo cáo" || order.status === "Xử Lý Báo Cáo"}
+                                        > Cập nhật trạng thái
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                                 {/* Phần xổ xuống chi tiết */}
@@ -241,6 +253,15 @@ const AdminOrder = () => {
                                                     <Typography><b>Điện thoại:</b> {order.phone}</Typography>
                                                     <Typography><b>Địa chỉ:</b> {order.address}</Typography>
                                                     <Typography><b>Ghi chú:</b> {order.note || "-"}</Typography>
+                                                    <Typography>
+                                                        <b>Ngày giao hàng:</b> {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : "-"}
+                                                    </Typography>
+                                                    <Typography>
+                                                        <b>Giờ giao hàng:</b> {order.is_express ? "Giao nhanh" : (order.delivery_time || "-")}
+                                                    </Typography>
+                                                    <Typography>
+                                                        <b>Giao nhanh:</b> {order.is_express ? "Có" : "Không"}
+                                                    </Typography>
                                                 </Box>
                                                 <Table size="small">
                                                     <TableHead>
@@ -335,6 +356,7 @@ const AdminOrder = () => {
                                     <TableCell>Kích thước</TableCell>
                                     <TableCell>Số lượng lỗi</TableCell>
                                     <TableCell>Lý do</TableCell>
+                                    <TableCell>Hoàn trả</TableCell>
                                     <TableCell>Trạng thái</TableCell>
                                     <TableCell>Ảnh</TableCell>
                                 </TableRow>
@@ -355,6 +377,7 @@ const AdminOrder = () => {
                                             </TableCell>
                                             <TableCell>{r.quantity}</TableCell>
                                             <TableCell>{r.reason}</TableCell>
+                                            <TableCell>{r.action}</TableCell>
                                             <TableCell>{r.status}</TableCell>
                                             <TableCell>
                                                 {r.image_url && (
@@ -376,23 +399,111 @@ const AdminOrder = () => {
                         </Table>
                     )}
                 </DialogContent>
-                <Dialog
-                    open={openImageDialog}
-                    onClose={() => setOpenImageDialog(false)}
-                    maxWidth="md"
-                >
-                    <DialogContent sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
-                        {currentImage && (
-                            <img
-                                src={currentImage}
-                                alt="Ảnh báo cáo"
-                                style={{ maxWidth: "100%", maxHeight: 500, borderRadius: 8 }}
-                            />
-                        )}
-                    </DialogContent>
-                </Dialog>
                 <DialogActions>
                     <Button onClick={() => setViewAllReportsDialog(false)}>Đóng</Button>
+                    {currentReports.length > 0 && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={async () => {
+                                // Lấy order chi tiết nếu chưa có
+                                let order = selectedOrder;
+                                if (!order || order.id !== currentReports[0]?.order_id) {
+                                    const res = await getOrderDetailAdmin(currentReports[0]?.order_id);
+                                    order = res.data.data || res.data;
+                                    setSelectedOrder(order);
+                                }
+                                setCurrentReports(order.product_reports || []);
+                                setHandleReportDialog(true);
+                            }}
+                        >
+                            Xử lý báo cáo
+                        </Button>
+                    )}
+                </DialogActions>
+            </Dialog>
+
+            {/* Modal xử lý báo cáo sản phẩm */}
+            <Dialog
+                open={handleReportDialog}
+                onClose={() => setHandleReportDialog(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>Xử lý báo cáo sản phẩm</DialogTitle>
+                <DialogContent>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Sản phẩm</TableCell>
+                                <TableCell>Kích thước</TableCell>
+                                <TableCell>Số lượng lỗi</TableCell>
+                                <TableCell>Lý do</TableCell>
+                                <TableCell>Trạng thái</TableCell>
+                                <TableCell>Ghi chú xử lý</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {currentReports.map((r, idx) => {
+                                const detail = (selectedOrder?.order_details || []).find(d => d.id === r.order_detail_id);
+                                return (
+                                    <TableRow key={r.id}>
+                                        <TableCell>{detail?.product_size?.product?.name || "-"}</TableCell>
+                                        <TableCell>{detail?.product_size?.size || "-"}</TableCell>
+                                        <TableCell>{r.quantity}</TableCell>
+                                        <TableCell>{r.reason}</TableCell>
+                                        <TableCell>
+                                            <Select
+                                                value={r.status || ""}
+                                                onChange={e => {
+                                                    const newReports = [...currentReports];
+                                                    newReports[idx].status = e.target.value;
+                                                    setCurrentReports(newReports);
+                                                }}
+                                                size="small"
+                                            >
+                                                <MenuItem value="Đã giải quyết">Đã giải quyết</MenuItem>
+                                                <MenuItem value="Đang xử lý">Đang xử lý</MenuItem>
+                                                <MenuItem value="Từ chối">Từ chối</MenuItem>
+                                            </Select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <TextField
+                                                value={r.admin_note || ""}
+                                                onChange={e => {
+                                                    const newReports = [...currentReports];
+                                                    newReports[idx].admin_note = e.target.value;
+                                                    setCurrentReports(newReports);
+                                                }}
+                                                size="small"
+                                                multiline
+                                                rows={2}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setHandleReportDialog(false)}>Hủy</Button>
+                    <Button
+                        variant="contained"
+                        onClick={async () => {
+                            if (!selectedOrder) return;
+                            await updateReport(
+                                selectedOrder.id,
+                                currentReports,
+                                orderStatus
+                            );
+                            setHandleReportDialog(false);
+                            setSelectedReport(null);
+                            fetchOrders(page);
+                        }}
+                    >
+                        Lưu xử lý
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Box>

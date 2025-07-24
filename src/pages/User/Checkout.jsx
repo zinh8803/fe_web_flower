@@ -23,6 +23,9 @@ const Checkout = () => {
         note: "",
         payment_method: "cod",
         discount_id: null,
+        delivery_date: "",
+        delivery_time: "",
+        is_express: false
     });
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
@@ -105,6 +108,9 @@ const Checkout = () => {
                         product_size_id: item.product_size_id,
                     })),
                     discount_id: discountId || null,
+                    delivery_date: form.delivery_date,
+                    delivery_time: form.delivery_time,
+                    is_express: form.is_express
                 };
 
                 const res = await createOrder(orderData);
@@ -205,6 +211,41 @@ const Checkout = () => {
                 fullWidth
                 margin="normal"
             />
+            <TextField
+                label="Ngày giao hàng"
+                name="delivery_date"
+                type="date"
+                value={form.delivery_date}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+                label="Giờ giao hàng"
+                name="delivery_time"
+                type="time"
+                value={form.is_express ? "" : form.delivery_time}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+                disabled={form.is_express}
+            />
+            <Box display="flex" alignItems="center" mb={2}>
+                <Typography mr={2}>Giao nhanh (Tốc độ 2 tiếng):</Typography>
+                <input
+                    type="checkbox"
+                    checked={form.is_express}
+                    onChange={e => {
+                        setForm({
+                            ...form,
+                            is_express: e.target.checked,
+                            delivery_time: e.target.checked ? "" : form.delivery_time
+                        });
+                    }}
+                />
+            </Box>
             <Typography fontWeight={600} mb={1}>Phương thức thanh toán</Typography>
             <Box display="flex" gap={3} mb={2}>
                 {user && (
