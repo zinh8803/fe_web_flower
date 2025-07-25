@@ -23,7 +23,7 @@ const OrderDetail = () => {
     const [reportDialog, setReportDialog] = useState(false);
     const [reporting, setReporting] = useState(false);
     const [selectedReports, setSelectedReports] = useState([]);
-
+    const [actionType, setActionType] = useState("Đổi hàng");
     const [viewReportDialog, setViewReportDialog] = useState(false);
     // const [viewReport, setViewReport] = useState(null);
 
@@ -89,7 +89,7 @@ const OrderDetail = () => {
                 order_detail_id: r.order_detail_id,
                 quantity: r.quantity,
                 reason: r.reason,
-                action: r.action,
+                action: actionType,
                 image: r.image
             }));
         if (reportsToSend.length === 0) {
@@ -337,6 +337,18 @@ const OrderDetail = () => {
             >
                 <DialogTitle>Báo cáo sản phẩm lỗi</DialogTitle>
                 <DialogContent>
+                    <Box mb={2}>
+                        <Typography fontWeight={700}>Yêu cầu xử lý:</Typography>
+                        <Select
+                            value={actionType}
+                            onChange={e => setActionType(e.target.value)}
+                            size="small"
+                            sx={{ minWidth: 180, ml: 2 }}
+                        >
+                            <MenuItem value="Đổi hàng">Đổi hàng</MenuItem>
+                            <MenuItem value="Mã giảm giá">Mã giảm giá</MenuItem>
+                        </Select>
+                    </Box>
                     <TableContainer component={Paper}>
                         <Table>
                             <TableHead>
@@ -347,7 +359,7 @@ const OrderDetail = () => {
                                     <TableCell sx={{ width: 100 }}>Số lượng mua</TableCell>
                                     <TableCell sx={{ width: 100 }}>Số lượng lỗi</TableCell>
                                     <TableCell sx={{ width: 220 }}>Lý do</TableCell>
-                                    <TableCell sx={{ width: 140 }}>Yêu cầu xử lý</TableCell>
+                                    {/* <TableCell sx={{ width: 140 }}>Yêu cầu xử lý</TableCell> */}
                                     <TableCell sx={{ width: 120 }}>Ảnh</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -398,18 +410,9 @@ const OrderDetail = () => {
                                                     multiline
                                                 />
                                             </TableCell>
-                                            <TableCell sx={{ width: 140 }}>
-                                                <Select
-                                                    value={r.action}
-                                                    onChange={e => handleChange(detail.id, "action", e.target.value)}
-                                                    disabled={!r.checked}
-                                                    size="small"
-                                                    fullWidth
-                                                >
-                                                    <MenuItem value="Đổi hàng">Đổi hàng</MenuItem>
-                                                    <MenuItem value="Mã giảm giá">Mã giảm giá</MenuItem>
-                                                </Select>
-                                            </TableCell>
+                                            {/* <TableCell sx={{ width: 140 }}>
+                                                {actionType}
+                                            </TableCell> */}
                                             <TableCell sx={{ width: 120 }}>
                                                 <IconButton
                                                     component="label"
@@ -475,8 +478,21 @@ const OrderDetail = () => {
                 }}
             >
                 <DialogTitle>Danh sách báo cáo sản phẩm</DialogTitle>
-
+                {order.product_reports && order.product_reports.length > 0 && (
+                    order.product_reports.map((report) => {
+                        const orderReturn = order.order_returns?.find(r => r.order_detail_id === report.order_detail_id);
+                        return orderReturn ? (
+                            <Typography variant="subtitle2" color="primary" sx={{ mt: 1, px: 3 }}>
+                                Trạng thái đổi trả sản phẩm  ({report.reason}):&nbsp;
+                                <span style={{ fontWeight: 700 }}>
+                                    {orderReturn.status}
+                                </span>
+                            </Typography>
+                        ) : null;
+                    })
+                )}
                 <DialogContent sx={{ minHeight: 200 }}>
+
                     {order.product_reports && order.product_reports.length > 0 ? (
                         <Table size="small">
                             <TableHead>
@@ -501,8 +517,8 @@ const OrderDetail = () => {
                                             <TableCell>{report.quantity}</TableCell>
                                             <TableCell>{report.reason}</TableCell>
                                             <TableCell>
-                                                {report.action === "Đổi hàng" ? "Đổi hàng" :
-                                                    report.action === "Mã giảm giá" ? "Mã giảm giá" : "-"}
+                                                {actionType === "Đổi hàng" ? "Đổi hàng" :
+                                                    actionType === "Mã giảm giá" ? "Mã giảm giá" : "-"}
                                             </TableCell>
                                             <TableCell>
                                                 {report.image_url ? (
@@ -522,13 +538,12 @@ const OrderDetail = () => {
                                                     <IconButton
                                                         size="small"
                                                         color="error"
-                                                        onClick={() => handleDelete(report.id)}
                                                         sx={{ ml: 1 }}
                                                     >
-                                                        <VisibilityIcon />
                                                     </IconButton>
                                                 )}
                                             </TableCell>
+
                                         </TableRow>
                                     );
                                 })}
