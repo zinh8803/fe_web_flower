@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { getOrders, getOrderDetailAdmin, updateOrder, updateReport, updateOrderReturns } from "../../services/orderService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Chip,
-    Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Collapse, IconButton
+    Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Collapse, IconButton,
+    InputAdornment
 } from "@mui/material";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/notificationSlice";
+import { SearchIcon } from "lucide-react";
 const AdminOrder = () => {
     const dispatch = useDispatch();
     const [orders, setOrders] = useState([]);
@@ -31,7 +33,7 @@ const AdminOrder = () => {
     const [adminNote, setAdminNote] = useState("");
     const [reportStatus, setReportStatus] = useState("");
     const [orderStatus, setOrderStatus] = useState("");
-
+    const [orderCode, setOrderCode] = useState("");
     const [updateReturnsDialog, setUpdateReturnsDialog] = useState(false);
     const [currentReturns, setCurrentReturns] = useState([]);
     const [returnStatus, setReturnStatus] = useState("");
@@ -47,7 +49,8 @@ const AdminOrder = () => {
                 from_date: filters.fromDate || fromDate,
                 to_date: filters.toDate || toDate,
                 status: filters.status || filterStatus,
-                has_report: filters.hasReport !== undefined ? filters.hasReport : hasReport || ""
+                has_report: filters.hasReport !== undefined ? filters.hasReport : hasReport || "",
+                order_code: orderCode || ""
             });
             console.log(res.data);
             setOrders(res.data.data);
@@ -107,10 +110,22 @@ const AdminOrder = () => {
             fromDate,
             toDate,
             status: filterStatus,
-            hasReport: hasReport
+            hasReport: hasReport,
         });
         dispatch(showNotification({
             message: "Đã lọc đơn hàng",
+            severity: "success"
+        }));
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setPage(1);
+        fetchOrders(1, {
+            orderCode
+        });
+        dispatch(showNotification({
+            message: "Đã tìm kiếm đơn hàng",
             severity: "success"
         }));
     };
@@ -213,6 +228,26 @@ const AdminOrder = () => {
                 >
                     Xóa bộ lọc
                 </Button>
+
+                <Box mb={2} component="form" onSubmit={handleSearch} display="flex" gap={2}>
+                    <TextField
+                        label="Tìm kiếm sản phẩm"
+                        value={orderCode}
+                        onChange={e => setOrderCode(e.target.value)}
+                        size="small"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <Button type="submit" variant="contained" color="primary">
+                        Tìm kiếm
+                    </Button>
+                </Box>
+
             </Box>
 
             <TableContainer component={Paper}>

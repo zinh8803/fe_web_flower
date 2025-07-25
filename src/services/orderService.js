@@ -10,8 +10,8 @@ export const getOrders = (page = 1, filters = {}) => api.get("/orders", {
         from_date: filters.from_date,
         to_date: filters.to_date,
         status: filters.status,
-        has_report: filters.has_report
-
+        has_report: filters.has_report,
+        order_code: filters.order_code
     },
 
     withCredentials: true,
