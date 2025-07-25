@@ -10,7 +10,6 @@ import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 import { showNotification } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmDeleteDialog from "../../component/dialog/user/ConfirmDeleteDialog";
 
 const OrderDetail = () => {
@@ -56,6 +55,7 @@ const OrderDetail = () => {
     const openReportDialog = () => {
         setSelectedReports(order.order_details.map(d => {
             const reported = order.product_reports?.find(r => r.order_detail_id === d.id);
+            console.log("Selected report:", reported.action);
             return {
                 order_detail_id: d.id,
                 checked: !!reported,
@@ -517,8 +517,9 @@ const OrderDetail = () => {
                                             <TableCell>{report.quantity}</TableCell>
                                             <TableCell>{report.reason}</TableCell>
                                             <TableCell>
-                                                {actionType === "Đổi hàng" ? "Đổi hàng" :
-                                                    actionType === "Mã giảm giá" ? "Mã giảm giá" : "-"}
+                                                {report.action === "Đổi hàng" ? "Đổi hàng"
+                                                    : report.action === "Mã giảm giá" ? "Mã giảm giá"
+                                                        : "-"}
                                             </TableCell>
                                             <TableCell>
                                                 {report.image_url ? (

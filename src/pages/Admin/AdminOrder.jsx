@@ -492,8 +492,6 @@ const AdminOrder = () => {
                             color="primary"
                             // disabled={
                             //     !selectedOrder ||
-                            //     selectedOrder.status === "hoàn thành" ||
-                            //     selectedOrder.status === "đã hủy" ||
                             //     currentReports.every(r => r.status === "Đã giải quyết")
                             // }
                             onClick={async () => {
