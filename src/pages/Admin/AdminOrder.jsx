@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { getOrders, getOrderDetailAdmin, updateOrder } from "../../services/orderService";
+import { getOrders, getOrderDetailAdmin, updateOrder, updateReport, updateOrderReturns } from "../../services/orderService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Chip,
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Collapse, IconButton
 } from "@mui/material";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
-
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/notificationSlice";
 const AdminOrder = () => {
+    const dispatch = useDispatch();
     const [orders, setOrders] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -19,10 +21,22 @@ const AdminOrder = () => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const [hasReport, setHasReport] = useState(null);
     const [viewAllReportsDialog, setViewAllReportsDialog] = useState(false);
     const [currentReports, setCurrentReports] = useState([]);
     const [openImageDialog, setOpenImageDialog] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
+    const [handleReportDialog, setHandleReportDialog] = useState(false);
+    const [selectedReport, setSelectedReport] = useState(null);
+    const [adminNote, setAdminNote] = useState("");
+    const [reportStatus, setReportStatus] = useState("");
+    const [orderStatus, setOrderStatus] = useState("");
+
+    const [updateReturnsDialog, setUpdateReturnsDialog] = useState(false);
+    const [currentReturns, setCurrentReturns] = useState([]);
+    const [returnStatus, setReturnStatus] = useState("");
+    const [returnOrderId, setReturnOrderId] = useState(null);
+
     useEffect(() => {
         fetchOrders(page);
     }, [page]);
@@ -32,8 +46,10 @@ const AdminOrder = () => {
             const res = await getOrders(pageNum, {
                 from_date: filters.fromDate || fromDate,
                 to_date: filters.toDate || toDate,
-                status: filters.status || filterStatus
+                status: filters.status || filterStatus,
+                has_report: filters.hasReport !== undefined ? filters.hasReport : hasReport || ""
             });
+            console.log(res.data);
             setOrders(res.data.data);
             setTotalPages(res.data.meta.last_page);
         } catch (err) {
@@ -71,6 +87,7 @@ const AdminOrder = () => {
         setSelectedOrder(res.data.data || res.data);
         setStatus(res.data.data?.status || res.data.status || "");
         setOpenUpdate(true);
+
     };
 
     const handleUpdateStatus = async () => {
@@ -78,20 +95,65 @@ const AdminOrder = () => {
         await updateOrder(selectedOrder.id, { status });
         setOpenUpdate(false);
         fetchOrders(page);
+        dispatch(showNotification({
+            message: "Cập nhật trạng thái đơn hàng thành công",
+            severity: "success"
+        }));
     };
 
     const handleFilter = () => {
         setPage(1);
-        fetchOrders(1);
+        fetchOrders(1, {
+            fromDate,
+            toDate,
+            status: filterStatus,
+            hasReport: hasReport
+        });
+        dispatch(showNotification({
+            message: "Đã lọc đơn hàng",
+            severity: "success"
+        }));
     };
 
     const handleClearFilter = () => {
         setFromDate("");
         setToDate("");
         setFilterStatus("");
+        setHasReport(null);
         setPage(1);
-        fetchOrders(1, { fromDate: "", toDate: "", status: "" });
+        fetchOrders(1, { fromDate: "", toDate: "", status: "", hasReport: "" });
+        dispatch(showNotification({
+            message: "Đã xóa bộ lọc",
+            severity: "info"
+        }));
     };
+
+    const handleUpdateReport = async () => {
+        if (!selectedOrder) return;
+        await updateReport(
+            selectedOrder.id,
+            currentReports,
+            orderStatus
+        );
+        setHandleReportDialog(false);
+        setSelectedReport(null);
+        fetchOrders(page);
+        dispatch(showNotification({
+            message: "Cập nhật báo cáo thành công",
+            severity: "success"
+        }));
+    }
+
+
+    const handleUpdateStatusOrderReturns = async () => {
+        await updateOrderReturns(returnOrderId, returnStatus);
+        setUpdateReturnsDialog(false);
+        fetchOrders(page);
+        dispatch(showNotification({
+            message: "Cập nhật trạng thái hoàn trả thành công",
+            severity: "success"
+        }));
+    }
 
     return (
         <Box>
@@ -123,13 +185,24 @@ const AdminOrder = () => {
                     size="small"
                     sx={{ minWidth: 180 }}
                 >
-                    <MenuItem value="">Tất cả trạng thái</MenuItem>
+                    <MenuItem value="">Tất cả trạng thái giao hàng</MenuItem>
                     <MenuItem value="đang xử lý">Đang xử lý</MenuItem>
                     <MenuItem value="đã xác nhận">Đã xác nhận</MenuItem>
                     <MenuItem value="đang giao hàng">Đang giao hàng</MenuItem>
                     <MenuItem value="hoàn thành">Hoàn thành</MenuItem>
-                    <MenuItem value="đang xử lý báo cáo">Đang xử lý báo cáo</MenuItem>
+                    <MenuItem value="Xử Lý Báo Cáo">xử lý báo cáo</MenuItem>
                     <MenuItem value="đã hủy">Đã hủy</MenuItem>
+                </Select>
+
+                <Select
+                    displayEmpty
+                    value={hasReport ?? ""}
+                    onChange={e => setHasReport(e.target.value)}
+                    size="small"
+                    sx={{ minWidth: 180 }}
+                >
+                    <MenuItem value="">Tất cả trạng thái báo cáo</MenuItem>
+                    <MenuItem value={true}>Có báo cáo</MenuItem>
                 </Select>
                 <Button variant="contained" onClick={handleFilter}>
                     Lọc
@@ -145,13 +218,16 @@ const AdminOrder = () => {
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow>
+                        <TableRow
+
+                        >
                             <TableCell />
                             <TableCell>Mã đơn</TableCell>
                             <TableCell>Khách hàng</TableCell>
                             <TableCell>Điện thoại</TableCell>
                             <TableCell>Ngày mua</TableCell>
-                            <TableCell>Giảm giá</TableCell>
+                            <TableCell>Ngày giao</TableCell>
+                            {/* <TableCell>Giảm giá</TableCell> */}
                             <TableCell>Tổng tiền</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
@@ -160,7 +236,9 @@ const AdminOrder = () => {
                     <TableBody>
                         {orders.map(order => (
                             <React.Fragment key={order.id}>
-                                <TableRow>
+                                <TableRow
+                                    sx={order.is_express ? { backgroundColor: "#EEEEEE" } : {}}
+                                >
                                     <TableCell>
                                         <IconButton
                                             size="small"
@@ -173,7 +251,8 @@ const AdminOrder = () => {
                                     <TableCell>{order.name}</TableCell>
                                     <TableCell>{order.phone}</TableCell>
                                     <TableCell>{order.buy_at}</TableCell>
-                                    <TableCell>
+                                    <TableCell>{order.delivery_date} {order.delivery_time}</TableCell>
+                                    {/* <TableCell>
                                         {order.discount ? (
                                             <Chip
                                                 label={`${order.discount.name} (${order.discount.type === "percent" ? `${order.discount.value}%` : `${parseInt(order.discount.value).toLocaleString()}đ`}) `}
@@ -181,7 +260,7 @@ const AdminOrder = () => {
                                                 size="small"
                                             />
                                         ) : "-"}
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell>
                                         {Number(order.total_price).toLocaleString()}đ
                                     </TableCell>
@@ -201,14 +280,15 @@ const AdminOrder = () => {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <Chip
-                                            label="Cập nhật trạng thái"
-                                            color="secondary"
+                                        <Button
+                                            variant="outlined"
                                             size="small"
+                                            color="primary"
                                             onClick={() => handleOpenUpdate(order.id)}
-                                            sx={{ cursor: "pointer" }}
-                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy"}
-                                        />
+                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy" || order.status === "đang xử lý báo cáo" || order.status === "Xử Lý Báo Cáo"}
+                                        > Cập nhật trạng thái
+                                        </Button>
+
                                     </TableCell>
                                 </TableRow>
                                 {/* Phần xổ xuống chi tiết */}
@@ -232,6 +312,23 @@ const AdminOrder = () => {
                                                         >
                                                             Xem báo cáo ({order.product_reports.length})
                                                         </Button>
+
+                                                    )}
+                                                    {(order.order_returns && order.order_returns.length > 0) && (
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            size="small"
+                                                            disabled={order.order_returns[0]?.status === "Hoàn Thành"}
+                                                            onClick={() => {
+                                                                setCurrentReturns(order.order_returns);
+                                                                setReturnOrderId(order.id);
+                                                                setReturnStatus(order.order_returns[0]?.status || "");
+                                                                setUpdateReturnsDialog(true);
+                                                            }}
+                                                        >
+                                                            Cập nhật đơn hàng đổi trả
+                                                        </Button>
                                                     )}
                                                 </Box>
                                                 <Box mb={2}>
@@ -241,6 +338,15 @@ const AdminOrder = () => {
                                                     <Typography><b>Điện thoại:</b> {order.phone}</Typography>
                                                     <Typography><b>Địa chỉ:</b> {order.address}</Typography>
                                                     <Typography><b>Ghi chú:</b> {order.note || "-"}</Typography>
+                                                    <Typography>
+                                                        <b>Ngày giao hàng:</b> {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : "-"}
+                                                    </Typography>
+                                                    <Typography>
+                                                        <b>Giờ giao hàng:</b> {order.is_express ? "Giao nhanh" : (order.delivery_time || "-")}
+                                                    </Typography>
+                                                    <Typography>
+                                                        <b>Giao nhanh:</b> {order.is_express ? "Có" : "Không"}
+                                                    </Typography>
                                                 </Box>
                                                 <Table size="small">
                                                     <TableHead>
@@ -335,6 +441,7 @@ const AdminOrder = () => {
                                     <TableCell>Kích thước</TableCell>
                                     <TableCell>Số lượng lỗi</TableCell>
                                     <TableCell>Lý do</TableCell>
+                                    <TableCell>Hoàn trả</TableCell>
                                     <TableCell>Trạng thái</TableCell>
                                     <TableCell>Ảnh</TableCell>
                                 </TableRow>
@@ -355,6 +462,7 @@ const AdminOrder = () => {
                                             </TableCell>
                                             <TableCell>{r.quantity}</TableCell>
                                             <TableCell>{r.reason}</TableCell>
+                                            <TableCell>{r.action}</TableCell>
                                             <TableCell>{r.status}</TableCell>
                                             <TableCell>
                                                 {r.image_url && (
@@ -376,26 +484,150 @@ const AdminOrder = () => {
                         </Table>
                     )}
                 </DialogContent>
-                <Dialog
-                    open={openImageDialog}
-                    onClose={() => setOpenImageDialog(false)}
-                    maxWidth="md"
-                >
-                    <DialogContent sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
-                        {currentImage && (
-                            <img
-                                src={currentImage}
-                                alt="Ảnh báo cáo"
-                                style={{ maxWidth: "100%", maxHeight: 500, borderRadius: 8 }}
-                            />
-                        )}
-                    </DialogContent>
-                </Dialog>
                 <DialogActions>
                     <Button onClick={() => setViewAllReportsDialog(false)}>Đóng</Button>
+                    {currentReports.length > 0 && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            // disabled={
+                            //     !selectedOrder ||
+                            //     currentReports.every(r => r.status === "Đã giải quyết")
+                            // }
+                            onClick={async () => {
+                                let order = selectedOrder;
+                                if (!order || order.id !== currentReports[0]?.order_id) {
+                                    const res = await getOrderDetailAdmin(currentReports[0]?.order_id);
+                                    order = res.data.data || res.data;
+                                    setSelectedOrder(order);
+                                }
+                                setCurrentReports(order.product_reports || []);
+                                setHandleReportDialog(true);
+                            }}
+                        >
+                            Xử lý báo cáo
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
-        </Box>
+
+            {/* Modal xử lý báo cáo sản phẩm */}
+            <Dialog
+                open={handleReportDialog}
+                onClose={() => setHandleReportDialog(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>Xử lý báo cáo sản phẩm</DialogTitle>
+                <DialogContent>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Sản phẩm</TableCell>
+                                <TableCell>Kích thước</TableCell>
+                                <TableCell>Số lượng lỗi</TableCell>
+                                <TableCell>Lý do</TableCell>
+                                <TableCell>Trạng thái</TableCell>
+                                <TableCell>Ghi chú xử lý</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {currentReports.map((r, idx) => {
+                                const detail = (selectedOrder?.order_details || []).find(d => d.id === r.order_detail_id);
+                                return (
+                                    <TableRow key={r.id}>
+                                        <TableCell>{detail?.product_size?.product?.name || "-"}</TableCell>
+                                        <TableCell>{detail?.product_size?.size || "-"}</TableCell>
+                                        <TableCell>{r.quantity}</TableCell>
+                                        <TableCell>{r.reason}</TableCell>
+                                        <TableCell>
+                                            <Select
+                                                value={r.status || ""}
+                                                onChange={e => {
+                                                    const newReports = [...currentReports];
+                                                    newReports[idx].status = e.target.value;
+                                                    setCurrentReports(newReports);
+                                                }}
+                                                size="small"
+                                            >
+                                                <MenuItem value="Đã giải quyết">Đã giải quyết</MenuItem>
+                                                <MenuItem value="Đang xử lý">Đang xử lý</MenuItem>
+                                                <MenuItem value="Từ chối">Từ chối</MenuItem>
+                                            </Select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <TextField
+                                                value={r.admin_note || ""}
+                                                onChange={e => {
+                                                    const newReports = [...currentReports];
+                                                    newReports[idx].admin_note = e.target.value;
+                                                    setCurrentReports(newReports);
+                                                }}
+                                                size="small"
+                                                multiline
+                                                rows={2}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setHandleReportDialog(false)}>Hủy</Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleUpdateReport}
+                    >
+                        Lưu xử lý
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={updateReturnsDialog}
+                onClose={() => setUpdateReturnsDialog(false)}
+                maxWidth="xs"
+            >
+                <DialogTitle>Cập nhật trạng thái đơn hàng đổi trả</DialogTitle>
+                <DialogContent>
+                    <Select
+                        value={returnStatus}
+                        onChange={e => setReturnStatus(e.target.value)}
+                        size="small"
+                        sx={{ minWidth: 200, mt: 2 }}
+                    >
+                        <MenuItem value="Đang xử lý">Đang xử lý</MenuItem>
+                        <MenuItem value="Đang giao">Đang giao</MenuItem>
+                        <MenuItem value="Hoàn Thành">Hoàn Thành</MenuItem>
+                    </Select>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setUpdateReturnsDialog(false)}>Hủy</Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleUpdateStatusOrderReturns}
+                    >
+                        Cập nhật
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={openImageDialog}
+                onClose={() => setOpenImageDialog(false)}
+                maxWidth="sm"
+            >
+                <DialogContent sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    {currentImage && (
+                        <img
+                            src={currentImage}
+                            alt="Ảnh báo cáo"
+                            style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 8 }}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
+        </Box >
     );
 };
 

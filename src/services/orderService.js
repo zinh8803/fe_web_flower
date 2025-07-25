@@ -9,8 +9,11 @@ export const getOrders = (page = 1, filters = {}) => api.get("/orders", {
         page,
         from_date: filters.from_date,
         to_date: filters.to_date,
-        status: filters.status
+        status: filters.status,
+        has_report: filters.has_report
+
     },
+
     withCredentials: true,
 });
 
@@ -26,8 +29,15 @@ export const cancelOrder = (id) =>
 export const reportProduct = (data) =>
     api.post("/orders/product-reports", data, { withCredentials: true });
 
-export const updateReport = (id, data) =>
-    api.put(`/orders/product-reports/${id}`, data, { withCredentials: true });
+export const updateReport = (order_id, reports, order_status = null) =>
+    api.put(`/orders/product-reports`, {
+        order_id,
+        reports,
+        ...(order_status ? { order_status } : {})
+    }, { withCredentials: true });
 
 export const deleteReport = (id) =>
     api.delete(`/orders/product-reports/${id}`, { withCredentials: true });
+
+export const updateOrderReturns = (orderId, status) =>
+    api.put(`/orders/returns/status`, { order_id: orderId, status }, { withCredentials: true });

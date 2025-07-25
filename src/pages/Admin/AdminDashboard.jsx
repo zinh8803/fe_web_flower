@@ -37,17 +37,16 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchData(firstDay, today);
-        // eslint-disable-next-line
     }, []);
 
     const fetchData = async (start = "", end = "") => {
-        console.log(`Fetching data from ${start} to ${end}`); // Debug
+        console.log(`Fetching data from ${start} to ${end}`);
         setLoading(true);
         try {
             const res = await getDashboardStats(start, end);
-            console.log("API Response:", res.data); // Debug
-            console.log("API URL:", res.config?.url); // Debug URL
-            console.log("API Params:", res.config?.params); // Debug params
+            console.log("API Response:", res.data);
+            console.log("API URL:", res.config?.url);
+            console.log("API Params:", res.config?.params);
 
             if (res.data && res.data.success) {
                 setStats(res.data.stats);
@@ -73,7 +72,6 @@ const AdminDashboard = () => {
         setLoading(false);
     };
 
-    // Thêm force refresh để tránh caching
     const handleFilter = () => {
         console.log("Manual filter:", startDate, "to", endDate);
         setStats({
@@ -145,12 +143,11 @@ const AdminDashboard = () => {
 
     return (
         <Box sx={{
-            p: 3,
             width: '100%',
-            maxWidth: 'none',  // Thay đổi từ '100%' thành 'none'
+            maxWidth: 'none',
             overflow: 'hidden'
         }}>
-            <Typography variant="h4" fontWeight="bold" mb={3}>
+            <Typography variant="h5" fontWeight="bold" mb={3}>
                 Dashboard Thống Kê
             </Typography>
 
