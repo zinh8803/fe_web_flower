@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, FormControlLabel, Switch
+    Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, FormControlLabel, Switch,
+    Pagination
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import {
@@ -17,6 +18,8 @@ const AdminDiscount = () => {
     const [discounts, setDiscounts] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editDiscount, setEditDiscount] = useState(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [form, setForm] = useState({
         name: "",
         value: "",
@@ -28,10 +31,11 @@ const AdminDiscount = () => {
     });
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const dispatch = useDispatch();
-    const fetchDiscounts = async () => {
+    const fetchDiscounts = async (pageNum = 1) => {
         try {
-            const res = await getDiscounts();
+            const res = await getDiscounts(pageNum);
             setDiscounts(res.data.data || []);
+            setTotalPages(res.data.meta.last_page || 1);
         } catch (e) {
             console.error(e);
             dispatch(showNotification({
@@ -42,8 +46,8 @@ const AdminDiscount = () => {
     };
 
     useEffect(() => {
-        fetchDiscounts();
-    }, []);
+        fetchDiscounts(page);
+    }, [page]);
 
     const handleOpenAdd = () => {
         const today = new Date().toISOString().slice(0, 10);
@@ -76,6 +80,10 @@ const AdminDiscount = () => {
             usage_count: discount.usage_count || "",
         });
         setOpenDialog(true);
+    };
+
+    const handlePageChange = (event, value) => {
+        setPage(value);
     };
 
     const handleCloseDialog = () => {
@@ -171,7 +179,7 @@ const AdminDiscount = () => {
                     <TableBody>
                         {discounts.map((d, index) => (
                             <TableRow key={d.id}>
-                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
                                 <TableCell>{d.name}</TableCell>
                                 <TableCell>{d.type === "fixed" ? "Tiền mặt" : "Phần trăm"}</TableCell>
                                 <TableCell>
@@ -202,6 +210,16 @@ const AdminDiscount = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            {discounts.length > 0 && (
+                <Box display="flex" justifyContent="center" mt={3}>
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={handlePageChange}
+                        color="primary"
+                    />
+                </Box>
+            )}
 
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{editDiscount ? "Sửa mã giảm giá" : "Thêm mã giảm giá"}</DialogTitle>
@@ -266,19 +284,7 @@ const AdminDiscount = () => {
                         type="number"
                         inputProps={{ min: 0 }}
                     />
-                    {/* <TextField
-                        label="Số lần đã sử dụng"
-                        name="usage_count"
-                        value={form.usage_count}
-                        onChange={e => {
-                            const val = Number(e.target.value);
-                            setForm({ ...form, usage_count: val < 0 ? 0 : val });
-                        }}
-                        fullWidth
-                        margin="normal"
-                        type="number"
-                        inputProps={{ min: 0 }}
-                    /> */}
+
                     <TextField
                         label="Ngày bắt đầu"
                         name="start_date"

@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Container, Typography } from "@mui/material";
+import SubscribeBell from "../../component/home/SubscribeBell";
 
 const About = () => {
     document.title = 'Trang giới thiệu';
@@ -33,7 +34,7 @@ const About = () => {
                     Cảm ơn bạn đã tin tưởng và lựa chọn chúng tôi. Chúng tôi rất mong được phục vụ bạn trong thời gian tới!
                 </Typography>
             </Container>
-
+            <SubscribeBell />
         </Box>
     );
 };

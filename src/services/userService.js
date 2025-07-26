@@ -73,3 +73,13 @@ export const changePassword = (old_password, new_password, new_password_confirma
 export const resetPassword = (email, otp, new_password, new_password_confirmation) =>
     api.put("/reset-password", { email, otp, new_password, new_password_confirmation }, {
     });
+
+export const updateUserSubscribed = () =>
+    api.put(`/users/update-subscribed`, {}, {
+        withCredentials: true,
+    });
+
+export const getallUsersSubScriber = (page = 1) =>
+    api.get(`users/getall-subscribed?page=${page}`, {
+        withCredentials: true,
+    });

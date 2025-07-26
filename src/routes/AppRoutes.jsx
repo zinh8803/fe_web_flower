@@ -33,6 +33,7 @@ import ScrollToTop from "../component/ScrollToTop";
 import AdminEmployee from "../pages/Admin/AdminEmployee";
 import ProfileAdmin from "../pages/Admin/ProfileAdmin";
 import ChangePasswordAdminPage from "../pages/Admin/ChangePasswordAdminPage";
+import AdminSubscribers from "../pages/Admin/AdminSubcribers";
 
 const AppRoutes = () => (
     <Router>
@@ -59,7 +60,6 @@ const AppRoutes = () => (
             </Route>
             <Route path="/admin/login" element={<AdminLogin />} />
 
-            {/* Admin: kiểm tra quyền trước, nếu đúng mới render layout và các page */}
             <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Admin />} />
@@ -69,6 +69,7 @@ const AppRoutes = () => (
                     <Route path="categories" element={<AdminCategory />} />
                     <Route path="orders" element={<AdminOrder />} />
                     <Route path="users" element={<AdminUser />} />
+                    <Route path="discounts/subscribers" element={<AdminSubscribers />} />
                     <Route path="employees" element={<AdminEmployee />} />
                     <Route path="flowers" element={<AdminFlower />} />
                     <Route path="flower-types" element={<AdminFlowerType />} />

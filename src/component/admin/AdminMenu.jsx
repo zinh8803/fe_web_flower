@@ -15,6 +15,7 @@ import { Warehouse } from "lucide-react";
 const AdminMenu = () => {
     const location = useLocation();
     const [openProduct, setOpenProduct] = useState(false);
+    const [openDiscount, setOpenDiscount] = useState(false);
     const navigate = useNavigate();
     //   const dispatch = useDispatch();
     const user = useSelector(state => state.user.user);
@@ -172,9 +173,8 @@ const AdminMenu = () => {
                             {/* Quản lý mã giảm giá */}
                             <ListItem
                                 button
-                                component={Link}
-                                to="/admin/discounts"
                                 selected={location.pathname.startsWith("/admin/discounts")}
+                                onClick={() => navigate("/admin/discounts")}
                                 sx={{
                                     "&.Mui-selected, &.Mui-selected:hover": {
                                         bgcolor: "#e0f2f1",
@@ -184,8 +184,41 @@ const AdminMenu = () => {
                                 }}
                             >
                                 <ListItemIcon sx={{ color: "green" }}><LocalOffer /></ListItemIcon>
-                                <ListItemText primary="Quản lý mã giảm giá" />
+                                <Box sx={{ display: "flex", alignItems: "center", width: '100%' }}>
+                                    <ListItemText primary="Quản lý mã giảm giá" />
+                                    <IconButton
+                                        size="small"
+                                        sx={{ ml: 1 }}
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            setOpenDiscount(!openDiscount);
+                                        }}
+                                    >
+                                        {openDiscount ? <ExpandLess /> : <ExpandMore />}
+                                    </IconButton>
+                                </Box>
                             </ListItem>
+                            <Collapse in={openDiscount} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding>
+                                    <ListItem
+                                        button
+                                        component={Link}
+                                        to="/admin/discounts/subscribers"
+                                        sx={{ pl: 4 }}
+                                        selected={location.pathname === "/admin/discounts/subscribers"}
+                                    >
+                                        <ListItemIcon sx={{ color: "green" }}><People /></ListItemIcon>
+                                        <ListItemText primary="Người đăng ký" sx={{
+                                            "&.Mui-selected, &.Mui-selected:hover": {
+                                                bgcolor: "#e0f2f1",
+                                                color: "black"
+                                            },
+                                            color: "black"
+                                        }} />
+                                    </ListItem>
+                                </List>
+                            </Collapse>
+
 
                             {/* Quản lý người dùng */}
                             <ListItem
