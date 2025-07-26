@@ -20,7 +20,7 @@ const Filter = ({ onFilter }) => {
   const [loading, setLoading] = useState(true);
   const [colors, setColors] = useState([]);
   const [flowerTypes, setFlowerTypes] = useState([]);
-  const [priceRange, setPriceRange] = useState(["", ""]); 
+  const [priceRange, setPriceRange] = useState(["", ""]);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [ManualFilter, setManualFilter] = useState(false);
@@ -76,7 +76,7 @@ const Filter = ({ onFilter }) => {
     setManualFilter(true);
 
     let minPrice = priceRange[0] === "" ? 0 : Number(priceRange[0]);
-    let maxPrice = priceRange[1] === "" ? 1000000 : Number(priceRange[1]);
+    let maxPrice = priceRange[1] === "" ? 10000000 : Number(priceRange[1]);
     if (minPrice > maxPrice) minPrice = maxPrice;
 
     onFilter({

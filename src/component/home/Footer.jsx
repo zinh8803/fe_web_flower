@@ -12,6 +12,7 @@ import {
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Logo from "../../assets/img/LOGO_HOA.png";
 
 export default function Footer() {
   return (
@@ -38,7 +39,7 @@ export default function Footer() {
               }}
             >
               <img
-                src="https://shop.dalathasfarm.com/public/dalathasfarm/images/footer-logo.png"
+                src={Logo}
                 alt="Dalat Hasfarm"
                 style={{ height: 48, marginBottom: 12 }}
               />
@@ -52,7 +53,7 @@ export default function Footer() {
                     fontSize: '1rem',
                   }}
                 >
-                  Công ty TNHH Dalat Hasfarm
+                  Công ty TNHH HOA SHOP
                 </Typography>
                 <Typography
                   variant="body2"
@@ -62,7 +63,7 @@ export default function Footer() {
                     fontSize: '13px',
                   }}
                 >
-                  Dalat Hasfarm - Được biết đến là công ty tiên phong mở đầu cho việc trồng hoa chuyên nghiệp tại Việt Nam được thành lập từ năm 1994.
+                  HOA SHOP - Được biết đến là công ty tiên phong mở đầu cho việc trồng hoa chuyên nghiệp tại Việt Nam được thành lập từ năm 1994.
                 </Typography>
                 <Typography
                   variant="body2"
@@ -73,7 +74,7 @@ export default function Footer() {
                     fontSize: '13px',
                   }}
                 >
-                  Năm 2013 Dalat Hasfarm được tạp chí Flowers Tech có trụ sở tại Mỹ bình chọn là công ty hoa tươi lớn nhất Đông Nam Á.
+                  Năm 2013 HOA SHOP được tạp chí Flowers Tech có trụ sở tại Mỹ bình chọn là công ty hoa tươi lớn nhất Đông Nam Á.
                 </Typography>
                 <Typography
                   variant="body2"
@@ -86,7 +87,7 @@ export default function Footer() {
                 >
                   <strong>- Địa chỉ trụ sở:</strong> 450 Nguyễn Tử Lực, P.8, Đà Lạt, Lâm Đồng, Việt Nam
                 </Typography>
-                <Typography
+                {/* <Typography
                   variant="body2"
                   sx={{
                     color: '#666',
@@ -96,7 +97,7 @@ export default function Footer() {
                   }}
                 >
                   <strong>- Giấy chứng nhận Đăng ký Doanh nghiệp số:</strong> <strong>5800000167</strong> do Sở Kế hoạch và Đầu tư Tỉnh Lâm Đồng cấp ngày 07/06/1994
-                </Typography>
+                </Typography> */}
               </Box>
             </Grid>
 
@@ -208,9 +209,9 @@ export default function Footer() {
                       }
                     }}
                   >
-                    Giới thiệu Dalat Hasfarm
+                    Giới thiệu Hoa Shop
                   </Link>
-                  <Link
+                  {/* <Link
                     href="#"
                     sx={{
                       color: '#666',
@@ -223,7 +224,7 @@ export default function Footer() {
                     }}
                   >
                     Shop Dalat Hasfarm
-                  </Link>
+                  </Link> */}
                   <Link
                     href="#"
                     sx={{
@@ -307,7 +308,7 @@ export default function Footer() {
                         Email Đặt Hàng:
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#666' }}>
-                        webshop@dalathasfarm.com
+                        hoashop@hoashop.com
                       </Typography>
                     </Box>
                   </Stack>
@@ -323,7 +324,7 @@ export default function Footer() {
                         Email CSKH:
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#666' }}>
-                        hotro@dalathasfarm.com
+                        hotro@hoashop.com
                       </Typography>
                     </Box>
                   </Stack>

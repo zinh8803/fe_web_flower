@@ -15,9 +15,9 @@ export const getProductsByCategory = (category) => api.get(`/products/category/i
 export const getProductsByCategorySlug = (slug) => api.get(`/products/category/${slug}`);
 export const getProductsBySearch = (keyword) => api.get(`/products/search`, { params: { product: keyword } });
 
-export const createProduct = (data) => api.post("/products", data);
-export const updateProduct = (id, data) => api.post(`/products/${id}`, data);
-export const deleteProduct = (id) => api.delete(`/products/${id}`);
+export const createProduct = (data) => api.post("/products", data, { withCredentials: true });
+export const updateProduct = (id, data) => api.post(`/products/${id}`, data, { withCredentials: true });
+export const deleteProduct = (id) => api.delete(`/products/${id}`, { withCredentials: true });
 
 export const hideProduct = (id) => api.put(`/products/${id}/hide`, { status: false });
 

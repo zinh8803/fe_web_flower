@@ -56,6 +56,8 @@ const AdminDiscount = () => {
             end_date: "",
             status: true,
             min_total: "",
+            usage_limit: "",
+            usage_count: "",
         });
         setOpenDialog(true);
     };
@@ -70,6 +72,8 @@ const AdminDiscount = () => {
             end_date: discount.end_date ? discount.end_date.slice(0, 10) : "",
             status: discount.status === 1 || discount.status === true,
             min_total: discount.min_total || "",
+            usage_limit: discount.usage_limit || "",
+            usage_count: discount.usage_count || "",
         });
         setOpenDialog(true);
     };
@@ -158,6 +162,8 @@ const AdminDiscount = () => {
                             <TableCell>Giá trị tối thiểu</TableCell>
                             <TableCell>Ngày bắt đầu</TableCell>
                             <TableCell>Ngày kết thúc</TableCell>
+                            <TableCell>Giới hạn sử dụng</TableCell>
+                            <TableCell>Số lần đã sử dụng</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
@@ -178,6 +184,8 @@ const AdminDiscount = () => {
                                 </TableCell>
                                 <TableCell>{d.start_date ? d.start_date.slice(0, 10) : ""}</TableCell>
                                 <TableCell>{d.end_date ? d.end_date.slice(0, 10) : ""}</TableCell>
+                                <TableCell>{d.usage_limit ? d.usage_limit : "Không giới hạn"}</TableCell>
+                                <TableCell>{d.usage_count ? d.usage_count : 0}</TableCell>
                                 <TableCell>
                                     {d.status ? "Đang hoạt động" : "Ngừng hoạt động"}
                                 </TableCell>
@@ -245,6 +253,32 @@ const AdminDiscount = () => {
                         type="number"
                         inputProps={{ min: 0 }}
                     />
+                    <TextField
+                        label="Giới hạn sử dụng"
+                        name="usage_limit"
+                        value={form.usage_limit}
+                        onChange={e => {
+                            const val = Number(e.target.value);
+                            setForm({ ...form, usage_limit: val < 0 ? 0 : val });
+                        }}
+                        fullWidth
+                        margin="normal"
+                        type="number"
+                        inputProps={{ min: 0 }}
+                    />
+                    {/* <TextField
+                        label="Số lần đã sử dụng"
+                        name="usage_count"
+                        value={form.usage_count}
+                        onChange={e => {
+                            const val = Number(e.target.value);
+                            setForm({ ...form, usage_count: val < 0 ? 0 : val });
+                        }}
+                        fullWidth
+                        margin="normal"
+                        type="number"
+                        inputProps={{ min: 0 }}
+                    /> */}
                     <TextField
                         label="Ngày bắt đầu"
                         name="start_date"

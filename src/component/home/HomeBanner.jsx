@@ -21,7 +21,6 @@ const HomeBanner = () => {
         "https://tools.dalathasfarm.com/assets/2024/2024-01/1caefd022bdb73b8ccbde96f54b9369e.jpg",
         "https://tools.dalathasfarm.com/assets/2023/2023-03/dff67f171dd7d839c1e4e664c44160e6.jpg",
     ];
-
     const [currentImage, setCurrentImage] = useState(0);
     const [slideDirection, setSlideDirection] = useState('left');
     const [isTransitioning, setIsTransitioning] = useState(false);

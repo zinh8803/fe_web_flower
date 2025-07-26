@@ -7,6 +7,7 @@ import { ShoppingCart, Menu as MenuIcon, Search, Close } from "@mui/icons-materi
 import UserMenu from "./UserMenu";
 import LoginDialog from "../auth/LoginDialog";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "../../assets/img/LOGO_HOA.png";
 
 const Header = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -26,9 +27,9 @@ const Header = () => {
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Link to="/" onClick={() => setMobileOpen(false)}>
                     <img
-                        src="https://shop.dalathasfarm.com/public/dalathasfarm/images/logo.png"
+                        src={Logo}
                         alt="Logo"
-                        style={{ height: 36 }}
+                        style={{ height: 36, width: "auto" }}
                     />
                 </Link>
                 <IconButton onClick={() => setMobileOpen(false)}>
@@ -92,9 +93,9 @@ const Header = () => {
                 <Box display="flex" alignItems="center" gap={2}>
                     <Link to="/">
                         <img
-                            src="https://shop.dalathasfarm.com/public/dalathasfarm/images/logo.png"
+                            src={Logo}
                             alt="Logo"
-                            style={{ height: 38 }}
+                            style={{ height: 38, width: "auto", cursor: "pointer" }}
                         />
                     </Link>
                 </Box>

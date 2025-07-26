@@ -43,7 +43,7 @@ const Cart = () => {
 
     const [currentQuantities, setCurrentQuantities] = useState({});
     const [needsStockUpdate, setNeedsStockUpdate] = useState(false);
-
+    const user = useSelector((state) => state.user.user);
     useEffect(() => {
         if (cartItems.length > 0) {
             dispatch(fetchStockAvailability(cartItems.map(item => ({
@@ -203,7 +203,7 @@ const Cart = () => {
 
     const handleApplyDiscount = async () => {
         try {
-            const res = await checkCodeValidity(discountCode);
+            const res = await checkCodeValidity(discountCode, user?.id || null);
             const discount = res.data.data;
             if (discount && discount.id) {
                 if (subtotal < (discount.min_total || 0)) {
@@ -232,8 +232,9 @@ const Cart = () => {
             console.error("Error checking discount code:", err);
             setDiscountAmount(0);
             setDiscountId(null);
+            const errorMessage = err.response?.data?.message;
             dispatch(showNotification({
-                message: "Mã giảm giá không hợp lệ!",
+                message: errorMessage,
                 severity: "error"
             }));
         }
@@ -517,7 +518,7 @@ const Cart = () => {
                         >
                             <Box sx={{ p: 3, bgcolor: '#fff' }}>
                                 {/* Thông tin giao hàng */}
-                                <Box sx={{ mb: 3 }}>
+                                {/* <Box sx={{ mb: 3 }}>
                                     <Typography variant="subtitle2" color="success.main" fontWeight="600">
                                         <MapPin size={16} style={{ marginRight: 8, verticalAlign: 'middle' }} />
                                         Giao hàng tới
@@ -525,9 +526,9 @@ const Cart = () => {
                                     <Typography variant="body2" sx={{ mt: 1, ml: 3 }}>
                                         TP Hồ Chí Minh
                                     </Typography>
-                                </Box>
+                                </Box> */}
 
-                                <Divider sx={{ my: 3 }} />
+                                {/* <Divider sx={{ my: 3 }} /> */}
 
                                 {/* Tóm tắt đơn hàng */}
                                 <Typography variant="h6" fontWeight="600" color="primary" mb={3}>
