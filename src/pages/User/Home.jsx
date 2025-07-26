@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Container, Box, Typography } from "@mui/material";
 import ProductGrid from "../../component/home/ProductGrid";
-import Filter from "../../component/home/filter";
+import Filter from "../../component/home/Filter";
 
 const Home = () => {
     document.title = 'Trang sản phẩm';
