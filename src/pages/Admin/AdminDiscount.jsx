@@ -2,24 +2,34 @@ import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, FormControlLabel, Switch,
-    Pagination
+    Pagination, Card, CardContent, Grid,
+    MenuItem,
+    InputAdornment
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import {
     getDiscounts,
     createDiscount,
     updateDiscount,
-    deleteDiscount
+    deleteDiscount,
+    getDiscountStats
 } from "../../services/discountService";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/notificationSlice";
 import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
+import { SearchIcon } from "lucide-react";
 const AdminDiscount = () => {
     const [discounts, setDiscounts] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editDiscount, setEditDiscount] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [stats, setStats] = useState({ total: 0, active: 0, expired: 0 });
+    const [filterName, setFilterName] = useState("");
+    const [filterType, setFilterType] = useState("");
+    const [filterStatus, setFilterStatus] = useState("");
+    const [filterStartDate, setFilterStartDate] = useState("");
+    const [filterEndDate, setFilterEndDate] = useState("");
     const [form, setForm] = useState({
         name: "",
         value: "",
@@ -33,7 +43,13 @@ const AdminDiscount = () => {
     const dispatch = useDispatch();
     const fetchDiscounts = async (pageNum = 1) => {
         try {
-            const res = await getDiscounts(pageNum);
+            const res = await getDiscounts(pageNum, {
+                name: filterName,
+                type: filterType,
+                status: filterStatus,
+                start_date: filterStartDate,
+                end_date: filterEndDate
+            });
             setDiscounts(res.data.data || []);
             setTotalPages(res.data.meta.last_page || 1);
         } catch (e) {
@@ -47,6 +63,7 @@ const AdminDiscount = () => {
 
     useEffect(() => {
         fetchDiscounts(page);
+        fetchStats();
     }, [page]);
 
     const handleOpenAdd = () => {
@@ -82,6 +99,29 @@ const AdminDiscount = () => {
         setOpenDialog(true);
     };
 
+    const fetchStats = async () => {
+        try {
+            const res = await getDiscountStats();
+            setStats(res.data.data);
+        } catch (e) {
+            console.error(e);
+            setStats({ total: 0, active: 0, expired: 0 });
+        }
+    };
+    const handleFilter = () => {
+        setPage(1);
+        fetchDiscounts(1);
+    };
+
+    const handleClearFilter = () => {
+        setFilterName("");
+        setFilterType("");
+        setFilterStatus("");
+        setFilterStartDate("");
+        setFilterEndDate("");
+        setPage(1);
+        fetchDiscounts(1);
+    };
     const handlePageChange = (event, value) => {
         setPage(value);
     };
@@ -156,9 +196,107 @@ const AdminDiscount = () => {
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Quản lý mã giảm giá
             </Typography>
+
+            {/* Thống kê */}
+            <Grid container spacing={2} mb={3}>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                Tổng số mã giảm giá
+                            </Typography>
+                            <Typography variant="h4" color="primary">
+                                {stats.total}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                Còn hiệu lực
+                            </Typography>
+                            <Typography variant="h4" color="success.main">
+                                {stats.active}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                Hết hiệu lực
+                            </Typography>
+                            <Typography variant="h4" color="error.main">
+                                {stats.expired}
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+
             <Button variant="contained" color="success" onClick={handleOpenAdd} sx={{ mb: 2 }}>
                 Thêm mã giảm giá
             </Button>
+            <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
+                <TextField
+                    label="Tìm kiếm mã giảm giá"
+                    value={filterName}
+                    onChange={e => setFilterName(e.target.value)}
+                    size="small"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <TextField
+                    label="Loại"
+                    select
+                    value={filterType}
+                    onChange={e => setFilterType(e.target.value)}
+                    size="small"
+                    sx={{ minWidth: 120 }}
+                >
+                    <MenuItem value="">Tất cả</MenuItem>
+                    <MenuItem value="fixed">Tiền mặt</MenuItem>
+                    <MenuItem value="percent">Phần trăm</MenuItem>
+                </TextField>
+                <TextField
+                    label="Trạng thái"
+                    select
+                    value={filterStatus}
+                    onChange={e => setFilterStatus(e.target.value)}
+                    size="small"
+                    sx={{ minWidth: 120 }}
+                >
+                    <MenuItem value="">Tất cả</MenuItem>
+                    <MenuItem value="1">Đang hoạt động</MenuItem>
+                    <MenuItem value="0">Ngừng hoạt động</MenuItem>
+                </TextField>
+                <TextField
+                    label="Từ ngày"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={filterStartDate}
+                    onChange={e => setFilterStartDate(e.target.value)}
+                />
+                <TextField
+                    label="Đến ngày"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={filterEndDate}
+                    onChange={e => setFilterEndDate(e.target.value)}
+                />
+                <Button variant="contained" onClick={handleFilter}>Lọc</Button>
+                <Button variant="outlined" onClick={handleClearFilter}>Xóa lọc</Button>
+            </Box>
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>

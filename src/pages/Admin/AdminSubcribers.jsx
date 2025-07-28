@@ -119,7 +119,6 @@ const AdminSubscribers = () => {
                 </Button>
             </Box>
 
-            {/* Hiển thị số lượng người đăng ký */}
             <Grid container spacing={3} mb={3}>
                 <Grid item xs={12} md={6}>
                     <Card>
@@ -296,7 +295,7 @@ const AdminSubscribers = () => {
                         onClick={handleSendDiscounts}
                         color="primary"
                         variant="contained"
-                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                        // startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
                         disabled={selectedDiscounts.length === 0 || loading}
                     >
                         {loading ? 'Đang gửi...' : 'Gửi mã giảm giá'}

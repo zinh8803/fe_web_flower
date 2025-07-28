@@ -1,7 +1,8 @@
 // src/component/LoginDialog.jsx
 import React, { useState, useRef } from "react";
 import {
-    Dialog, DialogContent, TextField, Button, Typography, Box, Link, IconButton, CircularProgress
+    Dialog, DialogContent, TextField, Button, Typography, Box, Link, IconButton, CircularProgress,
+    InputAdornment
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch } from "react-redux";
@@ -9,7 +10,7 @@ import { setUser } from "../../store/userSlice";
 import { register, getProfile } from "../../services/userService";
 import { sendOtpMail } from "../../services/mailService";
 import { showNotification } from "../../store/notificationSlice";
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
     const [form, setForm] = useState({
         name: "",
@@ -24,7 +25,8 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
     const [loadingRegister, setLoadingRegister] = useState(false);
     const [errors, setErrors] = useState({ phone: "", email: "" });
     const timerRef = useRef(null);
-
+    const [showCurrent, setShowCurrent] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const dispatch = useDispatch();
 
     const phoneRegex = /^0\d{9}$/;
@@ -274,12 +276,25 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                 <TextField
                     fullWidth
                     label="Nhập mật khẩu"
-                    type="password"
+                    type={showCurrent ? "text" : "password"}
                     variant="outlined"
                     margin="normal"
                     name="password"
                     value={form.password}
                     onChange={handleChange}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle current password visibility"
+                                    onClick={() => setShowCurrent((show) => !show)}
+                                    edge="end"
+                                >
+                                    {showCurrent ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 <Typography variant="body1" fontWeight="bold">
@@ -288,12 +303,25 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                 <TextField
                     fullWidth
                     label="Nhập lại mật khẩu"
-                    type="password"
+                    type={showConfirm ? "text" : "password"}
                     variant="outlined"
                     margin="normal"
                     name="password_confirmation"
                     value={form.password_confirmation}
                     onChange={handleChange}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle current password visibility"
+                                    onClick={() => setShowConfirm((show) => !show)}
+                                    edge="end"
+                                >
+                                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 <Box display="flex" justifyContent="center" mt={3}>

@@ -10,7 +10,8 @@ import {
     Box,
     Link,
     IconButton,
-    CircularProgress
+    CircularProgress,
+    InputAdornment
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { orange } from "@mui/material/colors";
@@ -20,6 +21,7 @@ import { setUser } from "../../store/userSlice";
 import { login, getProfile } from "../../services/userService";
 import { useState } from "react";
 import { showNotification } from "../../store/notificationSlice";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const LoginDialog = ({ open, onClose }) => {
     const [openRegister, setOpenRegister] = useState(false);
@@ -27,7 +29,7 @@ const LoginDialog = ({ open, onClose }) => {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
-
+    const [showCurrent, setShowCurrent] = useState(false);
     const handleOpenRegister = () => {
         setOpenRegister(true);
     };
@@ -123,7 +125,7 @@ const LoginDialog = ({ open, onClose }) => {
                     <TextField
                         fullWidth
                         label="Mật khẩu"
-                        type="password"
+                        type={showCurrent ? "text" : "password"}
                         variant="outlined"
                         margin="normal"
                         value={password}
@@ -131,6 +133,19 @@ const LoginDialog = ({ open, onClose }) => {
                         required
                         error={!password && password !== ""}
                         helperText={!password && password !== "" ? "Vui lòng nhập mật khẩu" : ""}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle current password visibility"
+                                        onClick={() => setShowCurrent((show) => !show)}
+                                        edge="end"
+                                    >
+                                        {showCurrent ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
 
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>

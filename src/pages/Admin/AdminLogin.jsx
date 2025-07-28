@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, getProfile } from "../../services/userService";
-import { Box, TextField, Button, Typography, Paper, CircularProgress } from "@mui/material";
+import { Box, TextField, Button, Typography, Paper, CircularProgress, IconButton } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../store/userSlice";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const AdminLogin = () => {
+    document.title = "Đăng nhập Admin";
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+    const [showCurrent, setShowCurrent] = useState(false);
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -63,12 +65,23 @@ const AdminLogin = () => {
                     <TextField
                         label="Mật khẩu"
                         name="password"
-                        type="password"
+                        type={showCurrent ? "text" : "password"}
                         value={form.password}
                         onChange={handleChange}
                         fullWidth
                         margin="normal"
                         required
+                        InputProps={{
+                            endAdornment: (
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowCurrent((show) => !show)}
+                                    edge="end"
+                                >
+                                    {showCurrent ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            ),
+                        }}
                     />
                     {error && (
                         <Typography color="error" fontSize={14} mt={1} mb={1}>
