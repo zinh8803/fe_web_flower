@@ -71,7 +71,6 @@ const AdminReceipt = () => {
             console.error("Error fetching auto config:", error);
         }
     };
-    // useEffect sẽ gọi hàm này khi mount
     useEffect(() => {
         fetchAutoConfig();
     }, []);
@@ -168,8 +167,10 @@ const AdminReceipt = () => {
         try {
             if (editReceipt) {
                 await updateImportReceipt(editReceipt.id, form);
+                dispatch(showNotification({ message: "Phiếu nhập đã được cập nhật", type: "success" }));
             } else {
                 await importReceipts(form);
+                dispatch(showNotification({ message: "Phiếu nhập đã được tạo", type: "success" }));
             }
             setOpenDialog(false);
             fetchReceipts();

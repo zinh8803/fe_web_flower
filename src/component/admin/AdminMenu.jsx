@@ -11,7 +11,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useSelector } from "react-redux";
 import { Warehouse } from "lucide-react";
-
+import Logo from "../../assets/img/LOGO_HOA.png";
 const AdminMenu = () => {
     const location = useLocation();
     const [openProduct, setOpenProduct] = useState(false);
@@ -46,7 +46,8 @@ const AdminMenu = () => {
                     flexShrink: 0
                 }}
             >
-                <LocalFlorist sx={{ fontSize: 48, color: "green", mb: 1 }} />
+                {/* <LocalFlorist sx={{ fontSize: 48, color: "green", mb: 1 }} /> */}
+                <img src={Logo} alt="Logo" style={{ width: "100%", height: "50%", marginBottom: "10px" }} />
                 <Typography variant="h6" fontWeight={700} color="green">
                     FLOWER SHOP
                 </Typography>

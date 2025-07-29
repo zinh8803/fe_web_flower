@@ -55,7 +55,7 @@ const OrderDetail = () => {
     const openReportDialog = () => {
         setSelectedReports(order.order_details.map(d => {
             const reported = order.product_reports?.find(r => r.order_detail_id === d.id);
-            console.log("Selected report:", reported.action);
+
             return {
                 order_detail_id: d.id,
                 checked: !!reported,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, ButtonGroup, Container, CircularProgress } from "@mui/material";
+import { Box, Typography, Button, ButtonGroup, Container, CircularProgress, Card, CardContent } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { getProductsByCategory, getProductDetailById } from "../../services/productService";
 import { useDispatch, useSelector } from "react-redux";
@@ -161,6 +161,7 @@ const ProductDetail = () => {
                 <Box sx={{ flex: 2 }}>
                     {product.sizes && product.sizes.length > 0 && (
                         <Box sx={{ mb: 2 }}>
+
                             <Typography fontWeight={600} mb={1}>Kích thước</Typography>
                             <ButtonGroup variant="outlined" color="primary">
                                 {product.sizes.map(size => {
@@ -186,6 +187,7 @@ const ProductDetail = () => {
                                     );
                                 })}
                             </ButtonGroup>
+
                         </Box>
                     )}
 
@@ -195,7 +197,7 @@ const ProductDetail = () => {
                             price: selectedSize ? selectedSize.price : 0,
                             size: selectedSize ? selectedSize.size : "",
                             receipt_details: selectedSize ? selectedSize.receipt_details : [],
-                            max_quantity: selectedSize && selectedSize.max_quantity ? selectedSize.max_quantity : 99 // truyền max_quantity nếu có
+                            max_quantity: selectedSize && selectedSize.max_quantity ? selectedSize.max_quantity : 99
                         }}
                         quantity={quantity}
                         onQuantityChange={handleQuantityChange}
@@ -203,6 +205,7 @@ const ProductDetail = () => {
                         disableAddToCart={!stockStatus}
                     />
                 </Box>
+
             </Box>
             <ProductDescription description={product.description} />
             <RelatedProducts related={related} />

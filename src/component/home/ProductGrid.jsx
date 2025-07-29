@@ -10,16 +10,25 @@ import {
     CircularProgress,
     Tooltip,
     Grid,
+    Drawer,
+    IconButton,
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import CloseIcon from "@mui/icons-material/Close";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
-import { getProducts, filterProducts } from "../../services/productService";
+import { filterProducts } from "../../services/productService";
 import { showNotification } from "../../store/notificationSlice";
 import { fetchStockAvailability } from "../../store/stockSlice";
+import Filter from "./filter";
 
 const ProductGrid = ({ filterParams = {} }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch();
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +64,7 @@ const ProductGrid = ({ filterParams = {} }) => {
                 setLoadingMore(true);
             }
 
-            const res = await getProducts(page);
+            const res = await filterProducts({ page });
 
             if (page === 1) {
                 setProducts(res.data.data);
@@ -83,7 +92,7 @@ const ProductGrid = ({ filterParams = {} }) => {
             setIsFiltering(true);
 
             if (filterParams.color || filterParams.flower_type_id || filterParams.price) {
-                const res = await filterProducts(filterParams);
+                const res = await filterProducts({ ...filterParams, page: 1 });
                 setProducts(res.data.data);
                 setCurrentPage(res.data.meta.current_page);
                 setLastPage(res.data.meta.last_page);
@@ -108,14 +117,11 @@ const ProductGrid = ({ filterParams = {} }) => {
             try {
                 setLoadingMore(true);
 
-                if (isFiltering) {
-                    const res = await filterProducts({ ...filterParams, page: currentPage + 1 });
-                    setProducts(prev => [...prev, ...res.data.data]);
-                    setCurrentPage(res.data.meta.current_page);
-                    setLastPage(res.data.meta.last_page);
-                } else {
-                    fetchProducts(currentPage + 1);
-                }
+                const params = isFiltering ? { ...filterParams, page: currentPage + 1 } : { page: currentPage + 1 };
+                const res = await filterProducts(params);
+                setProducts(prev => [...prev, ...res.data.data]);
+                setCurrentPage(res.data.meta.current_page);
+                setLastPage(res.data.meta.last_page);
             } catch (error) {
                 console.error("Error loading more:", error);
             } finally {
@@ -155,8 +161,52 @@ const ProductGrid = ({ filterParams = {} }) => {
         return sizeInfo ? sizeInfo.limiting_flower : null;
     };
 
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const mobileFilterButton = isMobile && (
+        <Box sx={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setDrawerOpen(true)}
+                startIcon={<FilterListIcon />}
+                sx={{ borderRadius: 30, boxShadow: 3, px: 2.5 }}
+            >
+                Bộ lọc
+            </Button>
+        </Box>
+    );
+
     return (
         <Box sx={{ width: "100%" }}>
+            {isMobile && (
+                <Drawer
+                    anchor="bottom"
+                    open={drawerOpen}
+                    onClose={() => setDrawerOpen(false)}
+                    PaperProps={{
+                        sx: {
+                            borderTopLeftRadius: 16,
+                            borderTopRightRadius: 16,
+                            maxHeight: "85vh",
+                            pb: 2
+                        }
+                    }}
+                >
+                    <Box sx={{ p: 2, maxHeight: "80vh", overflowY: "auto" }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                            <Typography variant="h6" fontWeight={700}>Bộ lọc sản phẩm</Typography>
+                            <IconButton onClick={() => setDrawerOpen(false)}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Box>
+                        <Filter onFilter={(params) => { setDrawerOpen(false); handleFilter(params); }} />
+                    </Box>
+                </Drawer>
+            )}
+
+            {mobileFilterButton}
+
             <Box sx={{ p: 3, borderRadius: 2, bgcolor: "#fff" }}>
                 <Box
                     sx={{

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createOrder } from "../../services/orderService";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Box, Typography, TextField, Button, MenuItem, Divider } from "@mui/material";
+import { Box, Typography, TextField, Button, MenuItem, Divider, Container } from "@mui/material";
 import { clearCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { getPayments } from "../../services/paymentService";
@@ -163,7 +163,7 @@ const Checkout = () => {
     const displayTotal = total < 0 ? 0 : total;
 
     return (
-        <Box maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
+        <Container maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Thanh toán đơn hàng
             </Typography>
@@ -318,19 +318,20 @@ const Checkout = () => {
                     {displayTotal.toLocaleString()}đ
                 </Typography>
             </Box>
+            <Box display="flex" justifyContent="center" mt={3}>
+                <Button
+                    variant="contained"
+                    color="error"
+                    size="large"
+                    sx={{ borderRadius: 2, fontWeight: 600, fontSize: "1.1rem" }}
+                    onClick={handlePlaceOrder}
+                    disabled={cartItems.length === 0 || loading}
+                >
+                    {loading ? "Đang gửi đơn hàng..." : "Đặt hàng"}
+                </Button>
+            </Box>
 
-            <Button
-                variant="contained"
-                color="error"
-                size="large"
-                fullWidth
-                sx={{ borderRadius: 2, fontWeight: 600, fontSize: "1.1rem" }}
-                onClick={handlePlaceOrder}
-                disabled={cartItems.length === 0 || loading}
-            >
-                {loading ? "Đang gửi đơn hàng..." : "Đặt hàng"}
-            </Button>
-        </Box>
+        </Container>
     );
 };
 

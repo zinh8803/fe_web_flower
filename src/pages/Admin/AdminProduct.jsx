@@ -316,7 +316,6 @@ const AdminProduct = () => {
                             <TableCell>Tên sản phẩm</TableCell>
                             <TableCell>Giá</TableCell>
                             <TableCell>Danh mục</TableCell>
-                            <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
@@ -341,13 +340,13 @@ const AdminProduct = () => {
                                             : "Liên hệ"}
                                     </TableCell>
                                     <TableCell>{getCategoryName(p.category_id)}</TableCell>
-                                    <TableCell>
+                                    {/* <TableCell>
                                         {p.status ? (
                                             <span style={{ color: "green" }}>Hiện</span>
                                         ) : (
                                             <span style={{ color: "gray" }}>Ẩn</span>
                                         )}
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell>
                                         <IconButton color="primary" onClick={() => handleOpenDialog(p)} disabled={loadingPage}>
                                             <Edit />

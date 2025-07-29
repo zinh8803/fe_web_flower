@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Container, Box, Typography } from "@mui/material";
+import { Container, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import ProductGrid from "../../component/home/ProductGrid";
-import Filter from "../../component/home/Filter";
+import Filter from "../../component/home/filter";
 
 const Home = () => {
     document.title = 'Trang sản phẩm';
     const [filterParams, setFilterParams] = useState({});
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleFilter = (params) => {
         setFilterParams(params);
@@ -19,18 +21,20 @@ const Home = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 3 }}>
-                {/* Bộ lọc bên trái - cố định width */}
-                <Box
-                    sx={{
-                        width: 280,
-                        flexShrink: 0, // Không co lại
-                        position: { sm: 'sticky' },
-                        top: { sm: 20 },
-                        alignSelf: 'flex-start'
-                    }}
-                >
-                    <Filter onFilter={handleFilter} />
-                </Box>
+                {/* Bộ lọc bên trái - chỉ hiện ở desktop/tablet */}
+                {!isMobile && (
+                    <Box
+                        sx={{
+                            width: 280,
+                            flexShrink: 0,
+                            position: { sm: 'sticky' },
+                            top: { sm: 20 },
+                            alignSelf: 'flex-start'
+                        }}
+                    >
+                        <Filter onFilter={handleFilter} />
+                    </Box>
+                )}
 
                 {/* Danh sách sản phẩm - chiếm phần còn lại */}
                 <Box sx={{ flex: 1 }}>
