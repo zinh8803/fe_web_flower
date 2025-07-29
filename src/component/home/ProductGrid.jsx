@@ -24,7 +24,7 @@ import { addToCart } from "../../store/cartSlice";
 import { filterProducts } from "../../services/productService";
 import { showNotification } from "../../store/notificationSlice";
 import { fetchStockAvailability } from "../../store/stockSlice";
-import Filter from "./filter";
+import Filter from "./Filter";
 
 const ProductGrid = ({ filterParams = {} }) => {
     const theme = useTheme();
