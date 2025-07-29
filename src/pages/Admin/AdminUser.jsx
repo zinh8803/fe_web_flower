@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllUsers } from "../../services/userService";
+import { getAllUsers, updateUserStatus } from "../../services/userService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip
 } from "@mui/material";
@@ -31,7 +31,14 @@ const AdminUser = () => {
         setPage(value);
     };
 
-
+    const handleUpdateStatus = async (id) => {
+        try {
+            await updateUserStatus(id);
+            fetchUsers(page);
+        } catch (err) {
+            console.error("Error updating user status:", err);
+        }
+    };
 
     return (
         <Box>
@@ -53,6 +60,7 @@ const AdminUser = () => {
                             <TableCell>Vai trò</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Ngày tạo</TableCell>
+                            <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -74,6 +82,15 @@ const AdminUser = () => {
                                 </TableCell>
                                 <TableCell>
                                     {new Date(user.created_at).toLocaleString()}
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="contained"
+                                        color={user.status === 1 ? "error" : "success"}
+                                        onClick={() => handleUpdateStatus(user.id)}
+                                    >
+                                        {user.status === 1 ? "Khoá" : "Kích hoạt"}
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

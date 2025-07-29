@@ -36,7 +36,7 @@ import ChangePasswordAdminPage from "../pages/Admin/ChangePasswordAdminPage";
 import AdminSubscribers from "../pages/Admin/AdminSubcribers";
 
 const AppRoutes = () => (
-    <Router>
+    <>
         <ScrollToTop />
         <Routes>
             {/* Main layout cho user */}
@@ -84,7 +84,7 @@ const AppRoutes = () => (
             </Route>
         </Routes>
         <ScrollToTop />
-    </Router>
+    </>
 );
 
 export default AppRoutes;

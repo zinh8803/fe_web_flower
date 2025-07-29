@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getEmployee, createEmployee } from "../../services/Employee";
+import { updateUserStatus } from "../../services/userService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip,
     Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button
@@ -41,6 +42,23 @@ const AdminEmployee = () => {
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleUpdateStatus = async (id) => {
+        try {
+            await updateUserStatus(id);
+            fetchEmployees(page);
+            dispatch(showNotification({
+                message: "Cập nhật trạng thái nhân viên thành công!",
+                severity: "success"
+            }));
+        } catch (err) {
+            console.error(err);
+            dispatch(showNotification({
+                message: "Cập nhật trạng thái nhân viên thất bại!",
+                severity: "error"
+            }));
+        }
     };
 
     const handleSubmit = async () => {
@@ -116,6 +134,7 @@ const AdminEmployee = () => {
                             <TableCell>Vai trò</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Ngày tạo</TableCell>
+                            <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -137,6 +156,15 @@ const AdminEmployee = () => {
                                 </TableCell>
                                 <TableCell>
                                     {new Date(emp.created_at).toLocaleString()}
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="contained"
+                                        color={emp.status === 1 ? "error" : "success"}
+                                        onClick={() => handleUpdateStatus(emp.id)}
+                                    >
+                                        {emp.status === 1 ? "Khoá" : "Kích hoạt"}
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

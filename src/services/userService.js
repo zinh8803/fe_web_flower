@@ -79,6 +79,11 @@ export const updateUserSubscribed = () =>
         withCredentials: true,
     });
 
+export const updateUserStatus = (id) =>
+    api.put(`/users/update-status/${id}`, {}, {
+        withCredentials: true,
+    });
+
 export const getallUsersSubScriber = (page = 1) =>
     api.get(`users/getall-subscribed?page=${page}`, {
         withCredentials: true,
