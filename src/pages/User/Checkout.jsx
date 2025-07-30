@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createOrder } from "../../services/orderService";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Box, Typography, TextField, Button, MenuItem, Divider, Container } from "@mui/material";
+import { Box, Typography, TextField, Button, MenuItem, Divider, Container, InputLabel, FormControl, Select } from "@mui/material";
 import { clearCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { getPayments } from "../../services/paymentService";
@@ -24,14 +24,17 @@ const Checkout = () => {
         payment_method: "cod",
         discount_id: null,
         delivery_date: "",
-        delivery_time: "",
+        delivery_time_slot: "",
         is_express: false
     });
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
     const [discountId, setDiscountId] = useState(null);
     const [errors, setErrors] = useState({ phone: "", email: "" });
-    //const isLoggedIn = !!user;
+    const timeSlots = [
+        { value: "Buổi sáng", label: "Buổi sáng (8h - 12h)" },
+        { value: "Buổi chiều", label: "Buổi chiều (13h - 18h)" }
+    ];
     const phoneRegex = /^0\d{9}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     useEffect(() => {
@@ -67,6 +70,10 @@ const Checkout = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === "delivery_date") {
+            handleDateChange(e);
+            return;
+        }
         setForm({ ...form, [name]: value });
 
         // Kiểm tra lỗi realtime
@@ -95,6 +102,50 @@ const Checkout = () => {
 
     const total = subtotal - discountAmount;
 
+    const isTimeSlotDisabled = (slotValue) => {
+        if (form.is_express) return false;
+
+        const selectedDate = form.delivery_date;
+        if (!selectedDate) return false;
+
+        const today = new Date().toISOString().split('T')[0];
+        const currentHour = new Date().getHours();
+
+        if (selectedDate === today) {
+            if (slotValue === "Buổi sáng" && currentHour >= 12) {
+                return true;
+            }
+            if (slotValue === "Buổi chiều" && currentHour >= 18) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    const handleDateChange = (e) => {
+        const { name, value } = e.target;
+        setForm(prev => {
+            const newForm = { ...prev, [name]: value };
+
+            if (name === "delivery_date" && newForm.delivery_time_slot) {
+                const today = new Date().toISOString().split('T')[0];
+                const currentHour = new Date().getHours();
+
+                if (value === today) {
+                    if (newForm.delivery_time_slot === "Buổi sáng" && currentHour >= 12) {
+                        newForm.delivery_time_slot = "";
+                    }
+                    if (newForm.delivery_time_slot === "Buổi chiều" && currentHour >= 18) {
+                        newForm.delivery_time_slot = "";
+                    }
+                }
+            }
+
+            return newForm;
+        });
+    };
+
     const handlePlaceOrder = async () => {
         setLoading(true);
         if (form.payment_method === "cod") {
@@ -109,7 +160,7 @@ const Checkout = () => {
                     })),
                     discount_id: discountId || null,
                     delivery_date: form.delivery_date,
-                    delivery_time: form.delivery_time,
+                    delivery_time_slot: form.delivery_time_slot,
                     is_express: form.is_express
                 };
 
@@ -139,6 +190,9 @@ const Checkout = () => {
                         product_size_id: item.product_size_id,
                     })),
                     discount_id: discountId || null,
+                    delivery_date: form.delivery_date,
+                    delivery_time_slot: form.delivery_time_slot,
+                    is_express: form.is_express
                 };
                 localStorage.setItem("pendingOrder", JSON.stringify(orderData));
 
@@ -220,18 +274,45 @@ const Checkout = () => {
                 fullWidth
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
+
+                inputProps={{
+                    min: new Date().toISOString().split('T')[0]
+                }}
             />
-            <TextField
-                label="Giờ giao hàng"
-                name="delivery_time"
-                type="time"
-                value={form.is_express ? "" : form.delivery_time}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                InputLabelProps={{ shrink: true }}
-                disabled={form.is_express}
-            />
+            <FormControl fullWidth margin="normal" disabled={form.is_express}>
+                <InputLabel>Khung giờ giao hàng</InputLabel>
+                <Select
+                    name="delivery_time_slot"
+                    value={form.is_express ? "" : form.delivery_time_slot}
+                    onChange={handleChange}
+                    label="Khung giờ giao hàng"
+                >
+                    <MenuItem value="">
+                        <em>Chọn khung giờ</em>
+                    </MenuItem>
+                    {timeSlots.map((slot) => {
+                        const disabled = isTimeSlotDisabled(slot.value);
+                        return (
+                            <MenuItem
+                                key={slot.value}
+                                value={slot.value}
+                                disabled={disabled}
+                                sx={{
+                                    opacity: disabled ? 0.5 : 1,
+                                    color: disabled ? 'text.disabled' : 'text.primary'
+                                }}
+                            >
+                                {slot.label}
+                                {disabled && (
+                                    <Typography variant="caption" color="error" ml={1}>
+                                        (Không khả dụng)
+                                    </Typography>
+                                )}
+                            </MenuItem>
+                        );
+                    })}
+                </Select>
+            </FormControl>
             <Box display="flex" alignItems="center" mb={2}>
                 <Typography mr={2}>Giao nhanh (Tốc độ 2 tiếng):</Typography>
                 <input
@@ -241,7 +322,7 @@ const Checkout = () => {
                         setForm({
                             ...form,
                             is_express: e.target.checked,
-                            delivery_time: e.target.checked ? "" : form.delivery_time
+                            delivery_time_slot: e.target.checked ? "" : form.delivery_time_slot
                         });
                     }}
                 />

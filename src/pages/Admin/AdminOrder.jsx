@@ -382,6 +382,9 @@ const AdminOrder = () => {
                                                     <Typography>
                                                         <b>Giao nhanh:</b> {order.is_express ? "Có" : "Không"}
                                                     </Typography>
+                                                    <Typography>
+                                                        <b>Phương thức thanh toán:</b> {order.payment_method}
+                                                    </Typography>
                                                 </Box>
                                                 <Table size="small">
                                                     <TableHead>
