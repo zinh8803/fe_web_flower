@@ -1,12 +1,50 @@
-# React + Vite
+# 🌸 Flower Shop Frontend (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Đây là frontend cho hệ thống bán hoa, được xây dựng bằng **React** kết hợp **Vite**, **Tailwind CSS**, và **Material UI**. Giao diện người dùng hiện đại, responsive, dễ dàng mở rộng và tích hợp với backend Laravel API.
 
-Currently, two official plugins are available:
+## 🚀 Tính năng chính
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Hiển thị sản phẩm, danh mục
+- Tìm kiếm, lọc sản phẩm
+- Đăng ký / Đăng nhập người dùng
+- Trang giỏ hàng và thanh toán
+- Giao diện quản trị (Admin)
+- Hỗ trợ responsive cho mobile/tablet
+- Giao tiếp với RESTful API (Laravel)
+- Hỗ trợ WebSocket và thông báo realtime
 
-## Expanding the ESLint configuration
+## 🛠️ Công nghệ sử dụng
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- [React](https://reactjs.org/)
+- [Vite](https://vitejs.dev/)
+- [Material UI](https://mui.com/)
+- [React Router](https://reactrouter.com/)
+- [Axios](https://axios-http.com/)
+- [React Hook Form](https://react-hook-form.com/)
+- [Redux](https://zustand-demo.pmnd.rs/)
+
+## ⚙️ Cài đặt
+
+### 1. Clone project
+
+```bash
+git clone https://github.com/your-username/flower-shop-frontend.git
+cd flower-shop-frontend
+```
+
+### 2. Cài đặt thư viện
+
+# dùng pnpm:
+
+pnpm install
+
+### 3. Cấu hình biến môi trường
+
+Tạo file .env trong thư mục gốc và thêm:
+
+VITE_API_URL=https://api.example.com
+VITE_SOCKET_URL=wss://socket.example.com
+
+### 4. Chạy project
+
+npm run dev

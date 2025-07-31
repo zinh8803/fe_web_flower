@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Grid, Card, CardContent, Avatar, LinearProgress,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, TextField, Button
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, TextField, Button,
+    CircularProgress
 } from "@mui/material";
 import { Line, Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
 } from "chart.js";
-import { getDashboardStats } from "../../services/adminService";
+import { getDashboardStats, exportStatistics } from "../../services/adminService";
 import { ShoppingCart, DollarSign, Users, Package, FileText } from "lucide-react";
+import { showNotification } from "../../store/notificationSlice";
+import { useDispatch } from "react-redux";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 const AdminDashboard = () => {
+    const dispatch = useDispatch();
     const today = new Date().toISOString().split('T')[0];
     const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
     const [loading, setLoading] = useState(true);
     const [startDate, setStartDate] = useState(firstDay);
     const [endDate, setEndDate] = useState(today);
+    const [exporting, setExporting] = useState(false);
     const [stats, setStats] = useState({
         totalOrders: 0,
         totalRevenue: 0,
@@ -141,6 +146,69 @@ const AdminDashboard = () => {
         fetchData(start, end);
     };
 
+    const handleExport = async () => {
+        setExporting(true);
+        try {
+            const res = await exportStatistics(startDate, endDate);
+
+            const blob = res.data;
+
+            if ('showSaveFilePicker' in window) {
+                try {
+                    const fileHandle = await window.showSaveFilePicker({
+                        suggestedName: `bao_cao_${startDate}_${endDate}.xlsx`,
+                        types: [
+                            {
+                                description: 'Excel files',
+                                accept: {
+                                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+                                }
+                            }
+                        ]
+                    });
+
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+
+                    dispatch(showNotification({
+                        message: "Xuất thống kê thành công",
+                        severity: "success"
+                    }));
+                } catch (saveErr) {
+                    if (saveErr.name !== 'AbortError') {
+                        console.error("Error saving file:", saveErr);
+                        downloadWithTraditionalMethod(blob);
+                    }
+                }
+            } else {
+                downloadWithTraditionalMethod(blob);
+            }
+        } catch (err) {
+            console.error("Error exporting statistics:", err);
+            dispatch(showNotification({
+                message: "Xuất thống kê thất bại",
+                severity: "error"
+            }));
+        }
+        setExporting(false);
+    };
+
+    const downloadWithTraditionalMethod = (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bao_cao_${startDate}_${endDate}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        dispatch(showNotification({
+            message: "File đã được tải xuống",
+            severity: "success"
+        }));
+    };
     return (
         <Box sx={{
             width: '100%',
@@ -208,6 +276,15 @@ const AdminDashboard = () => {
                             size="small"
                         >
                             Năm này
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => handleExport()}
+                            size="small"
+                            disabled={exporting}
+                            startIcon={exporting ? <CircularProgress size={20} /> : null}
+                        >
+                            {exporting ? "Đang xuất..." : "Xuất thống kê"}
                         </Button>
                     </Box>
                 </CardContent>

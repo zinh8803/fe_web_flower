@@ -8,6 +8,7 @@ import { showNotification } from "../../store/notificationSlice";
 import { getPayments } from "../../services/paymentService";
 import codImg from "../../assets/img/cash.png";
 import vnpayImg from "../../assets/img/vnpay.png";
+import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
     const user = useSelector(state => state.user.user);
@@ -217,7 +218,14 @@ const Checkout = () => {
     const displayTotal = total < 0 ? 0 : total;
 
     return (
-        <Container maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
+        <Container maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>'
+            <Breadcrumb
+                items={[
+                    { label: "Trang chủ", href: "/" },
+                    { label: "Giỏ hàng", href: "/cart" },
+                    { label: "Thanh toán" }
+                ]}
+            />
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Thanh toán đơn hàng
             </Typography>

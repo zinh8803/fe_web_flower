@@ -3,17 +3,21 @@ import { getEmployee, createEmployee } from "../../services/Employee";
 import { updateUserStatus } from "../../services/userService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip,
-    Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button
+    Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button,
+    CircularProgress
 } from "@mui/material";
 import { showNotification } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
+import { LockOpenIcon } from "lucide-react";
+import { LockIcon } from "lucide-react";
 const AdminEmployee = () => {
     const dispatch = useDispatch();
     const [employees, setEmployees] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [open, setOpen] = useState(false);
+    const [loadingLockId, setLoadingLockId] = useState(null);
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -45,6 +49,7 @@ const AdminEmployee = () => {
     };
 
     const handleUpdateStatus = async (id) => {
+        setLoadingLockId(id);
         try {
             await updateUserStatus(id);
             fetchEmployees(page);
@@ -59,6 +64,7 @@ const AdminEmployee = () => {
                 severity: "error"
             }));
         }
+        setLoadingLockId(null);
     };
 
     const handleSubmit = async () => {
@@ -139,7 +145,7 @@ const AdminEmployee = () => {
                     </TableHead>
                     <TableBody>
                         {employees.map((emp, index) => (
-                            <TableRow key={emp.id}>
+                            <TableRow key={emp.id} sx={{ backgroundColor: emp.status === 0 ? '#EEEEEE' : 'inherit' }}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>
                                     <Avatar src={emp.image_url} alt={emp.name} />
@@ -162,8 +168,13 @@ const AdminEmployee = () => {
                                         variant="contained"
                                         color={emp.status === 1 ? "error" : "success"}
                                         onClick={() => handleUpdateStatus(emp.id)}
+                                        disabled={loadingLockId === emp.id}
                                     >
-                                        {emp.status === 1 ? "Khoá" : "Kích hoạt"}
+                                        {loadingLockId === emp.id
+                                            ? <CircularProgress size={24} />
+                                            : emp.status === 1
+                                                ? <LockOpenIcon />
+                                                : <LockIcon />}
                                     </Button>
                                 </TableCell>
                             </TableRow>

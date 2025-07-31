@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { getAllUsers, updateUserStatus } from "../../services/userService";
 import {
-    Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip
+    Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip,
+    CircularProgress
 } from "@mui/material";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
+import { LockOpenIcon } from "lucide-react";
+import { Unlock } from "lucide-react";
+import { UnlockIcon } from "lucide-react";
+import { LockIcon } from "lucide-react";
 
 const AdminUser = () => {
     const [users, setUsers] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [loadingLockId, setLoadingLockId] = useState(null);
 
 
     useEffect(() => {
@@ -32,12 +38,14 @@ const AdminUser = () => {
     };
 
     const handleUpdateStatus = async (id) => {
+        setLoadingLockId(id);
         try {
             await updateUserStatus(id);
             fetchUsers(page);
         } catch (err) {
             console.error("Error updating user status:", err);
         }
+        setLoadingLockId(null);
     };
 
     return (
@@ -65,7 +73,7 @@ const AdminUser = () => {
                     </TableHead>
                     <TableBody>
                         {users.map((user, index) => (
-                            <TableRow key={user.id}>
+                            <TableRow key={user.id} sx={{ backgroundColor: user.status === 0 ? '#EEEEEE' : 'inherit' }}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>
                                     <Avatar src={user.image_url} alt={user.name} />
@@ -88,8 +96,9 @@ const AdminUser = () => {
                                         variant="contained"
                                         color={user.status === 1 ? "error" : "success"}
                                         onClick={() => handleUpdateStatus(user.id)}
+                                        disabled={loadingLockId === user.id}
                                     >
-                                        {user.status === 1 ? "Khoá" : "Kích hoạt"}
+                                        {loadingLockId === user.id ? <CircularProgress size={24} /> : user.status === 1 ? <LockOpenIcon /> : <LockIcon />}
                                     </Button>
                                 </TableCell>
                             </TableRow>

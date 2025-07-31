@@ -22,7 +22,6 @@ const HomeBanner = () => {
         "https://tools.dalathasfarm.com/assets/2023/2023-03/dff67f171dd7d839c1e4e664c44160e6.jpg",
     ];
     const [currentImage, setCurrentImage] = useState(0);
-    const [slideDirection, setSlideDirection] = useState('left');
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [categories, setCategories] = useState([]);
 
@@ -43,17 +42,15 @@ const HomeBanner = () => {
     const handleNext = () => {
         if (isTransitioning) return;
         setIsTransitioning(true);
-        setSlideDirection('left');
         setCurrentImage((prev) => (prev + 1) % bannerImages.length);
-        setTimeout(() => setIsTransitioning(false), 800);
+        setTimeout(() => setIsTransitioning(false), 500);
     };
 
     const handlePrev = () => {
         if (isTransitioning) return;
         setIsTransitioning(true);
-        setSlideDirection('right');
         setCurrentImage((prev) => (prev - 1 + bannerImages.length) % bannerImages.length);
-        setTimeout(() => setIsTransitioning(false), 800);
+        setTimeout(() => setIsTransitioning(false), 500);
     };
 
     const features = [
@@ -157,37 +154,69 @@ const HomeBanner = () => {
                             position: "relative"
                         }}
                     >
+                        {/* Slider container */}
                         <Box
-                            component="img"
-                            src={bannerImages[currentImage]}
-                            alt="Banner"
                             sx={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                animation: `${slideDirection === 'left' ? 'slideLeft' : 'slideRight'} 0.8s ease-in-out`,
-                                '@keyframes slideLeft': {
-                                    from: {
-                                        transform: 'translateX(100%)',
-                                        opacity: 0.5
-                                    },
-                                    to: {
-                                        transform: 'translateX(0)',
-                                        opacity: 1
-                                    }
-                                },
-                                '@keyframes slideRight': {
-                                    from: {
-                                        transform: 'translateX(-100%)',
-                                        opacity: 0.5
-                                    },
-                                    to: {
-                                        transform: 'translateX(0)',
-                                        opacity: 1
-                                    }
-                                }
+                                display: 'flex',
+                                width: `${bannerImages.length * 100}%`,
+                                height: '100%',
+                                transform: `translateX(-${currentImage * (100 / bannerImages.length)}%)`,
+                                transition: 'transform 0.5s cubic-bezier(0.77,0,0.18,1)'
                             }}
-                        />
+                        >
+                            {bannerImages.map((img, idx) => (
+                                <Box
+                                    key={idx}
+                                    component="img"
+                                    src={img}
+                                    alt={`Banner ${idx + 1}`}
+                                    sx={{
+                                        width: `${100 / bannerImages.length}%`,
+                                        height: "100%",
+                                        objectFit: "cover",
+                                        flexShrink: 0
+                                    }}
+                                />
+                            ))}
+                        </Box>
+
+                        {/* Dots indicator */}
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                bottom: 10,
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                display: "flex",
+                                gap: 1,
+                                zIndex: 2
+                            }}
+                        >
+                            {bannerImages.map((_, index) => (
+                                <Box
+                                    key={index}
+                                    onClick={() => {
+                                        if (!isTransitioning && index !== currentImage) {
+                                            setIsTransitioning(true);
+                                            setCurrentImage(index);
+                                            setTimeout(() => setIsTransitioning(false), 500);
+                                        }
+                                    }}
+                                    sx={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: "50%",
+                                        bgcolor: currentImage === index ? "white" : "rgba(255,255,255,0.5)",
+                                        cursor: "pointer",
+                                        transition: "all 0.3s ease",
+                                        "&:hover": {
+                                            bgcolor: "white"
+                                        }
+                                    }}
+                                />
+                            ))}
+                        </Box>
+
                         <Stack
                             direction="row"
                             justifyContent="space-between"
@@ -197,23 +226,28 @@ const HomeBanner = () => {
                                 left: 0,
                                 right: 0,
                                 transform: "translateY(-50%)",
-                                px: 1
+                                px: 1,
+                                zIndex: 2
                             }}
                         >
                             <IconButton
                                 onClick={handlePrev}
+                                disabled={isTransitioning}
                                 sx={{
                                     bgcolor: "rgba(255,255,255,0.7)",
-                                    "&:hover": { bgcolor: "rgba(255,255,255,0.9)" }
+                                    "&:hover": { bgcolor: "rgba(255,255,255,0.9)" },
+                                    "&:disabled": { bgcolor: "rgba(255,255,255,0.3)" }
                                 }}
                             >
                                 <ArrowBack />
                             </IconButton>
                             <IconButton
                                 onClick={handleNext}
+                                disabled={isTransitioning}
                                 sx={{
                                     bgcolor: "rgba(255,255,255,0.7)",
-                                    "&:hover": { bgcolor: "rgba(255,255,255,0.9)" }
+                                    "&:hover": { bgcolor: "rgba(255,255,255,0.9)" },
+                                    "&:disabled": { bgcolor: "rgba(255,255,255,0.3)" }
                                 }}
                             >
                                 <ArrowForward />

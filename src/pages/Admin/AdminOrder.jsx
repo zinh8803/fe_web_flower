@@ -95,13 +95,22 @@ const AdminOrder = () => {
 
     const handleUpdateStatus = async () => {
         if (!selectedOrder) return;
-        await updateOrder(selectedOrder.id, { status });
-        setOpenUpdate(false);
-        fetchOrders(page);
-        dispatch(showNotification({
-            message: "Cập nhật trạng thái đơn hàng thành công",
-            severity: "success"
-        }));
+        try {
+            await updateOrder(selectedOrder.id, { status });
+            setOpenUpdate(false);
+            fetchOrders(page);
+            dispatch(showNotification({
+                message: "Cập nhật trạng thái đơn hàng thành công",
+                severity: "success"
+            }));
+        } catch (err) {
+            console.error(err);
+            const errorMessage = err.response?.data?.message || "Cập nhật trạng thái đơn hàng thất bại";
+            dispatch(showNotification({
+                message: errorMessage,
+                severity: "error"
+            }));
+        }
     };
 
     const handleFilter = () => {
