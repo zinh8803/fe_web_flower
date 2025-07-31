@@ -17,13 +17,9 @@ const AdminMenu = () => {
     const [openProduct, setOpenProduct] = useState(false);
     const [openDiscount, setOpenDiscount] = useState(false);
     const navigate = useNavigate();
-    //   const dispatch = useDispatch();
     const user = useSelector(state => state.user.user);
 
-    // const handleLogout = () => {
-    //     dispatch(logoutAndClearCart());
-    //     window.location.href = "/admin/login";
-    // };
+
 
     return (
         <Box
@@ -39,15 +35,14 @@ const AdminMenu = () => {
             {/* Logo Section */}
             <Box
                 sx={{
-                    p: 3,
+                    p: 1,
                     textAlign: "center",
                     borderBottom: "1px solid #e0e0e0",
-                    mb: 2,
                     flexShrink: 0
                 }}
             >
                 {/* <LocalFlorist sx={{ fontSize: 48, color: "green", mb: 1 }} /> */}
-                <img src={Logo} alt="Logo" style={{ width: "100%", height: "50%", marginBottom: "10px" }} />
+                <img src={Logo} alt="Logo" style={{ width: "100%" }} />
                 <Typography variant="h6" fontWeight={700} color="green">
                     FLOWER SHOP
                 </Typography>
@@ -167,7 +162,22 @@ const AdminMenu = () => {
                                             color: "black"
                                         }} />
                                     </ListItem>
-
+                                    <ListItem
+                                        button
+                                        component={Link}
+                                        to="/admin/products/trash"
+                                        sx={{ pl: 4 }}
+                                        selected={location.pathname === "/admin/products/trash"}
+                                    >
+                                        <ListItemIcon sx={{ color: "green" }}><Delete /></ListItemIcon>
+                                        <ListItemText primary="Thùng rác" sx={{
+                                            "&.Mui-selected, &.Mui-selected:hover": {
+                                                bgcolor: "#e0f2f1",
+                                                color: "black"
+                                            },
+                                            color: "black"
+                                        }} />
+                                    </ListItem>
                                 </List>
                             </Collapse>
 
@@ -257,7 +267,7 @@ const AdminMenu = () => {
                         </>
                     )}
 
-                    {/* Đơn hàng và phiếu nhập: cả admin và employee đều có */}
+                    {/* Đơn hàng và phiếu nhập */}
                     <ListItem
                         button
                         component={Link}
@@ -291,23 +301,7 @@ const AdminMenu = () => {
                         <ListItemText primary="Quản lý phiếu nhập" />
                     </ListItem>
 
-                    {/* Logout */}
-                    {/* <ListItem
-                        button
-                        onClick={handleLogout}
-                        sx={{
-                            mt: 2,
-                            color: "black",
-                            "&:hover": {
-                                bgcolor: "#ffeaea",
-                                color: "red"
-                            },
-                            cursor: "pointer",
-                        }}
-                    >
-                        <ListItemIcon sx={{ color: "red" }}><LogoutIcon /></ListItemIcon>
-                        <ListItemText primary="Đăng xuất" />
-                    </ListItem> */}
+
                 </List>
             </Box>
         </Box>

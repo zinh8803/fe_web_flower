@@ -6,6 +6,16 @@ export const getProducts = (page = 1, search = "") =>
         withCredentials: true
     });
 
+export const getAllProductTrash = (page = 1) => {
+    return api.get("/products/trash", {
+        params: { page },
+        withCredentials: true
+    });
+};
+
+export const restoreProduct = (id) => {
+    return api.put(`/products/${id}/restore`, {}, { withCredentials: true });
+};
 export const getProductById = (id) => api.get(`/products/${id}`);
 
 export const getProductDetailById = (id) => api.get(`/products/detailId/${id}`);

@@ -182,6 +182,19 @@ const Checkout = () => {
             }
         } else if (form.payment_method === "vnpay") {
             try {
+
+                if (!form.delivery_date) {
+                    dispatch(showNotification({ message: "Vui lòng chọn ngày ", severity: "error" }));
+                    setLoading(false);
+                    return;
+                }
+                if (!form.is_express) {
+                    if (!form.delivery_time_slot) {
+                        dispatch(showNotification({ message: "Vui lòng chọn khung giờ giao hàng", severity: "error" }));
+                        setLoading(false);
+                        return;
+                    }
+                }
                 const orderData = {
                     ...form,
                     user_id: user?.id || null,
@@ -235,7 +248,10 @@ const Checkout = () => {
                 value={form.name}
                 onChange={handleChange}
                 fullWidth
+                required
                 margin="normal"
+                error={!form.name}
+                helperText={!form.name ? "Họ tên không được để trống" : ""}
             />
             <TextField
                 label="Email"
@@ -264,6 +280,9 @@ const Checkout = () => {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
+                required
+                error={!form.address}
+                helperText={!form.address ? "Địa chỉ không được để trống" : ""}
             />
             <TextField
                 label="Ghi chú"
@@ -286,6 +305,7 @@ const Checkout = () => {
                 inputProps={{
                     min: new Date().toISOString().split('T')[0]
                 }}
+
             />
             <FormControl fullWidth margin="normal" disabled={form.is_express}>
                 <InputLabel>Khung giờ giao hàng</InputLabel>
@@ -296,7 +316,7 @@ const Checkout = () => {
                     label="Khung giờ giao hàng"
                 >
                     <MenuItem value="">
-                        <em>Chọn khung giờ</em>
+                        <>Chọn khung giờ</>
                     </MenuItem>
                     {timeSlots.map((slot) => {
                         const disabled = isTimeSlotDisabled(slot.value);
@@ -414,7 +434,7 @@ const Checkout = () => {
                     size="large"
                     sx={{ borderRadius: 2, fontWeight: 600, fontSize: "1.1rem" }}
                     onClick={handlePlaceOrder}
-                    disabled={cartItems.length === 0 || loading}
+                    disabled={cartItems.length === 0 || loading || !form.name || !form.address || !form.phone || errors.phone || errors.email}
                 >
                     {loading ? "Đang gửi đơn hàng..." : "Đặt hàng"}
                 </Button>

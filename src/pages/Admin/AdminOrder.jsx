@@ -153,19 +153,33 @@ const AdminOrder = () => {
     };
 
     const handleUpdateReport = async () => {
-        if (!selectedOrder) return;
-        await updateReport(
-            selectedOrder.id,
-            currentReports,
-            orderStatus
-        );
-        setHandleReportDialog(false);
-        setSelectedReport(null);
-        fetchOrders(page);
-        dispatch(showNotification({
-            message: "Cập nhật báo cáo thành công",
-            severity: "success"
-        }));
+        try {
+            if (!selectedOrder) return;
+            await updateReport(
+                selectedOrder.id,
+                currentReports,
+                orderStatus
+            );
+            console.log("Report updated successfully");
+            setHandleReportDialog(false);
+            setSelectedReport(null);
+            fetchOrders(page);
+            dispatch(showNotification({
+                message: "Cập nhật báo cáo thành công",
+                severity: "success"
+            }));
+        } catch (error) {
+            console.error("Error updating report:", error);
+            // coi truyền vào cái gì
+            console.log("Selected Report:", selectedReport);
+            console.log("Current Reports:", currentReports);
+            console.log("Order Status:", orderStatus);
+            const errorMessage = error.response?.data?.message;
+            dispatch(showNotification({
+                message: errorMessage,
+                severity: "error"
+            }));
+        }
     }
 
 
@@ -581,6 +595,7 @@ const AdminOrder = () => {
                         <TableBody>
                             {currentReports.map((r, idx) => {
                                 const detail = (selectedOrder?.order_details || []).find(d => d.id === r.order_detail_id);
+                                const isDisabled = r.status === "Đã giải quyết" || r.status === "Từ chối";
                                 return (
                                     <TableRow key={r.id}>
                                         <TableCell>{detail?.product_size?.product?.name || "-"}</TableCell>
@@ -596,6 +611,7 @@ const AdminOrder = () => {
                                                     setCurrentReports(newReports);
                                                 }}
                                                 size="small"
+                                                disabled={isDisabled}
                                             >
                                                 <MenuItem value="Đã giải quyết">Đã giải quyết</MenuItem>
                                                 <MenuItem value="Đang xử lý">Đang xử lý</MenuItem>
@@ -613,6 +629,7 @@ const AdminOrder = () => {
                                                 size="small"
                                                 multiline
                                                 rows={2}
+                                                disabled={isDisabled}
                                             />
                                         </TableCell>
                                     </TableRow>
@@ -626,6 +643,7 @@ const AdminOrder = () => {
                     <Button
                         variant="contained"
                         onClick={handleUpdateReport}
+
                     >
                         Lưu xử lý
                     </Button>

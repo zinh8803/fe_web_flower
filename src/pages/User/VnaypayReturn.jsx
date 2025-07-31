@@ -22,23 +22,31 @@ const VnpayReturn = () => {
                 createOrder(orderData)
                     .then(() => {
                         dispatch(clearCart());
-                        dispatch(showNotification({ message: "Thanh toán thành công!", severity: "success" }));
-                        localStorage.removeItem("pendingOrder");
-                        localStorage.removeItem("pendingOrderSent");
-                        setTimeout(() => navigate("/"), 2000);
+                        setTimeout(() => {
+                            dispatch(showNotification({ message: "Thanh toán thành công!", severity: "success" }));
+                            localStorage.removeItem("pendingOrder");
+                            localStorage.removeItem("pendingOrderSent");
+                            navigate("/");
+                        }, 2000);
                     })
                     .catch(() => {
-                        dispatch(showNotification({ message: "Không đủ tồn kho cho sản phẩm này!", severity: "error" }));
-                        localStorage.removeItem("pendingOrderSent");
-                        setTimeout(() => navigate("/checkout"), 2000);
+                        setTimeout(() => {
+                            dispatch(showNotification({ message: "Không đủ tồn kho cho sản phẩm này!", severity: "error" }));
+                            localStorage.removeItem("pendingOrderSent");
+                            navigate("/checkout");
+                        }, 2000);
                     });
             } else if (!orderData) {
-                dispatch(showNotification({ message: "Không tìm thấy thông tin đơn hàng!", severity: "error" }));
-                setTimeout(() => navigate("/checkout"), 2000);
+                setTimeout(() => {
+                    dispatch(showNotification({ message: "Không tìm thấy thông tin đơn hàng!", severity: "error" }));
+                    navigate("/checkout");
+                }, 2000);
             }
         } else {
-            dispatch(showNotification({ message: "Thanh toán thất bại!", severity: "error" }));
-            setTimeout(() => navigate("/checkout"), 2000);
+            setTimeout(() => {
+                dispatch(showNotification({ message: "Thanh toán thất bại!", severity: "error" }));
+                navigate("/checkout");
+            }, 2000);
         }
     }, [dispatch, navigate, location.search]);
 

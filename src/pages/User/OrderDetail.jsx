@@ -462,7 +462,7 @@ const OrderDetail = () => {
                         color="error"
                         disabled={reporting}
                     >
-                        {reporting ? "Đang gửi..." : "Gửi báo cáo"}
+                        {reporting ? <CircularProgress size={24} /> : "Gửi báo cáo"}
                     </Button>
                 </DialogActions>
             </Dialog>

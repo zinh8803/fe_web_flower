@@ -639,7 +639,7 @@ const AdminProduct = () => {
                         color="primary"
                         disabled={loading}
                     >
-                        {loading ? "Đang lưu..." : "Lưu"}
+                        {loading ? <CircularProgress size={24} /> : "Lưu"}
                     </Button>
                 </DialogActions>
             </Dialog>

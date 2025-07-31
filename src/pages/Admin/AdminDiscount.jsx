@@ -316,7 +316,7 @@ const AdminDiscount = () => {
                     </TableHead>
                     <TableBody>
                         {discounts.map((d, index) => (
-                            <TableRow key={d.id}>
+                            <TableRow key={d.id} sx={{ backgroundColor: d.status ? 'inherit' : '#EEEEEE' }}>
                                 <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
                                 <TableCell>{d.name}</TableCell>
                                 <TableCell>{d.type === "fixed" ? "Tiền mặt" : "Phần trăm"}</TableCell>

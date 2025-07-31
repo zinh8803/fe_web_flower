@@ -34,6 +34,7 @@ import AdminEmployee from "../pages/Admin/AdminEmployee";
 import ProfileAdmin from "../pages/Admin/ProfileAdmin";
 import ChangePasswordAdminPage from "../pages/Admin/ChangePasswordAdminPage";
 import AdminSubscribers from "../pages/Admin/AdminSubcribers";
+import AdminTrashProducts from "../pages/Admin/AdminTrashProducts";
 
 const AppRoutes = () => (
     <>
@@ -64,6 +65,7 @@ const AppRoutes = () => (
                 <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Admin />} />
                     <Route path="products/stock" element={<StockProductAdmin />} />
+                    <Route path="products/trash" element={<AdminTrashProducts />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="products" element={<AdminProduct />} />
                     <Route path="categories" element={<AdminCategory />} />
