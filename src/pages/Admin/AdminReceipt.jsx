@@ -39,6 +39,7 @@ const AdminReceipt = () => {
         run_time: "",
         details: [],
         enabled: true,
+        repeat_daily: false
     });
     const [autoFlowerSearch, setAutoFlowerSearch] = useState("");
     const [autoFlowerDropdownOpen, setAutoFlowerDropdownOpen] = useState(false);
@@ -65,6 +66,7 @@ const AdminReceipt = () => {
                     import_date: import_date || "",
                     run_time: run_time || "",
                     enabled: !!data.enabled,
+                    repeat_daily: !!data.repeat_daily,
                 });
             }
         } catch (error) {
@@ -74,7 +76,18 @@ const AdminReceipt = () => {
     useEffect(() => {
         fetchAutoConfig();
     }, []);
-
+    useEffect(() => {
+        if (autoConfig.repeat_daily) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const currentDate = `${yyyy}-${mm}-${dd}`;
+            if (autoConfig.import_date !== currentDate) {
+                setAutoConfig(config => ({ ...config, import_date: currentDate }));
+            }
+        }
+    }, [autoConfig.repeat_daily]);
     const fetchReceipts = async (pageNum = 1) => {
         try {
             const res = await getImportReceipts(pageNum, fromDate, toDate, searchQuery);
@@ -215,6 +228,18 @@ const AdminReceipt = () => {
 
             await fetchAutoConfig();
 
+            setAutoConfig(prev => {
+                if (prev.repeat_daily) {
+                    const today = new Date();
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const currentDate = `${yyyy}-${mm}-${dd}`;
+                    return { ...prev, import_date: currentDate };
+                }
+                return prev;
+            });
+
             setAutoFlowerSearch("");
             setOpenAutoDialog(true);
         } catch (error) {
@@ -222,7 +247,6 @@ const AdminReceipt = () => {
             dispatch(showNotification({ message: "Lỗi khi tải danh sách hoa", type: "error" }));
         }
     };
-
     const isAutoFlowerSelected = (flowerId) => {
         return autoConfig.details.some(d => d.flower_id === flowerId);
     };
@@ -272,7 +296,16 @@ const AdminReceipt = () => {
 
     const handleSaveAutoConfig = async () => {
         try {
-            await createAutoImportReceipt(autoConfig);
+            let configToSave = { ...autoConfig };
+            if (autoConfig.repeat_daily) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                configToSave.import_date = `${yyyy}-${mm}-${dd}`;
+            }
+
+            await createAutoImportReceipt(configToSave);
             setOpenAutoDialog(false);
 
             await fetchAutoConfig();
@@ -659,7 +692,6 @@ const AdminReceipt = () => {
             <Dialog open={openAutoDialog} onClose={() => setOpenAutoDialog(false)} maxWidth="md" fullWidth>
                 <DialogTitle>Cấu hình tự động nhập phiếu</DialogTitle>
                 <DialogContent>
-                    {/* Thêm input cho import_date */}
                     <TextField
                         label="Ngày nhập"
                         type="date"
@@ -667,6 +699,7 @@ const AdminReceipt = () => {
                         onChange={e => setAutoConfig({ ...autoConfig, import_date: e.target.value })}
                         fullWidth
                         margin="normal"
+                        disabled={autoConfig.repeat_daily}
                         InputLabelProps={{ shrink: true }}
                     />
 
@@ -691,7 +724,17 @@ const AdminReceipt = () => {
                             <MenuItem value={0}>Tắt</MenuItem>
                         </Select>
                     </FormControl>
-
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Nhập tự động</InputLabel>
+                        <Select
+                            value={autoConfig.repeat_daily ? 1 : 0}
+                            onChange={e => setAutoConfig({ ...autoConfig, repeat_daily: !!e.target.value })}
+                            label="Nhập tự động"
+                        >
+                            <MenuItem value={1}>Bật</MenuItem>
+                            <MenuItem value={0}>Tắt</MenuItem>
+                        </Select>
+                    </FormControl>
                     {/* Phần chọn hoa cho cấu hình tự động */}
                     <Box sx={{ mt: 3, position: 'relative' }}>
                         <Typography variant="subtitle1" gutterBottom>
