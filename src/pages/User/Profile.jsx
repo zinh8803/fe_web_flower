@@ -10,6 +10,7 @@ const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [form, setForm] = useState({});
     const [loading, setLoading] = useState(true);
+    const [submitLoading, setSubmitLoading] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -36,7 +37,7 @@ const Profile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setSubmitLoading(true);
         const token = localStorage.getItem("token");
         const formData = new FormData();
         formData.append("_method", "PUT");
@@ -53,12 +54,12 @@ const Profile = () => {
                 setForm(res.data.data);
                 dispatch(setUser({ user: res.data.data, token }));
                 dispatch(showNotification({ message: "Cập nhật thông tin thành công!", severity: "success" }));
-                setLoading(false);
+                setSubmitLoading(false);
             });
         } catch (error) {
             console.error("Cập nhật thông tin thất bại:", error);
             dispatch(showNotification({ message: error.response?.data?.message || "Cập nhật thông tin thất bại!", severity: "error" }));
-            setLoading(false);
+            setSubmitLoading(false);
         }
     };
 
@@ -77,7 +78,7 @@ const Profile = () => {
             onChange={handleChange}
             onImageChange={handleImageChange}
             onSubmit={handleSubmit}
-            loading={loading}
+            submitLoading={submitLoading}
         />
     );
 };

@@ -117,7 +117,6 @@ const SubscribeBell = () => {
                 </Tooltip>
             </Box>
 
-            {/* Dialog xác nhận đăng ký */}
             <Dialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
@@ -134,7 +133,6 @@ const SubscribeBell = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Snackbar thông báo */}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={5000}

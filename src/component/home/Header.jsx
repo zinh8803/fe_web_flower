@@ -100,7 +100,7 @@ const Header = () => {
                     </Link>
                 </Box>
 
-                {/* Search - Ẩn trên xs, hiện từ sm trở lên */}
+                {/* Search */}
                 <Box flex={1} px={{ xs: 1, md: 4 }} maxWidth={500} display={{ xs: "none", sm: "block" }}>
                     <Paper
                         component="form"
@@ -200,7 +200,7 @@ const Header = () => {
                 </Box>
             </Container>
 
-            {/* Search riêng cho mobile */}
+            {/* Search mobile */}
             <Box display={{ xs: "block", sm: "none" }} px={2} pb={1}>
                 <Paper
                     component="form"

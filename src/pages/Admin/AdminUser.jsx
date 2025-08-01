@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getAllUsers, updateUserStatus } from "../../services/userService";
 import {
     Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer, Pagination, Avatar, Chip,
-    CircularProgress
+    CircularProgress,
+    IconButton
 } from "@mui/material";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -92,14 +93,14 @@ const AdminUser = () => {
                                     {new Date(user.created_at).toLocaleString()}
                                 </TableCell>
                                 <TableCell>
-                                    <Button
+                                    <IconButton
                                         variant="contained"
                                         color={user.status === 1 ? "error" : "success"}
                                         onClick={() => handleUpdateStatus(user.id)}
                                         disabled={loadingLockId === user.id}
                                     >
                                         {loadingLockId === user.id ? <CircularProgress size={24} /> : user.status === 1 ? <LockOpenIcon /> : <LockIcon />}
-                                    </Button>
+                                    </IconButton>
                                 </TableCell>
                             </TableRow>
                         ))}

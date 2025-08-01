@@ -51,9 +51,7 @@ const ProductGrid = ({ filterParams = {} }) => {
     }, [dispatch]);
 
     useEffect(() => {
-        if (Object.keys(filterParams).length > 0) {
-            handleFilter(filterParams);
-        }
+        handleFilter(filterParams);
     }, [filterParams]);
 
     const fetchProducts = async (page) => {

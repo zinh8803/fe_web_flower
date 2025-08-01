@@ -26,32 +26,33 @@ const Filter = ({ onFilter }) => {
   const [ManualFilter, setManualFilter] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [flowerRes, typeRes] = await Promise.all([
-          getFlower(),
-          getFlowerTypes(),
-        ]);
-
-        const apiColors = [
-          ...new Set(flowerRes.data.data.map((flower) => flower.color)),
-        ];
-        const availableColors = COLORS.filter((color) =>
-          apiColors.includes(color)
-        );
-        setColors(availableColors.length > 0 ? availableColors : apiColors);
-
-        setFlowerTypes(typeRes.data.data);
-      } catch (error) {
-        console.error("Lỗi khi tải dữ liệu bộ lọc:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchData();
+
   }, []);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [flowerRes, typeRes] = await Promise.all([
+        getFlower(),
+        getFlowerTypes(),
+      ]);
+
+      const apiColors = [
+        ...new Set(flowerRes.data.data.map((flower) => flower.color)),
+      ];
+      const availableColors = COLORS.filter((color) =>
+        apiColors.includes(color)
+      );
+      setColors(availableColors.length > 0 ? availableColors : apiColors);
+
+      setFlowerTypes(typeRes.data.data);
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu bộ lọc:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleColorChange = (color) => {
     setSelectedColors((prev) => {
@@ -92,7 +93,7 @@ const Filter = ({ onFilter }) => {
   const handleResetFilters = () => {
     setSelectedColors([]);
     setSelectedTypes([]);
-    setPriceRange([0, 1000000]);
+    setPriceRange(["", ""]);
     setManualFilter(true);
     onFilter({});
   };

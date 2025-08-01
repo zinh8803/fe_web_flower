@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography, TextField, Button, Avatar, Stack, CircularProgress, Card, CardContent } from "@mui/material";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
 
-const ProfileForm = ({ form, onChange, onImageChange, onSubmit, loading }) => (
+const ProfileForm = ({ form, onChange, onImageChange, onSubmit, submitLoading }) => (
     <Box maxWidth="1450px" mx="auto" mt={4}>
         <Breadcrumb
             items={[
@@ -61,11 +61,17 @@ const ProfileForm = ({ form, onChange, onImageChange, onSubmit, loading }) => (
                         margin="normal"
                     />
 
-                    <Stack direction="row" spacing={2} mt={2} justifyContent="center">
-                        <Button type="submit" variant="contained" color="primary" disabled={loading}>
-                            {loading ? <CircularProgress size={24} color="inherit" /> : "Lưu"}
+                    <Box display="flex" justifyContent="center">
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            disabled={submitLoading}
+                            sx={{ mt: 2 }}
+                        >
+                            {submitLoading ? <CircularProgress size={24} color="inherit" /> : "Lưu"}
                         </Button>
-                    </Stack>
+                    </Box>
                 </form>
             </CardContent>
         </Card>

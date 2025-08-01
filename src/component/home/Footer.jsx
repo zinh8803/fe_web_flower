@@ -85,7 +85,7 @@ export default function Footer() {
                     fontSize: '13px',
                   }}
                 >
-                  <strong>- Địa chỉ trụ sở:</strong> 450 Nguyễn Tử Lực, P.8, Đà Lạt, Lâm Đồng, Việt Nam
+                  <strong>- Địa chỉ trụ sở:</strong> Quận 1, TP. Hồ Chí Minh
                 </Typography>
                 {/* <Typography
                   variant="body2"
@@ -127,7 +127,7 @@ export default function Footer() {
               <Box sx={{ width: '100%', textAlign: 'center', maxWidth: 220 }}>
                 <Stack spacing={2}>
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -141,7 +141,7 @@ export default function Footer() {
                     Trang chủ
                   </Link>
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -155,7 +155,7 @@ export default function Footer() {
                     Cẩm nang
                   </Link>
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -198,7 +198,7 @@ export default function Footer() {
               <Box sx={{ width: '100%', textAlign: 'center', maxWidth: 220 }}>
                 <Stack spacing={2}>
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -226,7 +226,7 @@ export default function Footer() {
                     Shop Dalat Hasfarm
                   </Link> */}
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -240,7 +240,7 @@ export default function Footer() {
                     Chính sách bảo mật
                   </Link>
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -254,7 +254,7 @@ export default function Footer() {
                     Hướng dẫn mua hàng
                   </Link>
                   <Link
-                    href="#"
+                    href="/about"
                     sx={{
                       color: '#666',
                       textDecoration: 'none',
@@ -271,7 +271,7 @@ export default function Footer() {
               </Box>
             </Grid>
 
-            {/* LIÊN HỆ - dịch qua trái */}
+            {/* LIÊN HỆ */}
             <Grid
               item
               xs={12}
@@ -348,7 +348,7 @@ export default function Footer() {
         </Container>
       </Box>
 
-      {/* Copyright - luôn dính sát cuối */}
+      {/* Copyright  */}
       <Box
         sx={{
           bgcolor: "#e9ecef",
@@ -358,7 +358,7 @@ export default function Footer() {
         }}
       >
         <Typography variant="body2" sx={{ color: '#666' }}>
-          © 2020 Dalathasfarm. All rights reserved.
+          © 2020 Hoa Shop. All rights reserved.
         </Typography>
       </Box>
     </Box>

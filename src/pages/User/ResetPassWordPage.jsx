@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { showNotification } from '../../store/notificationSlice';
 import { sendResetPassword } from '../../services/mailService';
 import { resetPassword } from '../../services/userService';
+import { redirect } from 'react-router-dom';
 
 const ResetPassWordPage = () => {
     const [email, setEmail] = useState('');
@@ -44,6 +45,8 @@ const ResetPassWordPage = () => {
             setOtp('');
             setNewPassword('');
             setConfirmPassword('');
+
+            redirect('/login');
         } catch (error) {
             const message =
                 error.response?.data?.message ||
