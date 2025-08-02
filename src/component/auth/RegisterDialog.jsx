@@ -39,7 +39,6 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
             [name]: value,
         });
 
-        // Kiểm tra lỗi realtime
         if (name === "phone") {
             setErrors(errors => ({
                 ...errors,
@@ -169,7 +168,6 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
         setLoadingRegister(false);
     };
 
-    // Clear timer khi đóng dialog
     React.useEffect(() => {
         if (!open) {
             clearInterval(timerRef.current);
@@ -179,7 +177,7 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogContent sx={{ width: "600px", padding: 3, position: 'relative' }}>
+            <DialogContent sx={{ width: { xs: "100%", sm: "600px" }, padding: 3, position: 'relative' }}>
                 <IconButton
                     aria-label="close"
                     onClick={onClose}
@@ -241,9 +239,9 @@ const RegisterDialog = ({ open, onClose, onSwitchToLogin }) => {
                         helperText={errors.email}
                     />
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         color="primary"
-                        sx={{ minWidth: 120, height: 40, mt: 1 }}
+                        sx={{ height: 56, minWidth: 120, mt: '8px' }}
                         onClick={handleSendOtp}
                         disabled={otpTimer > 0 || loadingOtp}
                     >

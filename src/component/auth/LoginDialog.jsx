@@ -85,7 +85,7 @@ const LoginDialog = ({ open, onClose }) => {
     return (
         <>
             <Dialog open={open} onClose={handleCloseAll}>
-                <DialogContent sx={{ width: "600px", padding: 3, position: 'relative' }}>
+                <DialogContent sx={{ width: { xs: "100%", sm: "600px" }, padding: 3, position: 'relative' }}>
                     {/* Add Close Button */}
                     <IconButton
                         aria-label="close"

@@ -311,16 +311,16 @@ const Cart = () => {
                                 overflow: 'hidden'
                             }}
                         >
-                            <Box sx={{ p: 3, bgcolor: '#fff' }}>
+                            <Box sx={{ p: 3, bgcolor: '#fff', overflowX: { xs: 'auto', md: 'visible' } }}>
                                 <Typography variant="h5" fontWeight="600" mb={3}>
                                     Giỏ hàng của bạn ({cartItems.length} sản phẩm)
                                 </Typography>
 
-                                <Table>
+                                <Table sx={{ minWidth: 600 }}>
                                     <TableHead>
-                                        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                                        <TableRow sx={{ bgcolor: "#f8f9fa" }}>
                                             <TableCell sx={{ fontWeight: 600, py: 2 }}>Sản phẩm</TableCell>
-                                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Đơn giá</TableCell>
+                                            <TableCell sx={{ fontWeight: 600, py: 2, display: { xs: "none", sm: "table-cell" } }}>Đơn giá</TableCell>
                                             <TableCell sx={{ fontWeight: 600, py: 2 }}>Số lượng</TableCell>
                                             <TableCell sx={{ fontWeight: 600, py: 2 }}>Tổng cộng</TableCell>
                                             <TableCell sx={{ fontWeight: 600, py: 2 }}></TableCell>
@@ -343,15 +343,15 @@ const Cart = () => {
                                                         opacity: !isAvailable ? 0.6 : 1
                                                     }}
                                                 >
-                                                    <TableCell sx={{ py: 3 }}>
-                                                        <Box display="flex" alignItems="center" gap={3}>
+                                                    <TableCell sx={{ py: { xs: 1, md: 3 } }}>
+                                                        <Box display="flex" alignItems="center" gap={2}>
                                                             <Box
                                                                 component="img"
                                                                 src={item.image}
                                                                 alt={item.name}
                                                                 sx={{
-                                                                    width: 80,
-                                                                    height: 80,
+                                                                    width: { xs: 48, sm: 80 },
+                                                                    height: { xs: 48, sm: 80 },
                                                                     objectFit: 'cover',
                                                                     borderRadius: 2,
                                                                     border: '1px solid #e0e0e0'
@@ -361,8 +361,9 @@ const Cart = () => {
                                                                 <Typography
                                                                     variant="body1"
                                                                     sx={{
-                                                                        maxWidth: 300,
-                                                                        fontWeight: 500
+                                                                        maxWidth: 200,
+                                                                        fontWeight: 500,
+                                                                        fontSize: { xs: "0.95rem", sm: "1rem" }
                                                                     }}
                                                                 >
                                                                     {item.name}
@@ -396,7 +397,6 @@ const Cart = () => {
                                                                     </Typography>
                                                                 ) : null}
 
-                                                                {/* Hiển thị thông báo tồn kho */}
                                                                 {!isAvailable && (
                                                                     <Chip
                                                                         label="Hết hàng"
@@ -413,15 +413,11 @@ const Cart = () => {
                                                                         sx={{ mt: 1 }}
                                                                     />
                                                                 )}
-                                                                {/* {limitingFlower && (
-                                                                    <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                                                                        Còn tối đa: {maxQty} (thiếu {limitingFlower.name})
-                                                                    </Typography>
-                                                                )} */}
+
                                                             </Box>
                                                         </Box>
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
                                                         <Typography variant="body1" fontWeight="500" color="primary">
                                                             {item.price.toLocaleString()}đ
                                                         </Typography>
@@ -445,7 +441,6 @@ const Cart = () => {
                                                                 <Minus size={16} />
                                                             </IconButton>
 
-                                                            {/*TextField */}
                                                             <TextField
                                                                 value={currentQty}
                                                                 onChange={(e) => handleQuantityInputChange(item.id, e)}
@@ -488,11 +483,6 @@ const Cart = () => {
                                                             </IconButton>
                                                         </Box>
 
-                                                        {/* {isQuantityExceeded && (
-                                                            <Typography variant="caption" color="error" display="block" mt={1}>
-                                                                Vượt quá số lượng tối đa ({maxQty})
-                                                            </Typography>
-                                                        )} */}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Typography variant="body1" fontWeight="600" color="error">

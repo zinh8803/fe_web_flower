@@ -8,8 +8,12 @@ import UserMenu from "./UserMenu";
 import LoginDialog from "../auth/LoginDialog";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/img/LOGO_HOA.png";
+import { logoutAndClearCart } from "../../store/userSlice";
+import { showNotification } from "../../store/notificationSlice";
+import { useDispatch } from "react-redux";
 
 const Header = () => {
+    const dispatch = useDispatch();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [searchValue, setSearchValue] = useState("");
@@ -20,7 +24,16 @@ const Header = () => {
     const handleLoginDialogClose = (shouldReopen = false) => {
         setShowLogin(shouldReopen);
     };
+    const handleLogout = () => {
 
+        dispatch(logoutAndClearCart());
+        navigate("/");
+        dispatch(showNotification({
+            message: "Đăng xuất thành công!",
+            severity: "success"
+        }));
+
+    };
     // Mobile menu content
     const mobileMenu = (
         <Box sx={{ width: 260, p: 2 }}>
@@ -65,7 +78,7 @@ const Header = () => {
                             </Link>
                         </ListItem>
                         <ListItem>
-                            <Link to="/logout" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
+                            <Link to="/" onClick={handleLogout} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
                                 <ListItemText primary="Đăng xuất" />
                             </Link>
                         </ListItem>

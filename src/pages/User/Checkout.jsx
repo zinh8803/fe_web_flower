@@ -250,7 +250,7 @@ const Checkout = () => {
     const displayTotal = total < 0 ? 0 : total;
 
     return (
-        <Container maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
+        <Container maxWidth={700} mx="auto" sx={{ pt: 2 }} mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2} >
             <Breadcrumb
                 items={[
                     { label: "Trang chủ", href: "/" },
@@ -261,27 +261,29 @@ const Checkout = () => {
             <Typography variant="h5" fontWeight={700} mb={3}>
                 Thanh toán đơn hàng
             </Typography>
-            <TextField
-                label="Họ Tên"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                fullWidth
-                required
-                margin="normal"
-                error={!form.name}
-                helperText={!form.name ? "Họ tên không được để trống" : ""}
-            />
-            <TextField
-                label="Email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                error={!!errors.email}
-                helperText={errors.email}
-            />
+            <Box display="flex" flexWrap={{ xs: "wrap", sm: "nowrap" }} gap={2} flexDirection="row" >
+                <TextField
+                    label="Họ Tên"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    margin="normal"
+                    error={!form.name}
+                    helperText={!form.name ? "Họ tên không được để trống" : ""}
+                />
+                <TextField
+                    label="Email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    fullWidth
+                    margin="normal"
+                    error={!!errors.email}
+                    helperText={errors.email}
+                />
+            </Box>
             <TextField
                 label="Số điện thoại nhận hàng"
                 name="phone"
