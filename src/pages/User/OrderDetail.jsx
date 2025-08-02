@@ -203,7 +203,7 @@ const OrderDetail = () => {
                 </Box>
                 <Box flex={1} minWidth={280}>
                     <Typography><b>Ngày mua:</b> {order.buy_at}</Typography>
-                    <Typography><b>Ngày giao hàng:</b> {order.delivery_date || "Không có"} {order.delivery_time || "Không có"}</Typography>
+                    <Typography><b>Ngày giao hàng:</b> {order.delivery_date || "Không có"} {order.delivery_time_slot || ""}</Typography>
                     <Typography><b>Phương thức giao hàng:</b> {order.is_express ? "Giao hàng nhanh" : "Giao hàng thường"}</Typography>
                     <Typography><b>Phương thức thanh toán:</b> {order.payment_method}</Typography>
                     <Typography>

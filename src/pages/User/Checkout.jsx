@@ -231,7 +231,7 @@ const Checkout = () => {
     const displayTotal = total < 0 ? 0 : total;
 
     return (
-        <Container maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>'
+        <Container maxWidth={700} mx="auto" mt={5} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
             <Breadcrumb
                 items={[
                     { label: "Trang chủ", href: "/" },

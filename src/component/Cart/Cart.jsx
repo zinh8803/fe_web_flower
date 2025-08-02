@@ -33,7 +33,6 @@ const Cart = () => {
     const stockState = useSelector(state => state.stock);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
     const [discountCode, setDiscountCode] = useState("");
     const [discountAmount, setDiscountAmount] = useState(0);
     const [discountId, setDiscountId] = useState(null);
@@ -43,31 +42,49 @@ const Cart = () => {
 
     const [currentQuantities, setCurrentQuantities] = useState({});
     const [needsStockUpdate, setNeedsStockUpdate] = useState(false);
+    const [stockLoaded, setStockLoaded] = useState(false);
+
+    const [checkedInvalidItems, setCheckedInvalidItems] = useState(false);
+    const [hasInvalid, setHasInvalid] = useState(true);
     const user = useSelector((state) => state.user.user);
     useEffect(() => {
         if (cartItems.length > 0) {
             dispatch(fetchStockAvailability(cartItems.map(item => ({
                 product_size_id: item.product_size_id,
                 quantity: 0
-            })))).then(() => {
-                const maxQuantities = {};
-                cartItems.forEach(item => {
-                    const product = stockState.availableProducts.find(p => p.id === item.product_id);
-                    if (product) {
-                        const sizeInfo = product.sizes.find(s => s.size_id === item.product_size_id);
-                        if (sizeInfo) {
-                            maxQuantities[`${item.product_id}-${item.product_size_id}`] = sizeInfo.max_quantity;
-                        }
-                    }
-                });
-                setTotalMaxQuantities(maxQuantities);
-            });
+            }))));
         }
     }, [dispatch, cartItems]);
 
+    useEffect(() => {
+        if (cartItems.length > 0 && stockState.availableProducts.length > 0) {
+            const maxQuantities = {};
+            cartItems.forEach(item => {
+                const product = stockState.availableProducts.find(p => p.id === item.product_id);
+                if (product) {
+                    const sizeInfo = product.sizes.find(s => s.size_id === item.product_size_id);
+                    if (sizeInfo) {
+                        maxQuantities[`${item.product_id}-${item.product_size_id}`] = sizeInfo.max_quantity;
+                    }
+                }
+            });
+            setTotalMaxQuantities(maxQuantities);
+            setStockLoaded(true);
+
+            const invalid = cartItems.some(item => {
+                const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
+                const isAvailable = isProductAvailable(item.product_id, item.product_size_id);
+                return !isAvailable || item.quantity > maxQty;
+            });
+
+            setHasInvalid(invalid);
+            setCheckedInvalidItems(true);
+        }
+    }, [cartItems, stockState.availableProducts]);
+
     const isProductAvailable = (productId, sizeId) => {
         const product = stockState.availableProducts.find(p => p.id === productId);
-        if (!product) return true;
+        if (!product) return false;
 
         const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
         return sizeInfo && sizeInfo.in_stock && sizeInfo.max_quantity > 0;
@@ -75,19 +92,15 @@ const Cart = () => {
 
     const getMaxQuantity = (productId, sizeId) => {
         const totalMaxQty = totalMaxQuantities[`${productId}-${sizeId}`];
-        if (totalMaxQty) return totalMaxQty;
+        if (totalMaxQty !== undefined) return totalMaxQty;
 
         const product = stockState.availableProducts.find(p => p.id === productId);
-        if (!product) return 999;
+        if (!product) return 0;
 
         const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
-        if (!sizeInfo) return 999;
+        if (!sizeInfo) return 0;
 
-        const currentQty = cartItems.find(
-            i => i.product_id === productId && i.product_size_id === sizeId
-        )?.quantity || 0;
-
-        return sizeInfo.max_quantity + currentQty;
+        return sizeInfo.max_quantity;
     };
 
 
@@ -247,11 +260,15 @@ const Cart = () => {
 
     const total = Math.max(0, subtotal - discountAmount);
 
-    const hasInvalidItems = cartItems.some(item => {
-        const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
-        const isAvailable = isProductAvailable(item.product_id, item.product_size_id);
-        return !isAvailable || item.quantity > maxQty;
-    });
+    const hasInvalidItems = useCallback(() => {
+        if (!stockLoaded) return true; // Nếu chưa tải xong, coi như có sản phẩm không hợp lệ
+
+        return cartItems.some(item => {
+            const maxQty = getMaxQuantity(item.product_id, item.product_size_id);
+            const isAvailable = isProductAvailable(item.product_id, item.product_size_id);
+            return !isAvailable || item.quantity > maxQty;
+        });
+    }, [cartItems, stockLoaded, totalMaxQuantities, stockState.availableProducts]);
 
     return (
         <Box
@@ -390,7 +407,7 @@ const Cart = () => {
                                                                 )}
                                                                 {isQuantityExceeded && (
                                                                     <Chip
-                                                                        label={`Vượt quá số lượng (tối đa: ${maxQty})`}
+                                                                        label={`Còn số lượng (tối đa: ${maxQty})`}
                                                                         color="warning"
                                                                         size="small"
                                                                         sx={{ mt: 1 }}
@@ -471,11 +488,11 @@ const Cart = () => {
                                                             </IconButton>
                                                         </Box>
 
-                                                        {isQuantityExceeded && (
+                                                        {/* {isQuantityExceeded && (
                                                             <Typography variant="caption" color="error" display="block" mt={1}>
                                                                 Vượt quá số lượng tối đa ({maxQty})
                                                             </Typography>
-                                                        )}
+                                                        )} */}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Typography variant="body1" fontWeight="600" color="error">
@@ -648,7 +665,7 @@ const Cart = () => {
                                         textTransform: 'none',
                                         fontSize: '1.1rem'
                                     }}
-                                    disabled={hasInvalidItems}
+                                    disabled={!stockLoaded || !checkedInvalidItems || hasInvalidItems()}
                                     onClick={() => navigate("/checkout", {
                                         state: {
                                             discountId,
@@ -657,9 +674,12 @@ const Cart = () => {
                                         }
                                     })}
                                 >
-                                    {hasInvalidItems
-                                        ? "Vui lòng kiểm tra lại giỏ hàng"
-                                        : "Tiến hành thanh toán"
+                                    {!stockLoaded || !checkedInvalidItems
+                                        ? "Đang kiểm tra tồn kho..."
+                                        : (hasInvalid
+                                            ? "Vui lòng kiểm tra lại giỏ hàng"
+                                            : "Tiến hành thanh toán"
+                                        )
                                     }
                                 </Button>
                             </Box>

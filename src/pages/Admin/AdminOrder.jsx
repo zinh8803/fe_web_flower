@@ -400,7 +400,7 @@ const AdminOrder = () => {
                                                         <b>Ngày giao hàng:</b> {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : "-"}
                                                     </Typography>
                                                     <Typography>
-                                                        <b>Giờ giao hàng:</b> {order.is_express ? "Giao nhanh" : (order.delivery_time || "-")}
+                                                        <b>Giờ giao hàng:</b> {order.is_express ? "Giao nhanh" : (order.delivery_time_slot)}
                                                     </Typography>
                                                     <Typography>
                                                         <b>Giao nhanh:</b> {order.is_express ? "Có" : "Không"}

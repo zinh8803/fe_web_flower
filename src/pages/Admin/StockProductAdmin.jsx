@@ -23,9 +23,9 @@ const StockProductAdmin = () => {
         searchStockWarning(q, p, formattedDate)
             .then(res => {
                 setData({
-                    available: groupByProduct(res.data?.available?.data || []),
-                    low: groupByProduct(res.data?.low?.data || []),
-                    out: groupByProduct(res.data?.out?.data || []),
+                    available: res.data?.available?.data || [],
+                    low: res.data?.low?.data || [],
+                    out: res.data?.out?.data || [],
                 });
                 setLastPage({
                     available: res.data?.available?.last_page || 1,
@@ -69,26 +69,6 @@ const StockProductAdmin = () => {
         if (maxQuantity <= 10) return { label: "Gần hết", color: "warning" };
         return { label: "Còn hàng", color: "success" };
     };
-
-    function groupByProduct(arr) {
-        const map = {};
-        arr.forEach(item => {
-            if (!map[item.product_id]) {
-                map[item.product_id] = {
-                    product_id: item.product_id,
-                    product_image: item.product_image,
-                    product_name: item.product_name,
-                    sizes: []
-                };
-            }
-            map[item.product_id].sizes.push({
-                size: item.size,
-                max_quantity: item.max_quantity,
-                limiting_flower: item.limiting_flower
-            });
-        });
-        return Object.values(map);
-    }
 
     return (
         <Box>
@@ -185,7 +165,7 @@ const StockProductAdmin = () => {
                                 data[activeTab].map((product, idx) => (
                                     <TableRow key={product.product_id}>
                                         <TableCell>{
-                                            (page - 1) * data[activeTab].length + idx + 1
+                                            (page - 1) * 10 + idx + 1
                                         }
                                         </TableCell>
                                         <TableCell>
@@ -198,8 +178,8 @@ const StockProductAdmin = () => {
                                         </TableCell>
                                         <TableCell>
                                             <List dense>
-                                                {product.sizes.map((size, sizeIdx) => (
-                                                    <ListItem key={sizeIdx} disablePadding>
+                                                {product.product_sizes.map((size) => (
+                                                    <ListItem key={size.size_id} disablePadding>
                                                         <ListItemText
                                                             primary={`${size.size}: ${size.max_quantity} sản phẩm`}
                                                         />
@@ -209,8 +189,8 @@ const StockProductAdmin = () => {
                                         </TableCell>
                                         <TableCell>
                                             <List dense>
-                                                {product.sizes.map((size, sizeIdx) => (
-                                                    <ListItem key={sizeIdx} disablePadding>
+                                                {product.product_sizes.map((size) => (
+                                                    <ListItem key={size.size_id} disablePadding>
                                                         <ListItemText
                                                             primary={size.limiting_flower
                                                                 ? `${size.limiting_flower.name} (còn ${size.limiting_flower.available})`
@@ -222,11 +202,11 @@ const StockProductAdmin = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Box display="flex" flexDirection="column" gap={0.5}>
-                                                {product.sizes.map((size, sizeIdx) => {
+                                                {product.product_sizes.map((size) => {
                                                     const status = getStockStatusLabel(size.max_quantity);
                                                     return (
                                                         <Chip
-                                                            key={sizeIdx}
+                                                            key={size.size_id}
                                                             label={`${size.size}: ${status.label}`}
                                                             color={status.color}
                                                             size="small"

@@ -126,9 +126,7 @@ const Filter = ({ onFilter }) => {
                     <Checkbox
                       checked={selectedColors.includes(color.id)}
                       onChange={() => handleColorChange(color.id)}
-                      sx={{
-                        color: color.hex_code,
-                      }}
+
                     />
                   }
                   label={color.name}
