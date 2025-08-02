@@ -5,7 +5,8 @@ import {
 import {
     Dashboard, LocalOffer, Inventory, Category, ShoppingCart, People,
     ExpandLess, ExpandMore, Add, Edit, Delete, LocalFlorist, ReceiptLong, Spa,
-    SupervisorAccount
+    SupervisorAccount,
+    ColorLens
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -16,6 +17,7 @@ const AdminMenu = () => {
     const location = useLocation();
     const [openProduct, setOpenProduct] = useState(false);
     const [openDiscount, setOpenDiscount] = useState(false);
+    const [openFlowerType, setOpenFlowerType] = useState(false);
     const navigate = useNavigate();
     const user = useSelector(state => state.user.user);
 
@@ -74,20 +76,44 @@ const AdminMenu = () => {
                             {/* Quản lý loại hoa */}
                             <ListItem
                                 button
-                                component={Link}
-                                to="/admin/flower-types"
                                 selected={location.pathname.startsWith("/admin/flower-types")}
-                                sx={{
-                                    "&.Mui-selected, &.Mui-selected:hover": {
-                                        bgcolor: "#e0f2f1",
-                                        color: "black"
-                                    },
-                                    color: "black"
-                                }}
+                                onClick={() => navigate("/admin/flower-types")}
                             >
                                 <ListItemIcon sx={{ color: "green" }}><Spa /></ListItemIcon>
                                 <ListItemText primary="Quản lý loại hoa" sx={{ color: "black" }} />
+                                <IconButton
+                                    size="small"
+                                    sx={{ ml: 1 }}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        setOpenFlowerType(!openFlowerType);
+                                    }}
+                                >
+                                    {openFlowerType ? <ExpandLess /> : <ExpandMore />}
+                                </IconButton>
                             </ListItem>
+
+                            <Collapse in={openFlowerType} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding>
+                                    <ListItem
+                                        button
+                                        component={Link}
+                                        to="/admin/flower-types/colors"
+                                        sx={{ pl: 4 }}
+                                        selected={location.pathname === "/admin/flower-types/colors"}
+                                    >
+                                        <ListItemIcon sx={{ color: "green" }}><ColorLens /></ListItemIcon>
+                                        <ListItemText primary="Quản Lý Màu" sx={{
+                                            "&.Mui-selected, &.Mui-selected:hover": {
+                                                bgcolor: "#e0f2f1",
+                                                color: "black"
+                                            },
+                                            color: "black"
+                                        }} />
+                                    </ListItem>
+
+                                </List>
+                            </Collapse>
 
                             {/* Quản lý hoa */}
                             <ListItem
@@ -106,7 +132,7 @@ const AdminMenu = () => {
                                 <ListItemIcon sx={{ color: "green" }}><LocalFlorist /></ListItemIcon>
                                 <ListItemText primary="Quản lý hoa" sx={{ color: "black" }} />
                             </ListItem>
-                            {/* Các menu khác */}
+                            {/* categories */}
                             <ListItem
                                 button
                                 component={Link}

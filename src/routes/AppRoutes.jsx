@@ -35,6 +35,7 @@ import ProfileAdmin from "../pages/Admin/ProfileAdmin";
 import ChangePasswordAdminPage from "../pages/Admin/ChangePasswordAdminPage";
 import AdminSubscribers from "../pages/Admin/AdminSubcribers";
 import AdminTrashProducts from "../pages/Admin/AdminTrashProducts";
+import AdminColors from "../pages/Admin/AdminColors";
 
 const AppRoutes = () => (
     <>
@@ -75,6 +76,7 @@ const AppRoutes = () => (
                     <Route path="employees" element={<AdminEmployee />} />
                     <Route path="flowers" element={<AdminFlower />} />
                     <Route path="flower-types" element={<AdminFlowerType />} />
+                    <Route path="flower-types/colors" element={<AdminColors />} />
                     <Route path="discounts" element={<AdminDiscount />} />
                     <Route path="receipts" element={<AdminReceipt />} />
 
