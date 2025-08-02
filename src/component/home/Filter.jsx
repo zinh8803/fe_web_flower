@@ -12,8 +12,7 @@ import {
   Button,
 } from "@mui/material";
 import { getFlowerTypes } from "../../services/flowerTypeService";
-import { getFlower } from "../../services/flowerService";
-import { COLORS } from "../../utils/color";
+import { getColor } from "../../services/ColorService";
 
 
 const Filter = ({ onFilter }) => {
@@ -25,41 +24,40 @@ const Filter = ({ onFilter }) => {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [ManualFilter, setManualFilter] = useState(false);
 
+
   useEffect(() => {
-
-    fetchData();
-
+    fetchColors();
+    fetchFlowerTypes();
   }, []);
-  const fetchData = async () => {
+  const fetchFlowerTypes = async () => {
     try {
       setLoading(true);
-      const [flowerRes, typeRes] = await Promise.all([
-        getFlower(),
-        getFlowerTypes(),
-      ]);
-
-      const apiColors = [
-        ...new Set(flowerRes.data.data.map((flower) => flower.color)),
-      ];
-      const availableColors = COLORS.filter((color) =>
-        apiColors.includes(color)
-      );
-      setColors(availableColors.length > 0 ? availableColors : apiColors);
-
-      setFlowerTypes(typeRes.data.data);
+      const res = await getFlowerTypes();
+      setFlowerTypes(res.data.data || []);
     } catch (error) {
-      console.error("Lỗi khi tải dữ liệu bộ lọc:", error);
+      console.error("Lỗi khi tải loại hoa:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchColors = async () => {
+    try {
+      setLoading(true);
+      const res = await getColor();
+      setColors(res.data.data || []);
+    } catch {
+      alert("Lỗi khi tải màu hoa");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleColorChange = (color) => {
+  const handleColorChange = (colorId) => {
     setSelectedColors((prev) => {
-      if (prev.includes(color)) {
-        return prev.filter((c) => c !== color);
+      if (prev.includes(colorId)) {
+        return prev.filter((c) => c !== colorId);
       }
-      return [...prev, color];
+      return [...prev, colorId];
     });
   };
 
@@ -81,7 +79,7 @@ const Filter = ({ onFilter }) => {
     if (minPrice > maxPrice) minPrice = maxPrice;
 
     onFilter({
-      color: selectedColors.length > 0 ? selectedColors : null,
+      color_id: selectedColors.length > 0 ? selectedColors : null,
       flower_type_id: selectedTypes.length > 0 ? selectedTypes : null,
       price: [minPrice, maxPrice],
     });
@@ -123,36 +121,17 @@ const Filter = ({ onFilter }) => {
             <FormGroup>
               {colors.map((color) => (
                 <FormControlLabel
-                  key={color}
+                  key={color.id}
                   control={
                     <Checkbox
-                      checked={selectedColors.includes(color)}
-                      onChange={() => handleColorChange(color)}
+                      checked={selectedColors.includes(color.id)}
+                      onChange={() => handleColorChange(color.id)}
                       sx={{
-                        color:
-                          color === "Đỏ"
-                            ? "#f44336"
-                            : color === "Xanh dương"
-                              ? "#2196f3"
-                              : color === "Vàng"
-                                ? "#ffeb3b"
-                                : color === "Hồng"
-                                  ? "#e91e63"
-                                  : color === "Tím"
-                                    ? "#9c27b0"
-                                    : color === "Xanh lá"
-                                      ? "#4caf50"
-                                      : color === "Cam"
-                                        ? "#ff9800"
-                                        : color === "Nâu"
-                                          ? "#795548"
-                                          : color === "Đen"
-                                            ? "#000000"
-                                            : "gray",
+                        color: color.hex_code,
                       }}
                     />
                   }
-                  label={color}
+                  label={color.name}
                 />
               ))}
             </FormGroup>

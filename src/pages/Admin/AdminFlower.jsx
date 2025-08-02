@@ -11,14 +11,15 @@ import {
     deleteFlower
 } from "../../services/flowerService";
 import { getFlowerTypes } from "../../services/flowerTypeService";
-import { COLORS } from "../../utils/color";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/notificationSlice";
 import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
+import { getColor } from "../../services/ColorService";
 
 const AdminFlower = () => {
     const [flowers, setFlowers] = useState([]);
     const [flowerTypes, setFlowerTypes] = useState([]);
+    const [colors, setColors] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editFlower, setEditFlower] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
@@ -26,7 +27,7 @@ const AdminFlower = () => {
     const [form, setForm] = useState({
         name: "",
         flower_type_id: "",
-        color: "",
+        color_id: "",
         price: "",
     });
     const dispatch = useDispatch();
@@ -49,9 +50,19 @@ const AdminFlower = () => {
         }
     };
 
+    const fetchColors = async () => {
+        try {
+            const res = await getColor();
+            setColors(res.data.data || []);
+        } catch {
+            alert("Lỗi khi tải màu hoa");
+        }
+    };
+
     useEffect(() => {
         fetchFlowers();
         fetchFlowerTypes();
+        fetchColors();
     }, []);
 
     const handleOpenAdd = () => {
@@ -59,7 +70,7 @@ const AdminFlower = () => {
         setForm({
             name: "",
             flower_type_id: "",
-            color: "",
+            color_id: "",
             price: "",
         });
         setOpenDialog(true);
@@ -71,7 +82,7 @@ const AdminFlower = () => {
             name: flower.name,
             description: flower.description || "",
             flower_type_id: flower.flower_type_id || (flower.flower_type && flower.flower_type.id) || "",
-            color: flower.color || "",
+            color_id: flower.color_id || (flower.color && flower.color.id) || "",
             price: flower.price || "",
         });
         setOpenDialog(true);
@@ -98,9 +109,11 @@ const AdminFlower = () => {
             }
             setOpenDialog(false);
             fetchFlowers();
-        } catch {
+        } catch (error) {
+            console.log(error.response.data);
+            const errorMessage = error?.response?.data?.message;
             dispatch(showNotification({
-                message: "Lỗi khi lưu hoa",
+                message: errorMessage,
                 severity: "error"
             }));
         }
@@ -155,7 +168,7 @@ const AdminFlower = () => {
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>{flower.name}</TableCell>
                                 <TableCell>{flower.flower_type?.name}</TableCell>
-                                <TableCell>{flower.color}</TableCell>
+                                <TableCell>{flower.color?.name}</TableCell>
                                 <TableCell>{Number(flower.price).toLocaleString()} đ</TableCell>
                                 <TableCell>
                                     <IconButton color="primary" onClick={() => handleOpenEdit(flower)}>
@@ -198,16 +211,16 @@ const AdminFlower = () => {
                     </TextField>
                     <TextField
                         label="Màu hoa"
-                        name="color"
-                        value={form.color}
+                        name="color_id"
+                        value={form.color_id}
                         onChange={handleChange}
                         select
                         fullWidth
                         margin="normal"
                     >
                         <MenuItem value="">Chọn màu hoa</MenuItem>
-                        {COLORS.map(color => (
-                            <MenuItem key={color} value={color}>{color}</MenuItem>
+                        {colors.map(color => (
+                            <MenuItem key={color.id} value={color.id}>{color.name}</MenuItem>
                         ))}
                     </TextField>
                     <TextField
