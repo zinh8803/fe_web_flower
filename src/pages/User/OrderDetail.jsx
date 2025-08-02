@@ -11,6 +11,7 @@ import { showNotification } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import ConfirmDeleteDialog from "../../component/dialog/user/ConfirmDeleteDialog";
+import ConfirmDialog from "../../component/dialog/user/Confirm";
 
 const OrderDetail = () => {
     const { id } = useParams();
@@ -24,7 +25,8 @@ const OrderDetail = () => {
     const [selectedReports, setSelectedReports] = useState([]);
     const [actionType, setActionType] = useState("Đổi hàng");
     const [viewReportDialog, setViewReportDialog] = useState(false);
-    // const [viewReport, setViewReport] = useState(null);
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+
 
     useEffect(() => {
         document.title = 'Chi tiết đơn hàng';
@@ -43,6 +45,7 @@ const OrderDetail = () => {
                 severity: "success"
             }));
             setOrder(prev => ({ ...prev, status: "đã hủy" }));
+            setIsConfirmDialogOpen(false);
         } catch (e) {
             dispatch(showNotification({
                 message: e.response?.data?.message || "Hủy đơn hàng thất bại!",
@@ -50,6 +53,10 @@ const OrderDetail = () => {
             }));
         }
         setCanceling(false);
+    };
+
+    const handleOpenConfirmDialog = () => {
+        setIsConfirmDialogOpen(true);
     };
 
     const openReportDialog = () => {
@@ -185,7 +192,7 @@ const OrderDetail = () => {
                     <Button
                         variant="contained"
                         color="error"
-                        onClick={handleCancelOrder}
+                        onClick={handleOpenConfirmDialog}
                         disabled={canceling}
                     >
                         {canceling ? "Đang hủy..." : "Hủy đơn hàng"}
@@ -571,6 +578,13 @@ const OrderDetail = () => {
                 onClose={handleCancelDelete}
                 onConfirm={handleConfirmDeleteReport}
                 content="Bạn chắc chắn muốn hủy báo cáo này?"
+            />
+            <ConfirmDialog
+                open={isConfirmDialogOpen}
+                onClose={() => setIsConfirmDialogOpen(false)}
+                onConfirm={handleCancelOrder}
+                title="Xác nhận hủy đơn hàng"
+                content="Bạn có chắc chắn muốn hủy đơn hàng này?"
             />
         </Box >
     );

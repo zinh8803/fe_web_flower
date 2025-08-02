@@ -38,22 +38,36 @@ const Header = () => {
             </Box>
             <Divider />
             <List>
-                <ListItem button component={Link} to="/about" onClick={() => setMobileOpen(false)}>
-                    <ListItemText primary="Về chúng tôi" />
+                <ListItem>
+                    <Link to="/about" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
+                        <ListItemText primary="Về chúng tôi" />
+                    </Link>
                 </ListItem>
-                <ListItem button component={Link} to="/cart" onClick={() => setMobileOpen(false)}>
-                    <ListItemText primary="Giỏ hàng" />
-                </ListItem>
+
                 {user && (
                     <>
                         <ListItem>
                             <ListItemText primary={`Xin chào, ${user.name}`} />
                         </ListItem>
-                        <ListItem button component={Link} to="/profile" onClick={() => setMobileOpen(false)}>
-                            <ListItemText primary="Thông tin tài khoản" />
+                        <ListItem>
+                            <Link to="/profile" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
+                                <ListItemText primary="Thông tin tài khoản" />
+                            </Link>
                         </ListItem>
-                        <ListItem button component={Link} to="/orders/history" onClick={() => setMobileOpen(false)}>
-                            <ListItemText primary="Đơn hàng" />
+                        <ListItem>
+                            <Link to="/change-password" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
+                                <ListItemText primary="Đổi mật khẩu" />
+                            </Link>
+                        </ListItem>
+                        <ListItem>
+                            <Link to="/orders/history" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
+                                <ListItemText primary="Đơn hàng" />
+                            </Link>
+                        </ListItem>
+                        <ListItem>
+                            <Link to="/logout" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
+                                <ListItemText primary="Đăng xuất" />
+                            </Link>
                         </ListItem>
                     </>
                 )}

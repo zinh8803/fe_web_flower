@@ -9,6 +9,7 @@ import { getPayments } from "../../services/paymentService";
 import codImg from "../../assets/img/cash.png";
 import vnpayImg from "../../assets/img/vnpay.png";
 import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
+import ConfirmDialog from "../../component/dialog/user/Confirm";
 const Checkout = () => {
     const cartItems = useSelector(state => state.cart.items);
     const user = useSelector(state => state.user.user);
@@ -32,6 +33,8 @@ const Checkout = () => {
     const [discountAmount, setDiscountAmount] = useState(0);
     const [discountId, setDiscountId] = useState(null);
     const [errors, setErrors] = useState({ phone: "", email: "" });
+
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const timeSlots = [
         { value: "Buổi sáng", label: "Buổi sáng (8h - 12h)" },
         { value: "Buổi chiều", label: "Buổi chiều (13h - 18h)" }
@@ -68,6 +71,10 @@ const Checkout = () => {
     //         setForm(prev => ({ ...prev, payment_method: "vnpay" }));
     //     }
     // }, [isLoggedIn]);
+
+    const handleOpenConfirmDialog = () => {
+        setOpenConfirmDialog(true);
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -151,6 +158,18 @@ const Checkout = () => {
         setLoading(true);
         if (form.payment_method === "cod") {
             try {
+                if (!form.delivery_date) {
+                    dispatch(showNotification({ message: "Vui lòng chọn ngày ", severity: "error" }));
+                    setLoading(false);
+                    return;
+                }
+                if (!form.is_express) {
+                    if (!form.delivery_time_slot) {
+                        dispatch(showNotification({ message: "Vui lòng chọn khung giờ giao hàng", severity: "error" }));
+                        setLoading(false);
+                        return;
+                    }
+                }
                 const orderData = {
                     ...form,
                     user_id: user?.id || null,
@@ -433,14 +452,22 @@ const Checkout = () => {
                     color="error"
                     size="large"
                     sx={{ borderRadius: 2, fontWeight: 600, fontSize: "1.1rem" }}
-                    onClick={handlePlaceOrder}
+                    onClick={handleOpenConfirmDialog}
                     disabled={cartItems.length === 0 || loading || !form.name || !form.address || !form.phone || errors.phone || errors.email}
                 >
                     {loading ? "Đang gửi đơn hàng..." : "Đặt hàng"}
                 </Button>
             </Box>
-
+            <ConfirmDialog
+                open={openConfirmDialog}
+                onClose={() => setOpenConfirmDialog(false)}
+                onConfirm={handlePlaceOrder}
+                title="Xác nhận đặt hàng"
+                content="Bạn có chắc chắn muốn đặt hàng với thông tin đã nhập?"
+            />
         </Container>
+
+
     );
 };
 
