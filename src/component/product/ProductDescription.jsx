@@ -4,7 +4,13 @@ import { Box, Typography } from "@mui/material";
 const ProductDescription = ({ description }) => {
     if (!description) return null;
     return (
-        <Box sx={{ mt: 6 }}>
+        <Box sx={{
+            '& img': {
+                maxWidth: '100%',
+                height: 'auto',
+                display: 'block'
+            }
+        }}>
             <Typography variant="h6" fontWeight={700} mb={2}>
                 Mô tả sản phẩm
             </Typography>

@@ -14,6 +14,7 @@ import { showNotification } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 import ConfirmDeleteDialog from "../../component/dialog/admin/ConfirmDeleteDialog";
 import { SearchIcon } from "lucide-react";
+import RichTextEditorTinymce from "../../component/admin/TinyMCE/RichTextEditorTinymce";
 
 const RichTextEditor = forwardRef(({ value, onChange, placeholder }, ref) => {
     return (
@@ -396,9 +397,15 @@ const AdminProduct = () => {
                                 fullWidth
                                 sx={{ mb: 2 }}
                             />
-                            <RichTextEditor
+                            {/* <RichTextEditor
                                 value={editProduct.description || ''}
                                 onChange={handleDescriptionChange}
+                                placeholder="Nhập mô tả sản phẩm..."
+                            /> */}
+                            <RichTextEditorTinymce
+                                value={editProduct.description || ""}
+                                onChange={handleDescriptionChange}
+                                height={350}
                                 placeholder="Nhập mô tả sản phẩm..."
                             />
                             <TextField
