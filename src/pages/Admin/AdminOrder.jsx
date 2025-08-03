@@ -30,8 +30,6 @@ const AdminOrder = () => {
     const [currentImage, setCurrentImage] = useState(null);
     const [handleReportDialog, setHandleReportDialog] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
-    const [adminNote, setAdminNote] = useState("");
-    const [reportStatus, setReportStatus] = useState("");
     const [orderStatus, setOrderStatus] = useState("");
     const [orderCode, setOrderCode] = useState("");
     const [updateReturnsDialog, setUpdateReturnsDialog] = useState(false);
@@ -228,7 +226,6 @@ const AdminOrder = () => {
                     <MenuItem value="đã xác nhận">Đã xác nhận</MenuItem>
                     <MenuItem value="đang giao hàng">Đang giao hàng</MenuItem>
                     <MenuItem value="hoàn thành">Hoàn thành</MenuItem>
-                    <MenuItem value="Xử Lý Báo Cáo">xử lý báo cáo</MenuItem>
                     <MenuItem value="đã hủy">Đã hủy</MenuItem>
                 </Select>
 
@@ -389,25 +386,32 @@ const AdminOrder = () => {
                                                         </Button>
                                                     )}
                                                 </Box>
-                                                <Box mb={2}>
-                                                    <Typography><b>Mã đơn:</b> {order.order_code}</Typography>
-                                                    <Typography><b>Khách hàng:</b> {order.name}</Typography>
-                                                    <Typography><b>Email:</b> {order.email || "-"}</Typography>
-                                                    <Typography><b>Điện thoại:</b> {order.phone}</Typography>
-                                                    <Typography><b>Địa chỉ:</b> {order.address}</Typography>
-                                                    <Typography><b>Ghi chú:</b> {order.note || "-"}</Typography>
-                                                    <Typography>
-                                                        <b>Ngày giao hàng:</b> {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : "-"}
-                                                    </Typography>
-                                                    <Typography>
-                                                        <b>Giờ giao hàng:</b> {order.is_express ? "Giao nhanh" : (order.delivery_time_slot)}
-                                                    </Typography>
-                                                    <Typography>
-                                                        <b>Giao nhanh:</b> {order.is_express ? "Có" : "Không"}
-                                                    </Typography>
-                                                    <Typography>
-                                                        <b>Phương thức thanh toán:</b> {order.payment_method}
-                                                    </Typography>
+                                                <Box mb={2} display="flex" gap={4} flexWrap="wrap">
+                                                    <Box flex={1}>
+                                                        <Typography><b>Mã đơn:</b> {order.order_code}</Typography>
+                                                        <Typography><b>Khách hàng:</b> {order.name}</Typography>
+                                                        <Typography><b>Email:</b> {order.email || "-"}</Typography>
+                                                        <Typography><b>Điện thoại:</b> {order.phone}</Typography>
+                                                        <Typography><b>Địa chỉ:</b> {order.address}</Typography>
+                                                        <Typography><b>Ghi chú:</b> {order.note || "-"}</Typography>
+                                                    </Box>
+                                                    <Box flex={1}>
+                                                        <Typography>
+                                                            <b>Ngày giao hàng:</b> {order.delivery_date ? order.delivery_date : "-"}
+                                                        </Typography>
+                                                        <Typography>
+                                                            <b>Giao lúc:</b> {order.delivered_at ? order.delivered_at : "-"}
+                                                        </Typography>
+                                                        <Typography>
+                                                            <b>Giờ giao hàng:</b> {order.is_express ? "Giao nhanh" : (order.delivery_time_slot)}
+                                                        </Typography>
+                                                        <Typography>
+                                                            <b>Giao nhanh:</b> {order.is_express ? "Có" : "Không"}
+                                                        </Typography>
+                                                        <Typography>
+                                                            <b>Phương thức thanh toán:</b> {order.payment_method}
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
                                                 <Table size="small">
                                                     <TableHead>
@@ -473,7 +477,7 @@ const AdminOrder = () => {
                         <MenuItem value="đã xác nhận">Đã xác nhận</MenuItem>
                         <MenuItem value="đang giao hàng">Đang giao hàng</MenuItem>
                         <MenuItem value="hoàn thành">Hoàn thành</MenuItem>
-                        <MenuItem value="đang xử lý báo cáo">Đang xử lý báo cáo</MenuItem>
+                        <MenuItem value="Báo Cáo">Đang xử lý báo cáo</MenuItem>
                         <MenuItem value="đã hủy">Đã hủy</MenuItem>
                     </Select>
                 </DialogContent>

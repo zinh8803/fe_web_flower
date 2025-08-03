@@ -12,7 +12,6 @@ import { useDispatch } from "react-redux";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import ConfirmDeleteDialog from "../../component/dialog/user/ConfirmDeleteDialog";
 import ConfirmDialog from "../../component/dialog/user/Confirm";
-
 const OrderDetail = () => {
     const { id } = useParams();
     const [order, setOrder] = useState(null);
@@ -174,6 +173,15 @@ const OrderDetail = () => {
         </Box>);
     if (!order) return <Typography>Không tìm thấy đơn hàng.</Typography>;
 
+    const isReportDisabled = (() => {
+        if (!order?.delivered_at) return true;
+        const deliveredAt = new Date(order.delivered_at);
+        //console.log("Delivered at:", deliveredAt);
+        const now = new Date();
+        const diffMs = now - deliveredAt;
+        const diffHours = diffMs / (1000 * 60 * 60);
+        return diffHours > 24;
+    })();
     return (
         <Box maxWidth="1450px" mx="auto" mt={4}>
             <Breadcrumb
@@ -211,6 +219,7 @@ const OrderDetail = () => {
                 <Box flex={1} minWidth={280}>
                     <Typography><b>Ngày mua:</b> {order.buy_at}</Typography>
                     <Typography><b>Ngày giao hàng:</b> {order.delivery_date || "Không có"} {order.delivery_time_slot || ""}</Typography>
+                    <Typography><b>Giao lúc:</b> {order.delivered_at ? order.delivered_at : "Chưa giao hàng"}</Typography>
                     <Typography><b>Phương thức giao hàng:</b> {order.is_express ? "Giao hàng nhanh" : "Giao hàng thường"}</Typography>
                     <Typography><b>Phương thức thanh toán:</b> {order.payment_method}</Typography>
                     <Typography>
@@ -305,7 +314,7 @@ const OrderDetail = () => {
                     variant="contained"
                     color="error"
                     onClick={openReportDialog}
-                    disabled={order.status !== "hoàn thành"}
+                    disabled={order.status !== "hoàn thành" || isReportDisabled}
                 >
                     Báo cáo sản phẩm lỗi
                 </Button>

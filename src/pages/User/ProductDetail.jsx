@@ -159,7 +159,7 @@ const ProductDetail = () => {
                     />
                 </Box>
                 <Box sx={{ flex: 2 }}>
-                    {product.sizes && product.sizes.length > 0 && (
+                    {/* {product.sizes && product.sizes.length > 0 && (
                         <Box sx={{ mb: 2 }}>
 
                             <Typography fontWeight={600} mb={1}>Kích thước</Typography>
@@ -189,7 +189,7 @@ const ProductDetail = () => {
                             </ButtonGroup>
 
                         </Box>
-                    )}
+                    )} */}
 
                     <ProductInfo
                         product={{
@@ -198,11 +198,17 @@ const ProductDetail = () => {
                             size: selectedSize ? selectedSize.size : "",
                             receipt_details: selectedSize ? selectedSize.receipt_details : [],
                             max_quantity: selectedSize && selectedSize.max_quantity ? selectedSize.max_quantity : 99
+
                         }}
                         quantity={quantity}
                         onQuantityChange={handleQuantityChange}
                         onAddToCart={handleAddToCart}
                         disableAddToCart={!stockStatus}
+                        sizes={product.sizes}
+                        selectedSize={selectedSize}
+                        onSizeChange={handleSizeChange}
+                        isProductAvailable={isProductAvailable}
+                        productId={Number(id)}
                     />
                 </Box>
 

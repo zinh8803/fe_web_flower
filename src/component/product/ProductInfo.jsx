@@ -1,7 +1,18 @@
 import React from "react";
-import { Box, Typography, Button, TextField } from "@mui/material";
+import { Box, Typography, Button, TextField, ButtonGroup } from "@mui/material";
 
-const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart, disableAddToCart }) => {
+const ProductInfo = ({
+    product,
+    quantity,
+    onQuantityChange,
+    onAddToCart,
+    disableAddToCart,
+    sizes,
+    selectedSize,
+    onSizeChange,
+    isProductAvailable,
+    productId
+}) => {
     const total = Number(product.price) * quantity;
     const maxQuantity = product.max_quantity || 99;
 
@@ -10,6 +21,35 @@ const ProductInfo = ({ product, quantity, onQuantityChange, onAddToCart, disable
             <Typography variant="h5" fontWeight={700} mb={2}>
                 {product.name}
             </Typography>
+            {sizes && sizes.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                    <Typography fontWeight={600} mb={1}>Kích thước</Typography>
+                    <ButtonGroup variant="outlined" color="primary">
+                        {sizes.map(size => {
+                            const isSizeAvailable = isProductAvailable(productId, size.id, quantity);
+                            return (
+                                <Button
+                                    key={size.id}
+                                    variant={selectedSize && selectedSize.id === size.id ? "contained" : "outlined"}
+                                    color={isSizeAvailable ? "primary" : "error"}
+                                    onClick={() => onSizeChange(size)}
+                                    disabled={!isSizeAvailable}
+                                    sx={{
+                                        minWidth: 100,
+                                        fontWeight: 600,
+                                        opacity: isSizeAvailable ? 1 : 0.6,
+                                        borderRadius: 2,
+                                        mx: 0.5
+                                    }}
+                                >
+                                    {size.size} - {Number(size.price).toLocaleString()}đ
+                                    {!isSizeAvailable && " (Hết hàng)"}
+                                </Button>
+                            );
+                        })}
+                    </ButtonGroup>
+                </Box>
+            )}
             {product.size && (
                 <Typography variant="subtitle1" mb={1}>
                     Kích thước: <b>{product.size}</b>
