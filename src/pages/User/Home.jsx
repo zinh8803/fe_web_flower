@@ -21,7 +21,6 @@ const Home = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 3 }}>
-                {/* Bộ lọc bên trái - chỉ hiện ở desktop/tablet */}
                 {!isMobile && (
                     <Box
                         sx={{
@@ -36,7 +35,6 @@ const Home = () => {
                     </Box>
                 )}
 
-                {/* Danh sách sản phẩm - chiếm phần còn lại */}
                 <Box sx={{ flex: 1 }}>
                     <ProductGrid
                         filterParams={filterParams}

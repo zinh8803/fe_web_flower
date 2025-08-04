@@ -18,6 +18,7 @@ import {
     MenuItem,
     Tooltip,
     Chip,
+    CircularProgress
 } from "@mui/material";
 import { Minus, Plus, Trash2, MapPin } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
@@ -47,6 +48,18 @@ const Cart = () => {
     const [checkedInvalidItems, setCheckedInvalidItems] = useState(false);
     const [hasInvalid, setHasInvalid] = useState(true);
     const user = useSelector((state) => state.user.user);
+    const [promoInfo, setPromoInfo] = useState(null);
+    useEffect(() => {
+        async function fetchPromo() {
+            try {
+                const res = await checkCodeValidity("HOA350", user?.id || null);
+                setPromoInfo(res.data.data);
+            } catch {
+                setPromoInfo(null);
+            }
+        }
+        fetchPromo();
+    }, [user]);
     useEffect(() => {
         if (cartItems.length > 0) {
             dispatch(fetchStockAvailability(cartItems.map(item => ({
@@ -582,7 +595,7 @@ const Cart = () => {
                                                     borderRadius: 2
                                                 }
                                             }}
-                                            disabled={!!discountId} // Không cho nhập khi đã áp dụng
+                                            disabled={!!discountId}
                                         />
                                         {!discountId ? (
                                             <Button
@@ -621,6 +634,33 @@ const Cart = () => {
                                     )}
                                 </Box>
 
+                                <Divider sx={{ my: 3 }} />
+                                <Typography fontWeight={600} mb={1}>
+                                    Nhập mã giảm giá <span style={{ color: "#1976d2" }}>CHAOMUNGBANMOI</span>
+                                </Typography>
+                                {promoInfo ? (
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="body2">
+                                            <b>Tên mã:</b> {promoInfo.name}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Giá trị:</b> {promoInfo.type === "percent" ? `${promoInfo.value}%` : `${Number(promoInfo.value).toLocaleString()}đ`}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Điều kiện:</b> Đơn tối thiểu {Number(promoInfo.min_total).toLocaleString()}đ
+                                        </Typography>
+                                        {promoInfo.expired_at && (
+                                            <Typography variant="body2" color="error">
+                                                <b>Hạn dùng:</b> {promoInfo.expired_at}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                ) : (
+                                    <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: 60 }}>
+                                        <CircularProgress />
+
+                                    </Box>
+                                )}
                                 <Divider sx={{ my: 3 }} />
 
                                 {/* Tổng cộng */}
