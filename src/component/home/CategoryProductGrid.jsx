@@ -267,7 +267,7 @@ const CategoryProductGrid = ({ products, title }) => {
                                                             });
                                                         }}
                                                     >
-                                                        Mua Ngay
+                                                        Thêm vào giỏ hàng
                                                     </Button>
                                                 </span>
                                             </Tooltip>

@@ -635,14 +635,11 @@ const Cart = () => {
                                 </Box>
 
                                 <Divider sx={{ my: 3 }} />
-                                <Typography fontWeight={600} mb={1}>
-                                    Nhập mã giảm giá <span style={{ color: "#1976d2" }}>CHAOMUNGBANMOI</span>
+                                <Typography fontWeight={600} >
+                                    Nhập mã giảm giá <span style={{ color: "#1976d2" }}>HOA350</span>
                                 </Typography>
                                 {promoInfo ? (
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="body2">
-                                            <b>Tên mã:</b> {promoInfo.name}
-                                        </Typography>
+                                    <Box sx={{}}>
                                         <Typography variant="body2">
                                             <b>Giá trị:</b> {promoInfo.type === "percent" ? `${promoInfo.value}%` : `${Number(promoInfo.value).toLocaleString()}đ`}
                                         </Typography>

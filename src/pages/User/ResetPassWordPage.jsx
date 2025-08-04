@@ -6,9 +6,10 @@ import { useDispatch } from 'react-redux';
 import { showNotification } from '../../store/notificationSlice';
 import { sendResetPassword } from '../../services/mailService';
 import { resetPassword } from '../../services/userService';
-import { redirect } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ResetPassWordPage = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [new_password, setNewPassword] = useState('');
@@ -46,7 +47,7 @@ const ResetPassWordPage = () => {
             setNewPassword('');
             setConfirmPassword('');
 
-            redirect('/login');
+            navigate("/");
         } catch (error) {
             const message =
                 error.response?.data?.message ||

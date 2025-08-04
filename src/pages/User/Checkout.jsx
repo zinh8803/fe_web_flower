@@ -466,6 +466,7 @@ const Checkout = () => {
                 onConfirm={handlePlaceOrder}
                 title="Xác nhận đặt hàng"
                 content="Bạn có chắc chắn muốn đặt hàng với thông tin đã nhập?"
+                loading={loading}
             />
         </Container>
 

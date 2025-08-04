@@ -42,7 +42,7 @@ const AdminSubscribers = () => {
         try {
             const res = await getDiscounts();
             const activeDiscounts = res.data.data.filter(discount =>
-                discount.status && new Date(discount.end_date) >= new Date()
+                discount.status && new Date(discount.end_date) >= new Date() && discount.user_id === null
             );
             setDiscounts(activeDiscounts);
         } catch (err) {

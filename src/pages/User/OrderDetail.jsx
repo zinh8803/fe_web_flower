@@ -318,27 +318,27 @@ const OrderDetail = () => {
                 >
                     Báo cáo sản phẩm lỗi
                 </Button>
-                {order.status === "Xử Lý Báo Cáo" && (
-                    <><Button sx={{ ml: 2 }}
-                        variant="contained"
-                        onClick={handleViewReport}
-                    >
-                        xem báo cáo
-                    </Button>
+
+                {order.status === "Báo Cáo" && (
+                    <>
+                        <Button sx={{ ml: 2 }}
+                            variant="contained"
+                            onClick={handleViewReport}
+                        >
+                            xem báo cáo
+                        </Button>
+
                     </>)}
-                {order.status === "đang xử lý báo cáo" && (
-                    <><Button sx={{ ml: 2 }}
-                        variant="contained"
-                        onClick={handleViewReport}
-                    >
-                        xem báo cáo
-                    </Button>
+                {order.product_reports[0]?.status === "Đang xử lý" && (
+                    <>
+
                         <Button sx={{ ml: 2 }}
                             variant="contained"
                             onClick={handleDelete}
                         >
                             Hủy báo cáo
-                        </Button></>)}
+                        </Button>
+                    </>)}
 
             </Box>
 
@@ -594,6 +594,7 @@ const OrderDetail = () => {
                 onConfirm={handleCancelOrder}
                 title="Xác nhận hủy đơn hàng"
                 content="Bạn có chắc chắn muốn hủy đơn hàng này?"
+                loading={canceling}
             />
         </Box >
     );

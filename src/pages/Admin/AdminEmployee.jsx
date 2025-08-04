@@ -24,7 +24,7 @@ const AdminEmployee = () => {
         name: "",
         email: "",
         password: "",
-        phone: "",
+        //phone: "",
         role: "employee",
         status: 1
     });
@@ -78,7 +78,7 @@ const AdminEmployee = () => {
                     name: form.name,
                     email: form.email,
                     ...(form.password && { password: form.password }),
-                    phone: form.phone,
+                    //  phone: form.phone,
                     role: form.role,
                     status: form.status
                 });
@@ -98,7 +98,7 @@ const AdminEmployee = () => {
                 name: "",
                 email: "",
                 password: "",
-                phone: "",
+                // phone: "",
                 role: "employee",
                 status: 1
             });
@@ -118,7 +118,7 @@ const AdminEmployee = () => {
             name: employee.name,
             email: employee.email,
             password: "",
-            phone: employee.phone || "",
+            // phone: employee.phone || "",
             role: employee.role,
             status: employee.status
         });
@@ -130,7 +130,7 @@ const AdminEmployee = () => {
         setForm({
             name: "",
             email: "",
-            phone: "",
+            //      phone: "",
             role: "employee",
             status: 1
         });
@@ -176,14 +176,14 @@ const AdminEmployee = () => {
                             autoComplete="new-password"
                         />
                     )}
-                    <TextField
+                    {/* <TextField
                         margin="dense"
                         label="Số điện thoại"
                         name="phone"
                         fullWidth
                         value={form.phone}
                         onChange={handleChange}
-                    />
+                    /> */}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Huỷ</Button>

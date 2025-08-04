@@ -51,13 +51,13 @@ const AppRoutes = () => (
                 <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/search" element={<ProductSearch />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/change-password" element={<ChangePassWordPage />} />
                 <Route path="/reset-password" element={<ResetPassWordPage />} />
                 <Route path="/vnpay_return" element={<VnpayReturn />} />
                 <Route element={<PrivateRoute />}>
                     <Route path="/orders/history" element={<OrderHistory />} />
                     <Route path="/order/:id" element={<OrderDetail />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/change-password" element={<ChangePassWordPage />} />
                 </Route>
             </Route>
             <Route path="/admin/login" element={<AdminLogin />} />

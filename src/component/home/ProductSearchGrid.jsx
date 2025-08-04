@@ -258,7 +258,7 @@ const ProductSearchGrid = ({ products }) => {
                                                                 });
                                                             }}
                                                         >
-                                                            Mua Ngay
+                                                            Thêm vào giỏ hàng
                                                         </Button>
                                                     </span>
                                                 </Tooltip>

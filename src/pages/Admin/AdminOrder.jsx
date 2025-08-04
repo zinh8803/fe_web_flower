@@ -39,6 +39,14 @@ const AdminOrder = () => {
 
     useEffect(() => {
         fetchOrders(page);
+        console.log("selectedOrder:", selectedOrder);
+        console.log("currentReports:", currentReports);
+        console.log(
+            "Disable:",
+            !selectedOrder ||
+            currentReports.every(r => r.status === "Đã giải quyết")
+        );
+
     }, [page]);
 
     const fetchOrders = async (pageNum, filters = {}) => {
@@ -327,7 +335,7 @@ const AdminOrder = () => {
                                                     : order.status === "đã xác nhận" ? "primary"
                                                         : order.status === "đang giao hàng" ? "info"
                                                             : order.status === "hoàn thành" ? "success"
-                                                                : order.status === "đang xử lý báo cáo" ? "warning"
+                                                                : order.status === "Báo Cáo" ? "warning"
                                                                     : order.status === "đã hủy" ? "error"
                                                                         : "default"
                                             }
@@ -340,7 +348,7 @@ const AdminOrder = () => {
                                             size="small"
                                             color="primary"
                                             onClick={() => handleOpenUpdate(order.id)}
-                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy" || order.status === "đang xử lý báo cáo" || order.status === "Xử Lý Báo Cáo"}
+                                            disabled={order.status === "hoàn thành" || order.status === "đã hủy" || order.status === "Báo Cáo" || order.status === "Xử Lý Báo Cáo"}
                                         > Cập nhật trạng thái
                                         </Button>
 
@@ -555,10 +563,11 @@ const AdminOrder = () => {
                         <Button
                             variant="contained"
                             color="primary"
-                            // disabled={
-                            //     !selectedOrder ||
-                            //     currentReports.every(r => r.status === "Đã giải quyết")
-                            // }
+                            disabled={
+
+                                currentReports.every(r => r.status === "Đã giải quyết" ||
+                                    r.status === "Từ chối")
+                            }
                             onClick={async () => {
                                 let order = selectedOrder;
                                 if (!order || order.id !== currentReports[0]?.order_id) {
@@ -599,7 +608,7 @@ const AdminOrder = () => {
                         <TableBody>
                             {currentReports.map((r, idx) => {
                                 const detail = (selectedOrder?.order_details || []).find(d => d.id === r.order_detail_id);
-                                const isDisabled = r.status === "Đã giải quyết" || r.status === "Từ chối";
+                                // const isDisabled = r.status === "Đã giải quyết" || r.status === "Từ chối";
                                 return (
                                     <TableRow key={r.id}>
                                         <TableCell>{detail?.product_size?.product?.name || "-"}</TableCell>
@@ -615,7 +624,7 @@ const AdminOrder = () => {
                                                     setCurrentReports(newReports);
                                                 }}
                                                 size="small"
-                                                disabled={isDisabled}
+                                            //   disabled={isDisabled}
                                             >
                                                 <MenuItem value="Đã giải quyết">Đã giải quyết</MenuItem>
                                                 <MenuItem value="Đang xử lý">Đang xử lý</MenuItem>
@@ -633,7 +642,7 @@ const AdminOrder = () => {
                                                 size="small"
                                                 multiline
                                                 rows={2}
-                                                disabled={isDisabled}
+                                            //  disabled={isDisabled}
                                             />
                                         </TableCell>
                                     </TableRow>

@@ -4,16 +4,16 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, TextField, Button,
     CircularProgress
 } from "@mui/material";
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Pie } from "react-chartjs-2";
 import {
-    Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
+    Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ArcElement
 } from "chart.js";
 import { getDashboardStats, exportStatistics } from "../../services/adminService";
 import { ShoppingCart, DollarSign, Users, Package, FileText } from "lucide-react";
 import { showNotification } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
 
 const AdminDashboard = () => {
     const dispatch = useDispatch();
@@ -97,33 +97,40 @@ const AdminDashboard = () => {
         fetchData(startDate, endDate);
     };
 
+    function formatDateLocal(date) {
+        return date.getFullYear() +
+            '-' +
+            String(date.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(date.getDate()).padStart(2, '0');
+    }
     const handleQuickFilter = (type) => {
         let start, end;
         const now = new Date();
 
         switch (type) {
             case 'today':
-                start = end = now.toISOString().split('T')[0];
+                start = end = formatDateLocal(now);
                 break;
             case 'week':
                 const weekStart = new Date(now);
                 weekStart.setDate(weekStart.getDate() - 6);
-                start = weekStart.toISOString().split('T')[0];
-                end = now.toISOString().split('T')[0];
+                start = formatDateLocal(weekStart);
+                end = formatDateLocal(now);
                 break;
             case 'month':
-                start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-                end = now.toISOString().split('T')[0];
+                start = formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1));
+                end = formatDateLocal(now);
                 break;
             case 'year':
-                start = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
-                end = now.toISOString().split('T')[0];
+                start = formatDateLocal(new Date(now.getFullYear(), 0, 1));
+                end = formatDateLocal(now);
                 break;
             default:
                 return;
         }
 
-        console.log(`Quick filter ${type}: ${start} to ${end}`); // Debug
+        console.log(`Quick filter ${type}: ${start} to ${end}`);
         setStartDate(start);
         setEndDate(end);
 
@@ -398,7 +405,45 @@ const AdminDashboard = () => {
                     </Card>
                 </Grid>
             </Grid>
-
+            {/* <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
+                <Grid item xs={12} sx={{ width: '100%' }}>
+                    <Card sx={{ width: '100%', minWidth: '100%' }}>
+                        <CardContent sx={{ width: '100%' }}>
+                            <Typography variant="h6" gutterBottom>
+                                Doanh thu theo ngày
+                            </Typography>
+                            <Box sx={{
+                                height: 400,
+                                width: '100%',
+                                minWidth: '100%',
+                                position: 'relative'
+                            }}>
+                                <Pie
+                                    data={{
+                                        labels: stats.labels,
+                                        datasets: [
+                                            {
+                                                label: "Doanh thu",
+                                                data: stats.revenueByDate,
+                                                backgroundColor: [
+                                                    "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"
+                                                ]
+                                            }
+                                        ]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: { position: "bottom" }
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid> */}
             {/* Biểu đồ số đơn hàng & nhập kho theo ngày */}
             <Grid container spacing={0} mb={4} sx={{ width: '100%' }}>
                 <Grid item xs={12} sx={{ width: '100%' }}>
