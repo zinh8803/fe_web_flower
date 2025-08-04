@@ -8,7 +8,6 @@ const ProductDescription = ({ description }) => {
             '& img': {
                 maxWidth: '100%',
                 height: 'auto',
-                display: 'block'
             }
         }}>
             <Typography variant="h6" fontWeight={700} mb={2}>
