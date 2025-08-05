@@ -25,7 +25,10 @@ const AdminCategory = () => {
             const res = await getCategory();
             setCategories(res.data.data || []);
         } catch {
-            alert("Lỗi khi tải danh mục");
+            dispatch(showNotification({
+                message: "Lỗi khi tải danh mục",
+                severity: "error"
+            }));
         }
     };
 

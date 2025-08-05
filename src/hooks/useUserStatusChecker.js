@@ -8,8 +8,7 @@ import { showNotification } from '../store/notificationSlice';
 export const useUserStatusChecker = () => {
     const dispatch = useDispatch();
     const user = useSelector(state => state.user.user);
-    const location = useLocation(); // Theo dõi sự thay đổi route
-
+    const location = useLocation();
     useEffect(() => {
         if (!user) return;
 
@@ -30,12 +29,10 @@ export const useUserStatusChecker = () => {
             }
         };
 
-        // Kiểm tra ngay khi component mount hoặc route thay đổi
         checkUserStatus();
 
-    }, [user, dispatch, location.pathname]); // Thêm location.pathname vào dependency
+    }, [user, dispatch, location.pathname]);
 
-    // useEffect riêng cho interval check
     useEffect(() => {
         if (!user) return;
 
@@ -56,7 +53,6 @@ export const useUserStatusChecker = () => {
             }
         };
 
-        // Kiểm tra định kỳ mỗi 5 phút
         const interval = setInterval(checkUserStatus, 5 * 60 * 1000);
 
         return () => clearInterval(interval);

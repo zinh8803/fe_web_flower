@@ -380,7 +380,7 @@ const AdminProduct = () => {
                 open={!!confirmDeleteId}
                 onClose={handleCancelDelete}
                 onConfirm={handleConfirmDelete}
-                content="Bạn chắc chắn muốn xóa hoa này?" // hoặc loại hoa, sản phẩm...
+                content="Bạn chắc chắn muốn xóa hoa này?"
             />
 
             {/* Popup thêm/sửa sản phẩm */}

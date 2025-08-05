@@ -378,7 +378,7 @@ const ProductGrid = ({ filterParams = {} }) => {
                                                                     md: 2
                                                                 }
                                                             }}
-                                                            disabled={!isAvailable || !item.sizes || item.sizes.length === 0}
+                                                            disabled={!isAvailable || !item.sizes || item.sizes.length === 0 || (smallSize.max_quantity <= 0)}
                                                             onClick={e => {
                                                                 e.preventDefault();
                                                                 if (!item.sizes || item.sizes.length === 0) {
@@ -388,6 +388,7 @@ const ProductGrid = ({ filterParams = {} }) => {
                                                                     }));
                                                                     return;
                                                                 }
+                                                                
                                                                 const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
                                                                 handleAddToCart({
                                                                     id: item.id + '-' + smallSize.id,
