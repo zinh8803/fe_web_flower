@@ -36,59 +36,60 @@ import ChangePasswordAdminPage from "../pages/Admin/ChangePasswordAdminPage";
 import AdminSubscribers from "../pages/Admin/AdminSubcribers";
 import AdminTrashProducts from "../pages/Admin/AdminTrashProducts";
 import AdminColors from "../pages/Admin/AdminColors";
+import AdminMessage from "../pages/Admin/AdminMessage";
 
 const AppRoutes = () => (
-    <>
-        <ScrollToTop />
-        <Routes>
-            {/* Main layout cho user */}
-            <Route element={<MainLayout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<NotFound />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/category/:id" element={<CategoryProductDetail />} />
-                <Route path="/detail/:id" element={<ProductDetail />} />
-                <Route path="/search" element={<ProductSearch />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/reset-password" element={<ResetPassWordPage />} />
-                <Route path="/vnpay_return" element={<VnpayReturn />} />
-                <Route element={<PrivateRoute />}>
-                    <Route path="/orders/history" element={<OrderHistory />} />
-                    <Route path="/order/:id" element={<OrderDetail />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/change-password" element={<ChangePassWordPage />} />
-                </Route>
-            </Route>
-            <Route path="/admin/login" element={<AdminLogin />} />
+  <>
+    <ScrollToTop />
+    <Routes>
+      {/* Main layout cho user */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="*" element={<NotFound />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/category/:id" element={<CategoryProductDetail />} />
+        <Route path="/detail/:id" element={<ProductDetail />} />
+        <Route path="/search" element={<ProductSearch />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/reset-password" element={<ResetPassWordPage />} />
+        <Route path="/vnpay_return" element={<VnpayReturn />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/orders/history" element={<OrderHistory />} />
+          <Route path="/order/:id" element={<OrderDetail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/change-password" element={<ChangePassWordPage />} />
+        </Route>
+      </Route>
+      <Route path="/admin/login" element={<AdminLogin />} />
 
-            <Route element={<AdminRoute />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Admin />} />
-                    <Route path="products/stock" element={<StockProductAdmin />} />
-                    <Route path="products/trash" element={<AdminTrashProducts />} />
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="products" element={<AdminProduct />} />
-                    <Route path="categories" element={<AdminCategory />} />
-                    <Route path="orders" element={<AdminOrder />} />
-                    <Route path="users" element={<AdminUser />} />
-                    <Route path="discounts/subscribers" element={<AdminSubscribers />} />
-                    <Route path="employees" element={<AdminEmployee />} />
-                    <Route path="flowers" element={<AdminFlower />} />
-                    <Route path="flower-types" element={<AdminFlowerType />} />
-                    <Route path="flower-types/colors" element={<AdminColors />} />
-                    <Route path="discounts" element={<AdminDiscount />} />
-                    <Route path="receipts" element={<AdminReceipt />} />
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Admin />} />
+          <Route path="products/stock" element={<StockProductAdmin />} />
+          <Route path="products/trash" element={<AdminTrashProducts />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProduct />} />
+          <Route path="categories" element={<AdminCategory />} />
+          <Route path="orders" element={<AdminOrder />} />
+          <Route path="users" element={<AdminUser />} />
+          <Route path="discounts/subscribers" element={<AdminSubscribers />} />
+          <Route path="employees" element={<AdminEmployee />} />
+          <Route path="flowers" element={<AdminFlower />} />
+          <Route path="flower-types" element={<AdminFlowerType />} />
+          <Route path="flower-types/colors" element={<AdminColors />} />
+          <Route path="discounts" element={<AdminDiscount />} />
+          <Route path="receipts" element={<AdminReceipt />} />
+          <Route path="messages" element={<AdminMessage />} />
+          <Route path="profileAdmin" element={<ProfileAdmin />} />
+          <Route path="change-password" element={<ChangePasswordAdminPage />} />
 
-                    <Route path="profileAdmin" element={<ProfileAdmin />} />
-                    <Route path="change-password" element={<ChangePasswordAdminPage />} />
-
-                    <Route path="*" element={<NotFound />} />
-                </Route>
-            </Route>
-        </Routes>
-        <ScrollToTop />
-    </>
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Route>
+    </Routes>
+    <ScrollToTop />
+  </>
 );
 
 export default AppRoutes;
