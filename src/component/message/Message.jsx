@@ -23,7 +23,7 @@ import {
   sendMessage,
 } from "../../services/messageService";
 
-const Message = ({ currentUserId, adminId = 1 }) => {
+const Message = ({ currentUserId = "", adminId = 1 }) => {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState([]);

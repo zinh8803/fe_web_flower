@@ -5,20 +5,20 @@ import HomeBanner from "../component/home/HomeBanner";
 import Footer from "../component/home/Footer";
 import NotificationSnackbar from "../component/NotificationSnackbar";
 import { Outlet } from "react-router-dom";
-import Message from "../component/message/message";
+import Message from "../component/message/Message";
 const MainLayout = () => {
-    return (
-        <Box minHeight="100vh" bgcolor="#f9fafb">
-            <Box>
-                <Header />
-                <HomeBanner />
-                <Outlet />
-                <Message />
-                <Footer />
-            </Box>
-            <NotificationSnackbar />
-        </Box>
-    );
+  return (
+    <Box minHeight="100vh" bgcolor="#f9fafb">
+      <Box>
+        <Header />
+        <HomeBanner />
+        <Outlet />
+        <Message />
+        <Footer />
+      </Box>
+      <NotificationSnackbar />
+    </Box>
+  );
 };
 
 export default MainLayout;
