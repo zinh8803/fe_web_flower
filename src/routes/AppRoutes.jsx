@@ -37,6 +37,7 @@ import AdminSubscribers from "../pages/Admin/AdminSubcribers";
 import AdminTrashProducts from "../pages/Admin/AdminTrashProducts";
 import AdminColors from "../pages/Admin/AdminColors";
 import AdminMessage from "../pages/Admin/AdminMessage";
+import ZaloPayReturn from "../pages/User/ZaloPayReturn";
 
 const AppRoutes = () => (
   <>
@@ -54,6 +55,7 @@ const AppRoutes = () => (
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/reset-password" element={<ResetPassWordPage />} />
         <Route path="/vnpay_return" element={<VnpayReturn />} />
+        <Route path="/zalo_return" element={<ZaloPayReturn />} />
         <Route element={<PrivateRoute />}>
           <Route path="/orders/history" element={<OrderHistory />} />
           <Route path="/order/:id" element={<OrderDetail />} />
