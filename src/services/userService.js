@@ -5,6 +5,11 @@ export const login = (email, password) =>
         withCredentials: true,
     });
 
+export const loginWithGoogle = (tokenId) =>
+    api.post("/login-google", { token: tokenId }, {
+        withCredentials: true,
+    });
+
 export const refreshToken = (refreshToken) =>
     api.post("/refresh-token", { refresh_token: refreshToken },
         { withCredentials: true },
