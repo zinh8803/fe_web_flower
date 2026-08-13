@@ -1,22 +1,23 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
-    Menu, MenuItem, IconButton, Badge, Button, Box, Typography, InputBase, Paper, Avatar, Drawer, List, ListItem, ListItemText, Divider, Container
+    IconButton, Badge, Button, Box, Typography, InputBase, Paper, Drawer, List, ListItem, ListItemText, Divider, Container
 } from "@mui/material";
-import { ShoppingCart, Menu as MenuIcon, Search, Close } from "@mui/icons-material";
+import { ShoppingCart, Menu as MenuIcon, Search, Close, Info } from "@mui/icons-material";
 import UserMenu from "./UserMenu";
 import LoginDialog from "../auth/LoginDialog";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/img/LOGO_HOA.png";
 import { logoutAndClearCart } from "../../store/userSlice";
 import { showNotification } from "../../store/notificationSlice";
-import { useDispatch } from "react-redux";
 
 const Header = () => {
     const dispatch = useDispatch();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [searchValue, setSearchValue] = useState("");
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+
     const user = useSelector((state) => state.user.user);
     const cartCount = useSelector(state => state.cart.items.reduce((sum, i) => sum + i.quantity, 0));
     const navigate = useNavigate();
@@ -24,252 +25,331 @@ const Header = () => {
     const handleLoginDialogClose = (shouldReopen = false) => {
         setShowLogin(shouldReopen);
     };
-    const handleLogout = () => {
 
+    const handleLogout = () => {
         dispatch(logoutAndClearCart());
         navigate("/");
         dispatch(showNotification({
             message: "Đăng xuất thành công!",
             severity: "success"
         }));
-
     };
-    // Mobile menu content
+
+    // Mobile menu drawer
     const mobileMenu = (
-        <Box sx={{ width: 260, p: 2 }}>
+        <Box sx={{ width: 280, p: 2.5 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Link to="/" onClick={() => setMobileOpen(false)}>
                     <img
                         src={Logo}
                         alt="Logo"
-                        style={{ height: 36, width: "auto" }}
+                        style={{ height: 38, width: "auto" }}
                     />
                 </Link>
                 <IconButton onClick={() => setMobileOpen(false)}>
                     <Close />
                 </IconButton>
             </Box>
-            <Divider />
-            <List>
-                <ListItem>
-                    <Link to="/about" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
-                        <ListItemText primary="Về chúng tôi" />
-                    </Link>
+            <Divider sx={{ mb: 2 }} />
+            <List disablePadding>
+                <ListItem
+                    component={Link}
+                    to="/about"
+                    onClick={() => setMobileOpen(false)}
+                    sx={{ borderRadius: "8px", mb: 1, "&:hover": { bgcolor: "rgba(22, 163, 74, 0.08)" } }}
+                >
+                    <ListItemText primary="Về chúng tôi" primaryTypographyProps={{ fontWeight: 600 }} />
                 </ListItem>
 
-                {user && (
+                {user ? (
                     <>
-                        <ListItem>
-                            <ListItemText primary={`Xin chào, ${user.name}`} />
+                        <Box sx={{ p: 1.5, bgcolor: "rgba(22, 163, 74, 0.06)", borderRadius: "8px", mb: 1 }}>
+                            <Typography variant="subtitle2" color="#16a34a" fontWeight={700}>
+                                Xin chào, {user.name}
+                            </Typography>
+                        </Box>
+                        <ListItem
+                            component={Link}
+                            to="/profile"
+                            onClick={() => setMobileOpen(false)}
+                            sx={{ borderRadius: "8px", mb: 0.5 }}
+                        >
+                            <ListItemText primary="Thông tin tài khoản" />
                         </ListItem>
-                        <ListItem>
-                            <Link to="/profile" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
-                                <ListItemText primary="Thông tin tài khoản" />
-                            </Link>
+                        <ListItem
+                            component={Link}
+                            to="/change-password"
+                            onClick={() => setMobileOpen(false)}
+                            sx={{ borderRadius: "8px", mb: 0.5 }}
+                        >
+                            <ListItemText primary="Đổi mật khẩu" />
                         </ListItem>
-                        <ListItem>
-                            <Link to="/change-password" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
-                                <ListItemText primary="Đổi mật khẩu" />
-                            </Link>
+                        <ListItem
+                            component={Link}
+                            to="/orders/history"
+                            onClick={() => setMobileOpen(false)}
+                            sx={{ borderRadius: "8px", mb: 0.5 }}
+                        >
+                            <ListItemText primary="Đơn hàng" />
                         </ListItem>
-                        <ListItem>
-                            <Link to="/orders/history" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
-                                <ListItemText primary="Đơn hàng" />
-                            </Link>
-                        </ListItem>
-                        <ListItem>
-                            <Link to="/" onClick={handleLogout} style={{ textDecoration: "none", color: "inherit", width: "100%", display: "block" }}>
-                                <ListItemText primary="Đăng xuất" />
-                            </Link>
+                        <ListItem
+                            onClick={() => {
+                                setMobileOpen(false);
+                                handleLogout();
+                            }}
+                            sx={{ borderRadius: "8px", color: "error.main", cursor: "pointer" }}
+                        >
+                            <ListItemText primary="Đăng xuất" />
                         </ListItem>
                     </>
+                ) : (
+                    <Box mt={2}>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            fullWidth
+                            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 700, py: 1.2 }}
+                            onClick={() => {
+                                setShowLogin(true);
+                                setMobileOpen(false);
+                            }}
+                        >
+                            Đăng nhập
+                        </Button>
+                    </Box>
                 )}
             </List>
-            <Divider />
-            <Box mt={2}>
-                {!user && (
-                    <Button
-                        variant="contained"
-                        color="success"
-                        fullWidth
-                        onClick={() => {
-                            setShowLogin(true);
-                            setMobileOpen(false);
-                        }}
-                    >
-                        Đăng nhập
-                    </Button>
-                )}
-            </Box>
         </Box>
     );
 
     return (
-        <Box component="header" width="100%" borderTop={1} borderColor="divider" boxShadow={1} position="sticky" top={0} zIndex={1000} bgcolor="#fff">
+        <Box
+            component="header"
+            sx={{
+                width: "100%",
+                position: "sticky",
+                top: 0,
+                zIndex: 1100,
+                backgroundColor: "rgba(255, 255, 255, 0.92)",
+                backdropFilter: "blur(12px)",
+                borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
+                boxShadow: "0 2px 12px rgba(0, 0, 0, 0.03)",
+                transition: "all 0.3s ease"
+            }}
+        >
             <Container
                 maxWidth="xl"
                 sx={{
-                    px: { xs: 1, sm: 2, md: 4 },
-                    py: 1.5,
+                    px: { xs: 2, sm: 3, md: 4 },
+                    py: 1.2,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
+                    gap: 2
                 }}
             >
                 {/* Logo */}
-                <Box display="flex" alignItems="center" gap={2}>
-                    <Link to="/">
+                <Box display="flex" alignItems="center">
+                    <Link to="/" style={{ display: "flex", alignItems: "center" }}>
                         <img
                             src={Logo}
-                            alt="Logo"
-                            style={{ height: 38, width: "auto", cursor: "pointer" }}
+                            alt="Flower Shop Logo"
+                            style={{
+                                height: 42,
+                                width: "auto",
+                                transition: "transform 0.2s ease"
+                            }}
                         />
                     </Link>
                 </Box>
 
-                {/* Search */}
-                <Box flex={1} px={{ xs: 1, md: 4 }} maxWidth={500} display={{ xs: "none", sm: "block" }}>
+                {/* Search Bar - Desktop */}
+                <Box flex={1} px={{ xs: 1, md: 4 }} maxWidth={550} display={{ xs: "none", sm: "block" }}>
                     <Paper
                         component="form"
-                        onSubmit={e => {
+                        onSubmit={(e) => {
                             e.preventDefault();
                             if (searchValue.trim()) {
                                 navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
                             }
                         }}
+                        elevation={0}
                         sx={{
                             display: "flex",
                             alignItems: "center",
                             borderRadius: "999px",
-                            border: "1px solid #16a34a",
-                            overflow: "hidden",
+                            border: `1.5px solid ${isSearchFocused ? "#16a34a" : "#cbd5e1"}`,
+                            boxShadow: isSearchFocused ? "0 0 0 4px rgba(22, 163, 74, 0.12)" : "none",
+                            transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                            bgcolor: "#f8fafc",
+                            px: 1,
+                            py: 0.3
                         }}
-                        elevation={0}
                     >
                         <InputBase
-                            sx={{ ml: 2, flex: 1 }}
-                            placeholder="Tìm kiếm"
-                            inputProps={{ "aria-label": "search" }}
+                            sx={{ ml: 1.5, flex: 1, fontSize: "0.95rem" }}
+                            placeholder="Tìm hoa tươi, quà tặng..."
                             value={searchValue}
-                            onChange={e => setSearchValue(e.target.value)}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                            onBlur={() => setIsSearchFocused(false)}
                         />
                         <IconButton
                             type="submit"
+                            aria-label="search"
                             sx={{
                                 backgroundColor: "#16a34a",
                                 color: "#fff",
-                                borderRadius: "50%",
-                                border: "1px solid #fff",
-                                "&:hover": { backgroundColor: "#15803d" },
-                                m: 0.5,
+                                width: 36,
+                                height: 36,
+                                "&:hover": { backgroundColor: "#15803d", transform: "scale(1.05)" },
+                                transition: "all 0.2s ease",
+                                m: 0.3
                             }}
                         >
-                            <Search />
+                            <Search sx={{ fontSize: 20 }} />
                         </IconButton>
                     </Paper>
                 </Box>
 
-                {/* Right side */}
-                <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 2, md: 3 }}>
-                    {/* Hotline */}
-                    <Box display={{ xs: "none", md: "flex" }} flexDirection="column" alignItems="center" fontSize="small">
-                        <Link to="/about"
-                            style={{ textDecoration: "none", color: "#16a34a", fontWeight: "bold" }}
-                        >Về chúng tôi</Link>
+                {/* Right Navigation Controls */}
+                <Box display="flex" alignItems="center" gap={{ xs: 1, sm: 2, md: 2.5 }}>
+                    {/* Navigation Link */}
+                    <Box display={{ xs: "none", md: "flex" }} alignItems="center">
+                        <Link
+                            to="/about"
+                            style={{
+                                textDecoration: "none",
+                                color: "#334155",
+                                fontWeight: 600,
+                                fontSize: "0.95rem",
+                                padding: "6px 12px",
+                                borderRadius: "8px",
+                                transition: "all 0.2s ease",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6
+                            }}
+                        >
+                            <Info sx={{ fontSize: 18, color: "#16a34a" }} />
+                            Về chúng tôi
+                        </Link>
                     </Box>
 
-                    {/* Giỏ hàng */}
-                    <Link to="/cart" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <IconButton color="inherit">
-                            <Badge badgeContent={cartCount} color="warning">
-                                <ShoppingCart />
+                    {/* Cart Icon with badge */}
+                    <Link to="/cart" style={{ textDecoration: "none" }}>
+                        <IconButton
+                            sx={{
+                                color: "#334155",
+                                p: 1,
+                                transition: "all 0.2s ease",
+                                "&:hover": {
+                                    bgcolor: "rgba(22, 163, 74, 0.08)",
+                                    color: "#16a34a",
+                                    transform: "scale(1.08)"
+                                }
+                            }}
+                        >
+                            <Badge
+                                badgeContent={cartCount}
+                                color="error"
+                                sx={{
+                                    "& .MuiBadge-badge": {
+                                        fontWeight: 700,
+                                        boxShadow: "0 0 0 2px #fff",
+                                        animation: cartCount > 0 ? "badgeBounce 0.4s ease" : "none"
+                                    }
+                                }}
+                            >
+                                <ShoppingCart sx={{ fontSize: 24 }} />
                             </Badge>
                         </IconButton>
                     </Link>
 
-                    {/* Đăng nhập / User */}
+                    {/* User Auth Info */}
                     {user ? (
-                        <>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ display: { xs: 'none', md: 'block' } }}
-                            >
-                                Xin chào, {user.name}
-                            </Typography>
-                            <Box display={{ xs: "none", sm: "block" }}>
-                                <UserMenu
-                                    user={{
-                                        name: user.name,
-                                        image_url: user.image_url
-                                    }}
-                                />
-                            </Box>
-                        </>
+                        <Box display={{ xs: "none", sm: "flex" }} alignItems="center" gap={1}>
+                            <UserMenu
+                                user={{
+                                    name: user.name,
+                                    image_url: user.image_url
+                                }}
+                            />
+                        </Box>
                     ) : (
                         <Button
-                            color="success"
                             variant="contained"
-                            size="small"
-                            sx={{ display: { xs: "none", sm: "block" } }}
+                            color="success"
+                            size="medium"
+                            disableElevation
+                            sx={{
+                                display: { xs: "none", sm: "inline-flex" },
+                                borderRadius: "999px",
+                                px: 2.5,
+                                fontWeight: 700,
+                                textTransform: "none",
+                                bgcolor: "#16a34a",
+                                "&:hover": { bgcolor: "#15803d", boxShadow: "0 4px 14px rgba(22, 163, 74, 0.3)" }
+                            }}
                             onClick={() => setShowLogin(true)}
                         >
                             Đăng nhập
                         </Button>
                     )}
 
-                    {/* Mobile menu icon */}
+                    {/* Mobile Hamburger Toggle */}
                     <Box display={{ sm: "none" }}>
-                        <IconButton onClick={() => setMobileOpen(true)}>
+                        <IconButton onClick={() => setMobileOpen(true)} color="inherit">
                             <MenuIcon />
                         </IconButton>
                     </Box>
                 </Box>
             </Container>
 
-            {/* Search mobile */}
-            <Box display={{ xs: "block", sm: "none" }} px={2} pb={1}>
+            {/* Mobile Search Bar */}
+            <Box display={{ xs: "block", sm: "none" }} px={2} pb={1.5}>
                 <Paper
                     component="form"
-                    onSubmit={e => {
+                    onSubmit={(e) => {
                         e.preventDefault();
                         if (searchValue.trim()) {
                             navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
                         }
                     }}
+                    elevation={0}
                     sx={{
                         display: "flex",
                         alignItems: "center",
                         borderRadius: "999px",
                         border: "1px solid #16a34a",
-                        overflow: "hidden",
+                        bgcolor: "#f8fafc",
+                        px: 1,
+                        py: 0.2
                     }}
-                    elevation={0}
                 >
                     <InputBase
-                        sx={{ ml: 2, flex: 1 }}
-                        placeholder="Tìm kiếm"
-                        inputProps={{ "aria-label": "search" }}
+                        sx={{ ml: 1.5, flex: 1, fontSize: "0.9rem" }}
+                        placeholder="Tìm hoa tươi..."
                         value={searchValue}
-                        onChange={e => setSearchValue(e.target.value)}
+                        onChange={(e) => setSearchValue(e.target.value)}
                     />
                     <IconButton
                         type="submit"
                         sx={{
                             backgroundColor: "#16a34a",
                             color: "#fff",
-                            borderRadius: "50%",
-                            border: "1px solid #fff",
+                            width: 32,
+                            height: 32,
                             "&:hover": { backgroundColor: "#15803d" },
-                            m: 0.5,
+                            m: 0.3
                         }}
                     >
-                        <Search />
+                        <Search sx={{ fontSize: 18 }} />
                     </IconButton>
                 </Paper>
             </Box>
 
-            {/* Drawer cho mobile */}
+            {/* Mobile Drawer */}
             <Drawer
                 anchor="right"
                 open={mobileOpen}

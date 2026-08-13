@@ -17,6 +17,7 @@ import {
 import { clearCart } from "../../store/cartSlice";
 import { showNotification } from "../../store/notificationSlice";
 import { createZaloPayment, getPayments } from "../../services/paymentService";
+import { checkStockAvailable } from "../../services/productService";
 import codImg from "../../assets/img/cash.png";
 import vnpayImg from "../../assets/img/vnpay.png";
 import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
@@ -168,8 +169,71 @@ const Checkout = () => {
     });
   };
 
+  const validateCartStockBeforeCheckout = async () => {
+    if (!cartItems.length) {
+      dispatch(
+        showNotification({
+          message: "Giỏ hàng đang trống",
+          severity: "warning",
+        })
+      );
+      navigate("/cart");
+      return false;
+    }
+
+    try {
+      const stockRes = await checkStockAvailable({
+        cart_items: cartItems.map((item) => ({
+          product_size_id: item.product_size_id,
+          quantity: item.quantity,
+        })),
+      });
+
+      const availableProducts = stockRes?.data?.available_products || [];
+      const hasInvalidStock = cartItems.some((item) => {
+        const product = availableProducts.find((p) => p.id === item.product_id);
+        if (!product) return true;
+
+        const sizeInfo = (product.sizes || []).find(
+          (s) => Number(s.size_id) === Number(item.product_size_id)
+        );
+        if (!sizeInfo) return true;
+
+        return !sizeInfo.in_stock || Number(sizeInfo.max_quantity) < Number(item.quantity);
+      });
+
+      if (hasInvalidStock) {
+        dispatch(
+          showNotification({
+            message: "Một số sản phẩm đã hết hàng hoặc không đủ số lượng. Vui lòng kiểm tra lại giỏ hàng",
+            severity: "warning",
+          })
+        );
+        navigate("/cart");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: "Không thể kiểm tra tồn kho. Vui lòng thử lại",
+          severity: "error",
+        })
+      );
+      return false;
+    }
+  };
+
   const handlePlaceOrder = async () => {
     setLoading(true);
+
+    const isStockValid = await validateCartStockBeforeCheckout();
+    if (!isStockValid) {
+      setLoading(false);
+      return;
+    }
+
     if (form.payment_method === "cod") {
       try {
         if (!form.delivery_date) {

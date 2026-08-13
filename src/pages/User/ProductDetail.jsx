@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, ButtonGroup, Container, CircularProgress, Card, CardContent } from "@mui/material";
+import { Box, Typography, Container, CircularProgress, Paper } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { getProductsByCategory, getProductDetailById } from "../../services/productService";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,7 +12,6 @@ import RelatedProducts from "../../component/product/RelatedProducts";
 import Breadcrumb from "../../component/breadcrumb/Breadcrumb";
 
 const ProductDetail = () => {
-    // const { id } = useParams();
     const location = useLocation();
     const id = location.state?.id;
     const fromCategory = location.state?.fromCategory;
@@ -23,27 +22,29 @@ const ProductDetail = () => {
     const [selectedSize, setSelectedSize] = useState(null);
     const dispatch = useDispatch();
 
-    const stockState = useSelector(state => state.stock);
-    const cartItems = useSelector(state => state.cart.items);
+    const stockState = useSelector((state) => state.stock);
+    const cartItems = useSelector((state) => state.cart.items);
 
-    console.log("id:", id);
-    // console.log("productId:", productId);
     useEffect(() => {
-        dispatch(fetchStockAvailability(cartItems.map(item => ({
-            product_size_id: item.product_size_id,
-            quantity: item.quantity
-        }))));
+        dispatch(
+            fetchStockAvailability(
+                cartItems.map((item) => ({
+                    product_size_id: item.product_size_id,
+                    quantity: item.quantity
+                }))
+            )
+        );
     }, [dispatch, cartItems]);
 
     useEffect(() => {
-        document.title = 'Chi tiết sản phẩm';
+        document.title = "Chi tiết sản phẩm";
         setLoading(true);
         getProductDetailById(id)
-            .then(res => {
+            .then((res) => {
                 setProduct(res.data.data);
                 setQuantity(1);
                 if (res.data.data.sizes && res.data.data.sizes.length > 0) {
-                    const small = res.data.data.sizes.find(s => s.size.toLowerCase() === "nhỏ");
+                    const small = res.data.data.sizes.find((s) => s.size.toLowerCase() === "nhỏ");
                     setSelectedSize(small || res.data.data.sizes[0]);
                 }
             })
@@ -52,34 +53,30 @@ const ProductDetail = () => {
 
     useEffect(() => {
         if (product && product.category_id) {
-            getProductsByCategory(product.category_id).then(res => {
-                const filtered = res.data.data.filter(p => p.id !== product.id);
+            getProductsByCategory(product.category_id).then((res) => {
+                const filtered = res.data.data.filter((p) => p.id !== product.id);
                 setRelated(filtered);
             });
         }
     }, [product]);
 
     const isProductAvailable = (productId, sizeId, requestedQuantity = 1) => {
-        const product = stockState.availableProducts.find(p => p.id === productId);
+        const product = stockState.availableProducts.find((p) => p.id === productId);
         if (!product) return true;
-        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        const sizeInfo = product.sizes.find((s) => s.size_id === sizeId);
         return sizeInfo && sizeInfo.in_stock && sizeInfo.max_quantity >= requestedQuantity;
     };
 
     const getLimitingFlowerInfo = (productId, sizeId) => {
-        const product = stockState.availableProducts.find(p => p.id === productId);
+        const product = stockState.availableProducts.find((p) => p.id === productId);
         if (!product) return null;
-        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        const sizeInfo = product.sizes.find((s) => s.size_id === sizeId);
         return sizeInfo ? sizeInfo.limiting_flower : null;
     };
 
-    const stockStatus = selectedSize ?
-        isProductAvailable(Number(id), selectedSize.id, quantity) :
-        false;
+    const stockStatus = selectedSize ? isProductAvailable(Number(id), selectedSize.id, quantity) : false;
 
-    const limitingFlower = selectedSize ?
-        getLimitingFlowerInfo(Number(id), selectedSize.id) :
-        null;
+    const limitingFlower = selectedSize ? getLimitingFlowerInfo(Number(id), selectedSize.id) : null;
 
     const handleQuantityChange = (e) => {
         let value = parseInt(e.target.value);
@@ -93,22 +90,22 @@ const ProductDetail = () => {
         setSelectedSize(size);
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!selectedSize) {
             dispatch(showNotification({ message: "Vui lòng chọn kích thước!", severity: "warning" }));
             return;
         }
         if (!stockStatus) {
-            dispatch(showNotification({
-                message: limitingFlower ?
-                    `Không đủ hoa ${limitingFlower.name} trong kho` :
-                    "Sản phẩm đã hết hàng",
-                severity: "error"
-            }));
+            dispatch(
+                showNotification({
+                    message: limitingFlower ? `Không đủ hoa ${limitingFlower.name} trong kho` : "Sản phẩm đã hết hàng",
+                    severity: "error"
+                })
+            );
             return;
         }
-        dispatch(addToCart({
-            id: product.id + '-' + selectedSize.id,
+        const item = {
+            id: product.id + "-" + selectedSize.id,
             product_id: product.id,
             product_size_id: selectedSize.id,
             name: product.name,
@@ -116,81 +113,100 @@ const ProductDetail = () => {
             image: product.image_url,
             quantity: quantity,
             size: selectedSize.size,
-            sizes: product.sizes,
-        }));
+            sizes: product.sizes
+        };
+
+        const resultAction = await dispatch(addToCart(item));
+        if (!addToCart.fulfilled.match(resultAction)) {
+            dispatch(
+                showNotification({
+                    message: resultAction.payload || "Không thể thêm sản phẩm vào giỏ hàng",
+                    severity: "error"
+                })
+            );
+            return;
+        }
+
         dispatch(showNotification({ message: "Thêm vào giỏ hàng thành công!", severity: "success" }));
 
-        const updatedCartItems = [...cartItems, {
-            product_size_id: selectedSize.id,
-            quantity: quantity
-        }];
+        const updatedCartItems = [
+            ...cartItems,
+            {
+                product_size_id: selectedSize.id,
+                quantity: quantity
+            }
+        ];
         dispatch(fetchStockAvailability(updatedCartItems));
         setQuantity(1);
     };
 
     if (loading)
-        return (<Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
-            <CircularProgress />
-        </Box>);
-    if (!product) return <Typography>Không tìm thấy sản phẩm.</Typography>;
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                <CircularProgress color="success" />
+            </Box>
+        );
+
+    if (!product) return <Typography color="text.secondary">Không tìm thấy sản phẩm.</Typography>;
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ py: 3, mb: 4 }}>
             <Breadcrumb
                 items={
                     fromCategory
                         ? [
-                            { label: "Trang chủ", href: "/" },
-                            { label: "Danh mục", href: "/category" },
-                            { label: "Sản phẩm" }
-                        ]
-                        : [
-                            { label: "Trang chủ", href: "/" },
-                            { label: "Sản phẩm" }
-                        ]
+                              { label: "Trang chủ", href: "/" },
+                              { label: "Danh mục", href: "/category" },
+                              { label: product.name }
+                          ]
+                        : [{ label: "Trang chủ", href: "/" }, { label: product.name }]
                 }
             />
-            <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
-                <Box sx={{ flex: 1 }}>
-                    <img
-                        src={product.image_url}
-                        alt={product.name}
-                        style={{ width: "100%", maxWidth: "400px", objectFit: "contain", borderRadius: 10 }}
-                    />
-                </Box>
-                <Box sx={{ flex: 2 }}>
-                    {/* {product.sizes && product.sizes.length > 0 && (
-                        <Box sx={{ mb: 2 }}>
 
-                            <Typography fontWeight={600} mb={1}>Kích thước</Typography>
-                            <ButtonGroup variant="outlined" color="primary">
-                                {product.sizes.map(size => {
-                                    const isSizeAvailable = isProductAvailable(Number(id), size.id, quantity);
-                                    return (
-                                        <Button
-                                            key={size.id}
-                                            variant={selectedSize && selectedSize.id === size.id ? "contained" : "outlined"}
-                                            color={isSizeAvailable ? "primary" : "error"}
-                                            onClick={() => handleSizeChange(size)}
-                                            disabled={!isSizeAvailable}
-                                            sx={{
-                                                minWidth: 100,
-                                                fontWeight: 600,
-                                                opacity: isSizeAvailable ? 1 : 0.6,
-                                                borderRadius: 2,
-                                                mx: 0.5
-                                            }}
-                                        >
-                                            {size.size} - {Number(size.price).toLocaleString()}đ
-                                            {!isSizeAvailable && " (Hết hàng)"}
-                                        </Button>
-                                    );
-                                })}
-                            </ButtonGroup>
+            <Paper
+                elevation={0}
+                sx={{
+                    p: { xs: 2, md: 4 },
+                    borderRadius: "20px",
+                    border: "1px solid #e2e8f0",
+                    bgcolor: "#fff",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                    mt: 2,
+                    mb: 4
+                }}
+            >
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: { xs: 3, md: 5 } }}>
+                    {/* Main Image */}
+                    <Box
+                        sx={{
+                            flex: 1,
+                            bgcolor: "#f8fafc",
+                            borderRadius: "16px",
+                            p: 2,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px solid #f1f5f9",
+                            maxHeight: 460
+                        }}
+                    >
+                        <Box
+                            component="img"
+                            src={product.image_url}
+                            alt={product.name}
+                            sx={{
+                                width: "100%",
+                                maxHeight: 420,
+                                objectFit: "contain",
+                                transition: "transform 0.3s ease",
+                                "&:hover": {
+                                    transform: "scale(1.03)"
+                                }
+                            }}
+                        />
+                    </Box>
 
-                        </Box>
-                    )} */}
-
+                    {/* Product Details Info */}
                     <ProductInfo
                         product={{
                             ...product,
@@ -198,7 +214,6 @@ const ProductDetail = () => {
                             size: selectedSize ? selectedSize.size : "",
                             receipt_details: selectedSize ? selectedSize.receipt_details : [],
                             max_quantity: selectedSize && selectedSize.max_quantity ? selectedSize.max_quantity : 99
-
                         }}
                         quantity={quantity}
                         onQuantityChange={handleQuantityChange}
@@ -211,8 +226,8 @@ const ProductDetail = () => {
                         productId={Number(id)}
                     />
                 </Box>
+            </Paper>
 
-            </Box>
             <ProductDescription description={product.description} />
             <RelatedProducts related={related} />
         </Container>

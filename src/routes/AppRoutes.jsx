@@ -37,6 +37,7 @@ import AdminSubscribers from "../pages/Admin/AdminSubcribers";
 import AdminTrashProducts from "../pages/Admin/AdminTrashProducts";
 import AdminColors from "../pages/Admin/AdminColors";
 import AdminMessage from "../pages/Admin/AdminMessage";
+import AdminFlowerLog from "../pages/Admin/AdminFlowerLog";
 import ZaloPayReturn from "../pages/User/ZaloPayReturn";
 
 const AppRoutes = () => (
@@ -78,6 +79,7 @@ const AppRoutes = () => (
           <Route path="discounts/subscribers" element={<AdminSubscribers />} />
           <Route path="employees" element={<AdminEmployee />} />
           <Route path="flowers" element={<AdminFlower />} />
+          <Route path="flower-logs" element={<AdminFlowerLog />} />
           <Route path="flower-types" element={<AdminFlowerType />} />
           <Route path="flower-types/colors" element={<AdminColors />} />
           <Route path="discounts" element={<AdminDiscount />} />

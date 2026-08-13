@@ -1,6 +1,4 @@
 import axios from "axios";
-import store from "../store";
-import { setUser, logout } from "../store/userSlice";
 // const API_URL = import.meta.env.VITE_API_URL;
 const API_URL = "/api";
 const api = axios.create({
@@ -22,6 +20,8 @@ api.interceptors.response.use(
                 const res = await api.post("/refresh-token", {}, { withCredentials: true });
                 const newToken = res.data.data.access_token;
                 const user = JSON.parse(localStorage.getItem("user"));
+                const { default: store } = await import("../store");
+                const { setUser } = await import("../store/userSlice");
                 store.dispatch(setUser({
                     user,
                 }));
@@ -29,6 +29,8 @@ api.interceptors.response.use(
                 return api(originalRequest);
             } catch (refreshError) {
                 console.error("Refresh token failed:", refreshError);
+                const { default: store } = await import("../store");
+                const { logout } = await import("../store/userSlice");
                 store.dispatch(logout());
             }
         }

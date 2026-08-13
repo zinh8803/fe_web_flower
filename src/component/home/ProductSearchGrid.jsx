@@ -8,6 +8,7 @@ import {
     CardMedia,
     Typography,
     Tooltip,
+    Chip
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
@@ -18,41 +19,56 @@ import { fetchStockAvailability } from "../../store/stockSlice";
 
 const ProductSearchGrid = ({ products }) => {
     const dispatch = useDispatch();
-
-    const stockState = useSelector(state => state.stock);
-    const cartItems = useSelector(state => state.cart.items);
+    const stockState = useSelector((state) => state.stock);
+    const cartItems = useSelector((state) => state.cart.items);
 
     useEffect(() => {
-        dispatch(fetchStockAvailability(cartItems.map(item => ({
-            product_size_id: item.product_size_id,
-            quantity: item.quantity
-        }))));
+        dispatch(
+            fetchStockAvailability(
+                cartItems.map((item) => ({
+                    product_size_id: item.product_size_id,
+                    quantity: item.quantity
+                }))
+            )
+        );
     }, [dispatch]);
 
     const isProductAvailable = (productId, sizeId) => {
-        const product = stockState.availableProducts.find(p => p.id === productId);
+        const product = stockState.availableProducts.find((p) => p.id === productId);
         if (!product) return true;
 
-        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        const sizeInfo = product.sizes.find((s) => s.size_id === sizeId);
         return sizeInfo && sizeInfo.in_stock && sizeInfo.max_quantity > 0;
     };
 
     const getLimitingFlowerInfo = (productId, sizeId) => {
-        const product = stockState.availableProducts.find(p => p.id === productId);
+        const product = stockState.availableProducts.find((p) => p.id === productId);
         if (!product) return null;
 
-        const sizeInfo = product.sizes.find(s => s.size_id === sizeId);
+        const sizeInfo = product.sizes.find((s) => s.size_id === sizeId);
         return sizeInfo ? sizeInfo.limiting_flower : null;
     };
 
-    const handleAddToCart = (item) => {
-        dispatch(addToCart(item));
-        dispatch(showNotification({
-            message: "Thêm vào giỏ hàng thành công!",
-            severity: "success"
-        }));
+    const handleAddToCart = async (item) => {
+        const resultAction = await dispatch(addToCart(item));
+        if (!addToCart.fulfilled.match(resultAction)) {
+            dispatch(
+                showNotification({
+                    message: resultAction.payload || "Không thể thêm sản phẩm vào giỏ hàng",
+                    severity: "error"
+                })
+            );
+            return;
+        }
 
-        const updatedCartItems = [...cartItems, item].map(cartItem => ({
+        dispatch(
+            showNotification({
+                message: "Thêm vào giỏ hàng thành công!",
+                severity: "success"
+            })
+        );
+
+        const updatedCartItems = [...cartItems, item].map((cartItem) => ({
             product_size_id: cartItem.product_size_id,
             quantity: cartItem.quantity
         }));
@@ -62,23 +78,22 @@ const ProductSearchGrid = ({ products }) => {
 
     return (
         <Box sx={{ width: "100%" }}>
-            <Box sx={{ p: 3, borderRadius: 2, bgcolor: "#fff" }}>
+            <Box sx={{ p: { xs: 2, sm: 3 }, borderRadius: "16px", bgcolor: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.03)" }}>
                 <Box
                     sx={{
                         display: "flex",
                         flexWrap: "wrap",
-                        justifyContent: "flex-start",
                         gap: {
-                            xs: "10px",
-                            sm: "15px",
+                            xs: "12px",
+                            sm: "16px",
                             md: "20px"
                         }
                     }}
                 >
                     {products
-                        .filter(item => Array.isArray(item.sizes) && item.sizes.length > 0)
+                        .filter((item) => Array.isArray(item.sizes) && item.sizes.length > 0)
                         .map((item) => {
-                            const smallSize = item.sizes.find(s => s.size && s.size.toLowerCase() === "nhỏ") || item.sizes[0];
+                            const smallSize = item.sizes.find((s) => s.size && s.size.toLowerCase() === "nhỏ") || item.sizes[0];
                             const isAvailable = isProductAvailable(item.id, smallSize?.id);
                             const limitingFlower = getLimitingFlowerInfo(item.id, smallSize?.id);
 
@@ -87,15 +102,15 @@ const ProductSearchGrid = ({ products }) => {
                                     key={item.id}
                                     sx={{
                                         width: {
-                                            xs: "calc(50% - 5px)",
-                                            sm: "calc(50% - 10px)",
-                                            md: "calc(33.33% - 15px)",
-                                            lg: "calc(25% - 16px)"
+                                            xs: "calc(50% - 6px)",
+                                            sm: "calc(50% - 8px)",
+                                            md: "calc(33.33% - 14px)",
+                                            lg: "calc(25% - 15px)"
                                         },
                                         height: {
-                                            xs: 320,
-                                            sm: 350,
-                                            md: 380
+                                            xs: 340,
+                                            sm: 360,
+                                            md: 390
                                         }
                                     }}
                                 >
@@ -110,33 +125,62 @@ const ProductSearchGrid = ({ products }) => {
                                         }}
                                     >
                                         <Card
+                                            elevation={0}
                                             sx={{
                                                 width: "100%",
                                                 height: "100%",
                                                 display: "flex",
                                                 flexDirection: "column",
-                                                borderRadius: 2,
-                                                boxShadow: "0 0 10px rgba(0,0,0,0.05)",
-                                                transition: "transform 0.2s",
+                                                borderRadius: "16px",
+                                                border: "1px solid #f1f5f9",
+                                                bgcolor: "#ffffff",
+                                                boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                                                transition: "all 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+                                                position: "relative",
+                                                overflow: "hidden",
                                                 "&:hover": {
-                                                    transform: "translateY(-4px)",
-                                                },
+                                                    transform: "translateY(-6px)",
+                                                    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.08)",
+                                                    borderColor: "rgba(22, 163, 74, 0.3)",
+                                                    "& .product-img": {
+                                                        transform: "scale(1.07)"
+                                                    }
+                                                }
                                             }}
                                         >
-                                            {/* Image container */}
                                             <Box
                                                 sx={{
                                                     height: {
-                                                        xs: 160,
-                                                        sm: 170,
-                                                        md: 180
+                                                        xs: 170,
+                                                        sm: 185,
+                                                        md: 200
                                                     },
                                                     overflow: "hidden",
                                                     position: "relative",
-                                                    flexShrink: 0,
+                                                    bgcolor: "#f8fafc",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    p: 1.5
                                                 }}
                                             >
+                                                {!isAvailable && (
+                                                    <Chip
+                                                        label="Hết hàng"
+                                                        color="error"
+                                                        size="small"
+                                                        sx={{
+                                                            position: "absolute",
+                                                            top: 10,
+                                                            left: 10,
+                                                            zIndex: 2,
+                                                            fontWeight: 700,
+                                                            fontSize: "0.75rem"
+                                                        }}
+                                                    />
+                                                )}
                                                 <CardMedia
+                                                    className="product-img"
                                                     component="img"
                                                     image={item.image_url}
                                                     alt={item.name}
@@ -144,109 +188,96 @@ const ProductSearchGrid = ({ products }) => {
                                                         width: "100%",
                                                         height: "100%",
                                                         objectFit: "contain",
-                                                        p: 1
+                                                        transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
                                                     }}
                                                 />
                                             </Box>
-                                            {/* Content */}
+
                                             <CardContent
                                                 sx={{
-                                                    textAlign: "center",
+                                                    textAlign: "left",
                                                     flex: "1 0 auto",
                                                     display: "flex",
                                                     flexDirection: "column",
-                                                    justifyContent: "center",
-                                                    height: {
-                                                        xs: 90,
-                                                        sm: 100,
-                                                        md: 120
-                                                    },
-                                                    p: {
-                                                        xs: 1,
-                                                        md: 2
-                                                    },
-                                                    overflow: "hidden"
+                                                    justifyContent: "space-between",
+                                                    p: { xs: 1.5, md: 2 },
+                                                    pb: "8px !important"
                                                 }}
                                             >
-                                                <Typography
-                                                    variant="body2"
-                                                    fontWeight={600}
-                                                    sx={{
-                                                        mb: 1,
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        display: "-webkit-box",
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: "vertical",
-                                                        lineHeight: 1.2,
-                                                        minHeight: {
-                                                            xs: 36,
-                                                            sm: 38,
-                                                            md: 40
-                                                        }
-                                                    }}
-                                                >
-                                                    {item.name}
-                                                </Typography>
-                                                <Typography color="error" fontWeight={700}>
-                                                    {item.sizes && item.sizes.length > 0
-                                                        ? Number(smallSize.price).toLocaleString() + "đ"
-                                                        : "Liên hệ"}
-                                                </Typography>
-                                                {!isAvailable && (
+                                                <Box>
                                                     <Typography
-                                                        variant="caption"
-                                                        color="error"
-                                                        sx={{ mt: 0.5 }}
+                                                        variant="body2"
+                                                        fontWeight={600}
+                                                        color="#1e293b"
+                                                        sx={{
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                            display: "-webkit-box",
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: "vertical",
+                                                            lineHeight: 1.3,
+                                                            fontSize: { xs: "0.875rem", md: "0.95rem" },
+                                                            minHeight: { xs: 36, md: 40 }
+                                                        }}
                                                     >
-                                                        Hết hàng
+                                                        {item.name}
                                                     </Typography>
-                                                )}
+                                                </Box>
+
+                                                <Box mt={1}>
+                                                    <Typography
+                                                        variant="h6"
+                                                        fontWeight={700}
+                                                        color="#16a34a"
+                                                        sx={{ fontSize: { xs: "1rem", md: "1.15rem" } }}
+                                                    >
+                                                        {smallSize ? Number(smallSize.price).toLocaleString() + "đ" : "Liên hệ"}
+                                                    </Typography>
+                                                </Box>
                                             </CardContent>
-                                            <CardActions
-                                                sx={{
-                                                    justifyContent: "center",
-                                                    height: {
-                                                        xs: 50,
-                                                        sm: 60,
-                                                        md: 60
-                                                    },
-                                                    p: 0,
-                                                    flexShrink: 0
-                                                }}
-                                            >
-                                                <Tooltip
-                                                    title={!isAvailable && limitingFlower
-                                                        ? `Thiếu hoa ${limitingFlower.name}`
-                                                        : ""}
-                                                >
-                                                    <span>
+
+                                            <CardActions sx={{ p: 1.5, pt: 0, flexShrink: 0 }}>
+                                                <Tooltip title={!isAvailable && limitingFlower ? `Thiếu hoa ${limitingFlower.name}` : ""}>
+                                                    <Box width="100%">
                                                         <Button
+                                                            fullWidth
                                                             size="small"
                                                             variant="contained"
-                                                            color="error"
-                                                            endIcon={<ShoppingCartIcon />}
+                                                            disableElevation
+                                                            startIcon={<ShoppingCartIcon sx={{ fontSize: 16 }} />}
                                                             sx={{
-                                                                borderRadius: 5,
-                                                                px: {
-                                                                    xs: 1,
-                                                                    md: 2
+                                                                borderRadius: "10px",
+                                                                py: 0.8,
+                                                                fontWeight: 700,
+                                                                fontSize: "0.8rem",
+                                                                textTransform: "none",
+                                                                bgcolor: "#16a34a",
+                                                                color: "#fff",
+                                                                "&:hover": {
+                                                                    bgcolor: "#15803d",
+                                                                    boxShadow: "0 4px 12px rgba(22, 163, 74, 0.3)"
+                                                                },
+                                                                "&:disabled": {
+                                                                    bgcolor: "#e2e8f0",
+                                                                    color: "#94a3b8"
                                                                 }
                                                             }}
                                                             disabled={!isAvailable || !item.sizes || item.sizes.length === 0}
-                                                            onClick={e => {
+                                                            onClick={(e) => {
                                                                 e.preventDefault();
                                                                 if (!item.sizes || item.sizes.length === 0) {
-                                                                    dispatch(showNotification({
-                                                                        message: "Sản phẩm chưa có size!",
-                                                                        severity: "warning"
-                                                                    }));
+                                                                    dispatch(
+                                                                        showNotification({
+                                                                            message: "Sản phẩm chưa có size!",
+                                                                            severity: "warning"
+                                                                        })
+                                                                    );
                                                                     return;
                                                                 }
 
-                                                                const smallSize = item.sizes.find(s => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
+                                                                const smallSize = item.sizes.find((s) => s.size.toLowerCase() === "nhỏ") || item.sizes[0];
                                                                 handleAddToCart({
-                                                                    id: item.id + '-' + smallSize.id,
+                                                                    id: item.id + "-" + smallSize.id,
                                                                     name: item.name,
                                                                     price: Number(smallSize.price),
                                                                     image: item.image_url,
@@ -258,9 +289,9 @@ const ProductSearchGrid = ({ products }) => {
                                                                 });
                                                             }}
                                                         >
-                                                            Thêm vào giỏ hàng
+                                                            Thêm vào giỏ
                                                         </Button>
-                                                    </span>
+                                                    </Box>
                                                 </Tooltip>
                                             </CardActions>
                                         </Card>

@@ -54,7 +54,6 @@ function emitAdmin(data) {
     for (const fn of chatHandlers.adminMessages) fn(data);
 }
 
-// NEW: cho component cleanup để tránh duplicate handler
 export function removeChatHandler({ userId, isStaff = false, onChatMessage }) {
     if (typeof onChatMessage !== "function") return;
     if (isStaff) removeAdminHandler(onChatMessage);
@@ -62,10 +61,8 @@ export function removeChatHandler({ userId, isStaff = false, onChatMessage }) {
 }
 
 export function initWebsocket(onOrderCreated, onAutoImport, onChatMessage, userId, isStaff = false) {
-    // DEBUG: xác nhận initWebsocket có được gọi không
     console.log("[ws] initWebsocket()", { hasEcho: !!echoInstance, userId, isStaff, hasOnChat: typeof onChatMessage === "function" });
 
-    // Register handler trước (để dù subscribe đã có sẵn thì vẫn nhận)
     if (typeof onChatMessage === "function") {
         if (isStaff) addAdminHandler(onChatMessage);
         if (userId) addPrivateHandler(userId, onChatMessage);
@@ -73,55 +70,73 @@ export function initWebsocket(onOrderCreated, onAutoImport, onChatMessage, userI
 
     if (!echoInstance) {
         window.Pusher = Pusher;
-
-        // Bật log pusher để thấy connect/subscription trong console
-        Pusher.logToConsole = true;
-
-        const token =
-            localStorage.getItem("token") ||
-            localStorage.getItem("access_token") ||
-            localStorage.getItem("accessToken") ||
-            "";
+        Pusher.logToConsole = true; // Bật log Pusher để debug
 
         echoInstance = new Echo({
             broadcaster: "pusher",
-            key: import.meta.env.VITE_PUSHER_APP_KEY,
-            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-
-            // Tránh "im lặng" vì ép TLS trong môi trường http/local
-            forceTLS: window.location.protocol === "https:",
-
-            // Auth cho private channel (routes/api.php => /api/...)
-            authEndpoint: "/api/broadcasting/auth",
-            ...(token
-                ? {
-                    auth: {
+            key: import.meta.env.VITE_PUSHER_APP_KEY || "local",
+            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || "ap1",
+            forceTLS: true,
+            authEndpoint: `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/broadcasting/auth`,
+            // Gửi cookie (withCredentials) để backend xác thực JWT từ cookie
+            auth: {
+                headers: {
+                    "Accept": "application/json",
+                },
+                params: {},
+            },
+            // Custom authorizer: gửi kèm cookie
+            authorizer: (channel) => ({
+                authorize: (socketId, callback) => {
+                    console.log("[ws] authorizing channel:", channel.name);
+                    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/broadcasting/auth`, {
+                        method: "POST",
                         headers: {
-                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
                         },
-                    },
-                }
-                : {}),
+                        // credentials: "include" để browser tự gửi cookie
+                        credentials: "include",
+                        body: JSON.stringify({
+                            socket_id: socketId,
+                            channel_name: channel.name,
+                        }),
+                    })
+                        .then((res) => {
+                            console.log("[ws] broadcasting/auth status:", res.status);
+                            if (!res.ok) {
+                                res.text().then(t => console.error("[ws] auth error:", t));
+                                callback(new Error("Unauthorized"), null);
+                                return;
+                            }
+                            return res.json();
+                        })
+                        .then((data) => {
+                            if (data) {
+                                console.log("[ws] auth success ✅");
+                                callback(null, data);
+                            }
+                        })
+                        .catch((err) => {
+                            console.error("[ws] auth error:", err);
+                            callback(err, null);
+                        });
+                },
+            }),
         });
 
-        // DEBUG: trạng thái kết nối
         const conn = echoInstance.connector?.pusher?.connection;
-        conn?.bind("connected", () => console.log("[ws] pusher connected"));
-        conn?.bind("error", (err) => console.error("[ws] pusher error", err));
+        conn?.bind("connected", () => console.log("[ws] pusher connected ✅"));
+        conn?.bind("error", (err) => console.error("[ws] pusher error ❌", err));
+        conn?.bind("state_change", (states) => console.log("[ws] pusher state:", states.previous, "→", states.current));
 
         echoInstance.channel("admin-orders").listen("OrderCreated", (data) => {
             if (typeof onOrderCreated === "function") onOrderCreated(data);
         });
 
         echoInstance.channel("admin-auto-imports").listen("AutoImport", (data) => {
-            console.log("AutoImport event received:", data);
             if (typeof onAutoImport === "function") onAutoImport(data);
         });
-
-        // DEBUG env (nếu key/cluster rỗng sẽ connect fail)
-        if (!import.meta.env.VITE_PUSHER_APP_KEY || !import.meta.env.VITE_PUSHER_APP_CLUSTER) {
-            console.warn("[ws] Missing VITE_PUSHER_APP_KEY / VITE_PUSHER_APP_CLUSTER");
-        }
     }
 
     // Subscribe private chat.{userId} 1 lần, emit cho mọi handler
@@ -129,16 +144,17 @@ export function initWebsocket(onOrderCreated, onAutoImport, onChatMessage, userI
         attached.privateChat.add(String(userId));
         console.log("[ws] subscribing private", `chat.${userId}`);
 
-        const ch = echoInstance.private(`chat.${userId}`);
-
-        // QUAN TRỌNG: chỉ listen 1 kiểu để tránh double fire
-        ch.listen(".NewChatMessage", (data) => {
-            console.log("NewChatMessage (private) received:", data);
+        const handlePrivateEvent = (data) => {
+            console.log("[ws] NewChatMessage received on private-chat:", data.id);
             emitPrivate(userId, data);
-        });
+        };
 
-        ch.subscribed?.(() => console.log("[ws] subscribed private", `chat.${userId}`));
-        ch.error?.((e) => console.error("[ws] private subscription error", `chat.${userId}`, e));
+        // Chỉ subscribe private channel (không cần public fallback nữa vì auth đã hoạt động)
+        const privCh = echoInstance.private(`chat.${userId}`);
+        privCh.listen(".NewChatMessage", handlePrivateEvent);
+
+        privCh.subscribed?.(() => console.log("[ws] subscribed ✅ private-chat.", userId));
+        privCh.error?.((e) => console.error("[ws] private subscription error", `chat.${userId}`, e));
     }
 
     // Subscribe admin-messages 1 lần, emit cho mọi handler
@@ -148,29 +164,28 @@ export function initWebsocket(onOrderCreated, onAutoImport, onChatMessage, userI
 
         const ch = echoInstance.channel("admin-messages");
 
-        // QUAN TRỌNG: chỉ listen 1 kiểu để tránh double fire
-        ch.listen(".NewChatMessage", (data) => {
-            console.log("NewChatMessage (admin-messages) received:", data);
+        const handleAdminEvent = (data) => {
+            console.log("[ws] NewChatMessage received on admin-messages:", data.id);
             emitAdmin(data);
-        });
+        };
 
-        ch.subscribed?.(() => console.log("[ws] subscribed public admin-messages"));
-        ch.error?.((e) => console.error("[ws] public subscription error admin-messages", e));
+        ch.listen(".NewChatMessage", handleAdminEvent);
+
+        ch.subscribed?.(() => console.log("[ws] subscribed ✅ admin-messages"));
+        ch.error?.((e) => console.error("[ws] admin-messages subscription error:", e));
     }
 
     return echoInstance;
 }
 
-// Dedupe event theo id ở layer service (phòng trường hợp event bị deliver lặp)
-const seenEventIds = new Set(); // Set<string>
+// Dedupe event theo id ở layer service
+const seenEventIds = new Set();
 function shouldDropEvent(data) {
     const id = data?.id;
     if (id == null) return false;
     const key = String(id);
     if (seenEventIds.has(key)) return true;
     seenEventIds.add(key);
-    // giới hạn bộ nhớ đơn giản
     if (seenEventIds.size > 5000) seenEventIds.clear();
     return false;
 }
-

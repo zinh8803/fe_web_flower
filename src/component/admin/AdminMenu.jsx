@@ -27,6 +27,7 @@ import {
   SupervisorAccount,
   ColorLens,
   Message,
+  History
 } from "@mui/icons-material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -38,6 +39,7 @@ const AdminMenu = () => {
   const [openProduct, setOpenProduct] = useState(false);
   const [openDiscount, setOpenDiscount] = useState(false);
   const [openFlowerType, setOpenFlowerType] = useState(false);
+  const [openFlower, setOpenFlower] = useState(false);
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
 
@@ -143,21 +145,49 @@ const AdminMenu = () => {
               {/* Quản lý hoa */}
               <ListItem
                 button
-                component={Link}
-                to="/admin/flowers"
-                selected={location.pathname.startsWith("/admin/flowers")}
-                sx={{
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    bgcolor: "#e0f2f1",
-                    color: "black",
-                  },
-                  color: "black",
-                }}>
+                selected={location.pathname.startsWith("/admin/flowers") || location.pathname.startsWith("/admin/flower-logs")}
+                onClick={() => navigate("/admin/flowers")}>
                 <ListItemIcon sx={{ color: "green" }}>
                   <LocalFlorist />
                 </ListItemIcon>
                 <ListItemText primary="Quản lý hoa" sx={{ color: "black" }} />
+                <IconButton
+                  size="small"
+                  sx={{ ml: 1 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenFlower(!openFlower);
+                  }}>
+                  {openFlower ? <ExpandLess /> : <ExpandMore />}
+                </IconButton>
               </ListItem>
+
+              <Collapse in={openFlower} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItem
+                    button
+                    component={Link}
+                    to="/admin/flowers"
+                    sx={{ pl: 4 }}
+                    selected={location.pathname === "/admin/flowers"}>
+                    <ListItemIcon sx={{ color: "green" }}>
+                      <LocalFlorist />
+                    </ListItemIcon>
+                    <ListItemText primary="Danh sách hoa" sx={{ color: "black" }} />
+                  </ListItem>
+                  <ListItem
+                    button
+                    component={Link}
+                    to="/admin/flower-logs"
+                    sx={{ pl: 4 }}
+                    selected={location.pathname === "/admin/flower-logs"}>
+                    <ListItemIcon sx={{ color: "green" }}>
+                      <History />
+                    </ListItemIcon>
+                    <ListItemText primary="Nhật ký biến động hoa" sx={{ color: "black" }} />
+                  </ListItem>
+                </List>
+              </Collapse>
               {/* categories */}
               <ListItem
                 button
